@@ -1,0 +1,33 @@
+{
+  "name": "panel",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^1.8.6",
+    "@emotion/react": "^11.8.2",
+    "@emotion/styled": "^11.8.1",
+    "framer-motion": "^6.2.8",
+    "react": "^17.0.2",
+    "react-custom-scrollbars": "^4.2.1",
+    "react-dom": "^17.0.2",
+    "react-icons": "^4.3.1",
+    "react-input-mask": "^2.0.4",
+    "react-query": "^3.34.18",
+    "react-router-dom": "6",
+    "recharts": "^2.1.9"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.33",
+    "@types/react-custom-scrollbars": "^4.0.10",
+    "@types/react-dom": "^17.0.10",
+    "@types/react-input-mask": "^3.0.1",
+    "@vitejs/plugin-react": "^1.0.7",
+    "typescript": "^4.5.4",
+    "vite": "^2.8.0"
+  }
+}
