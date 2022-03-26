@@ -1,9 +1,10 @@
-import { Box, Grid, Text } from "@chakra-ui/react";
+import { Box, Container, Grid, Text } from "@chakra-ui/react";
 import { Fragment } from "react";
 import Header from "./header";
 
 import logo from "../assets/logo.svg";
 import Scrollbars from "react-custom-scrollbars";
+import Routing from "../routes";
 
 export default function Layout() {
   return (
@@ -16,9 +17,11 @@ export default function Layout() {
         templateRows={"60px 1fr"}
       >
         <Header />
-        <Box w="100%" h="100%" overflow="auto">
+        <Box w="100%" h="100%" overflow="auto" py={5}>
           <Scrollbars>
-            <Text h={1360}>adhjaskdjahskh</Text>
+            <Container maxW={"8xl"}>
+              <Routing />
+            </Container>
           </Scrollbars>
         </Box>
       </Grid>

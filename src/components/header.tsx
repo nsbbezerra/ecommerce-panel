@@ -4,8 +4,12 @@ import {
   Flex,
   HStack,
   Image,
-  Text,
-  useColorModeValue,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
   Menu,
   MenuButton,
   MenuList,
@@ -14,11 +18,26 @@ import {
   IconButton,
   useColorMode,
   Tooltip,
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  Stack,
+  FormControl,
+  FormLabel,
+  Input,
+  Grid,
+  Switch,
 } from "@chakra-ui/react";
-import { Fragment } from "react";
+import { Fragment, useRef, useState } from "react";
 import {
   AiOutlineAppstoreAdd,
   AiOutlineAreaChart,
+  AiOutlineCheck,
+  AiOutlineClose,
   AiOutlineFall,
   AiOutlineFileText,
   AiOutlineHome,
@@ -44,7 +63,11 @@ import { FaRegSun, FaRegMoon } from "react-icons/fa";
 import logo from "../assets/logo.svg";
 
 export default function Header() {
+  const btnRef = useRef(null);
+  const cancelRef = useRef(null);
   const { toggleColorMode, colorMode } = useColorMode();
+  const [drawer, setDrawer] = useState<boolean>(false);
+  const [alert, setAlert] = useState<boolean>(false);
 
   return (
     <Fragment>
@@ -175,6 +198,7 @@ export default function Header() {
               <IconButton
                 aria-label="Abrir configurações gerais"
                 icon={<AiOutlineTool />}
+                onClick={() => setDrawer(true)}
               />
             </Tooltip>
             <Tooltip hasArrow label="Logout">
@@ -182,11 +206,134 @@ export default function Header() {
                 aria-label="Sair do aplicativo"
                 icon={<AiOutlineLogout />}
                 colorScheme="red"
+                onClick={() => setAlert(true)}
               />
             </Tooltip>
           </HStack>
         </Flex>
       </Box>
+
+      <Drawer
+        isOpen={drawer}
+        placement="right"
+        onClose={() => setDrawer(false)}
+        finalFocusRef={btnRef}
+        size="lg"
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Configurações Gerais</DrawerHeader>
+
+          <DrawerBody>
+            <Stack spacing={3}>
+              <Grid templateColumns={"1fr 1fr"} gap={3}>
+                <FormControl>
+                  <FormLabel>Máximo de Parcelas com Boleto</FormLabel>
+                  <Input />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Máximo de Parcelas com Cartões</FormLabel>
+                  <Input />
+                </FormControl>
+              </Grid>
+              <Grid templateColumns={"1fr 1fr"} gap={3}>
+                <FormControl>
+                  <FormLabel>Valor Mínimo para Parcelar com Boleto</FormLabel>
+                  <Input />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Valor Mínimo para Parcelar com Cartões</FormLabel>
+                  <Input />
+                </FormControl>
+              </Grid>
+              <FormControl>
+                <FormLabel>Chave API de Pagamentos</FormLabel>
+                <Input />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Chave API de Notas Fiscais</FormLabel>
+                <Input />
+              </FormControl>
+              <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
+                <FormControl>
+                  <FormLabel>Emite Notas Fiscais?</FormLabel>
+                  <Switch />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Aceita Boleto?</FormLabel>
+                  <Switch />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Aceita Cartões de Crédito?</FormLabel>
+                  <Switch />
+                </FormControl>
+              </Grid>
+              <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
+                <FormControl>
+                  <FormLabel>Aceita PIX?</FormLabel>
+                  <Switch />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Aceita Pagamento Digital?</FormLabel>
+                  <Switch />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Aceita Cripto Moedas?</FormLabel>
+                  <Switch />
+                </FormControl>
+              </Grid>
+            </Stack>
+          </DrawerBody>
+
+          <DrawerFooter>
+            <Button
+              mr={3}
+              onClick={() => setDrawer(false)}
+              leftIcon={<AiOutlineClose />}
+            >
+              Cancelar
+            </Button>
+            <Button colorScheme="blue" leftIcon={<AiOutlineSave />}>
+              Salvar
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <AlertDialog
+        isOpen={alert}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setAlert(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Logout
+            </AlertDialogHeader>
+
+            <AlertDialogBody>Deseja realmente sair?</AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setAlert(false)}
+                leftIcon={<AiOutlineClose />}
+              >
+                Não
+              </Button>
+              <Button
+                colorScheme="blue"
+                onClick={() => setAlert(false)}
+                ml={3}
+                leftIcon={<AiOutlineCheck />}
+              >
+                Sim
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Fragment>
   );
 }
