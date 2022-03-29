@@ -17,29 +17,9 @@ import {
   theme,
   Tr,
   useColorModeValue,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Image,
-  Text,
-  Stack,
-  FormControl,
-  FormLabel,
-  InputLeftElement,
-  InputGroup,
-  Avatar,
-  useToast,
 } from "@chakra-ui/react";
-import { Fragment, useRef, useState, useEffect } from "react";
+import { Fragment } from "react";
 import {
-  AiOutlineKey,
-  AiOutlineLogin,
-  AiOutlineSave,
-  AiOutlineShop,
   AiOutlineShopping,
   AiOutlineTags,
   AiOutlineUser,
@@ -55,42 +35,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import Input from "../components/Input";
-import { Form } from "@unform/web";
-import logo from "../assets/logo.svg";
-import { FormHandles, SubmitHandler } from "@unform/core";
-import axios from "axios";
-import { api } from "../configs/index";
-import pt_br from "date-fns/locale/pt-BR";
-import { format, differenceInDays } from "date-fns";
-import * as Yup from "yup";
-
-interface LoginData {
-  user: string;
-  password: string;
-}
-
-interface AuthData {
-  company_id: string;
-  code: string;
-}
-
-type LoadingProps = {
-  loading: boolean;
-  action: "login" | "auth";
-};
-
-type CompanyProps = {
-  id: string;
-  thumbnail: string;
-  fantasy_name: string;
-  company_code: string;
-  expires_code_date: Date;
-};
 
 export default function Index() {
-  const toast = useToast();
-  const formRef = useRef<FormHandles>(null);
   const data = [
     {
       name: "Page A",
@@ -135,77 +81,6 @@ export default function Index() {
       amt: 2100,
     },
   ];
-
-  const [login, setLogin] = useState<boolean>(true);
-  const [show, setShow] = useState<boolean>(false);
-  const [loading, setLoading] = useState<LoadingProps>();
-  const [company, setCompany] = useState<CompanyProps>();
-
-  useEffect(() => {
-    const result = localStorage.getItem("company");
-    const companyParsed = JSON.parse(result || "");
-    setCompany(companyParsed);
-  }, []);
-
-  function showToast(
-    message: string,
-    status: "error" | "info" | "warning" | "success" | undefined,
-    title: string
-  ) {
-    toast({
-      title: title,
-      description: message,
-      status: status,
-      position: "top-right",
-      duration: 8000,
-      isClosable: true,
-    });
-  }
-
-  const handleLogin: SubmitHandler<LoginData> = (data) => {
-    console.log(data);
-  };
-
-  const handleAuth: SubmitHandler<AuthData> = async (data) => {
-    console.log(data);
-
-    try {
-      const schema = Yup.object().shape({
-        company_id: Yup.string().required("Insira o ID da empresa"),
-        code: Yup.string().required("Insira o código de ativação da empresa"),
-      });
-
-      await schema.validate(data, {
-        abortEarly: false,
-      });
-
-      setLoading({ action: "auth", loading: true });
-
-      const response = await api.post(
-        `/findCompanyInformation/${data.company_id}`,
-        {
-          code: data.code,
-        }
-      );
-
-      localStorage.setItem("company", JSON.stringify(response.data));
-
-      setCompany(response.data);
-
-      setLoading({ action: "auth", loading: false });
-      setShow(false);
-    } catch (error) {
-      setLoading({ action: "auth", loading: false });
-      if (error instanceof Yup.ValidationError) {
-        error.inner.forEach((err) => {
-          showToast(err.message, "error", "Erro");
-        });
-      }
-      if (axios.isAxiosError(error) && error.message) {
-        console.log(error);
-      }
-    }
-  };
 
   return (
     <Fragment>
@@ -495,174 +370,6 @@ export default function Index() {
           </Table>
         </Box>
       </Grid>
-
-      <Modal
-        isOpen={login}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={() => setLogin(false)}
-        size="2xl"
-        isCentered
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalBody mt={5} mb={5}>
-            <Grid templateColumns={"1fr 1fr"} gap={5}>
-              <Box borderWidth="1px" rounded="md">
-                <Flex justify={"center"} align="center" mt={2}>
-                  <Image src={logo} w="50%" />
-                </Flex>
-
-                <Stack mt={3} p={3}>
-                  <Text fontSize="xs">
-                    <strong>ID da Empresa:</strong> {company?.id || ""}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Nome da Empresa:</strong>{" "}
-                    {company?.fantasy_name || ""}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Código de Ativação:</strong>{" "}
-                    {company?.company_code || ""}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Data de Expiração:</strong>{" "}
-                    {format(
-                      new Date(company?.expires_code_date || new Date()),
-                      "dd/MM/yyyy 'às' HH:mm'h'",
-                      {
-                        locale: pt_br,
-                      }
-                    )}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Status da Ativação:</strong>{" "}
-                    {new Date(company?.expires_code_date || new Date()) <
-                    new Date() ? (
-                      <Tag colorScheme={"red"} size="sm">
-                        Expirou há{" "}
-                        {differenceInDays(
-                          new Date(),
-                          new Date(company?.expires_code_date || new Date())
-                        )}
-                      </Tag>
-                    ) : (
-                      <Tag colorScheme={"green"} size="sm">
-                        Expira em{" "}
-                        {differenceInDays(
-                          new Date(company?.expires_code_date || new Date()),
-                          new Date()
-                        )}
-                      </Tag>
-                    )}
-                  </Text>
-
-                  <Button
-                    size="sm"
-                    leftIcon={<AiOutlineShop />}
-                    variant="outline"
-                    colorScheme={"blue"}
-                    onClick={() => setShow(true)}
-                  >
-                    Configurar Empresa
-                  </Button>
-                </Stack>
-              </Box>
-
-              <Box>
-                <Form onSubmit={handleLogin} ref={formRef}>
-                  <Flex
-                    justify={"center"}
-                    align="center"
-                    direction={"column"}
-                    h="100%"
-                  >
-                    <Avatar icon={<AiOutlineLogin />} size="lg" />
-
-                    <FormControl mt={10}>
-                      <InputGroup size={"lg"}>
-                        <InputLeftElement>
-                          <Icon as={AiOutlineUser} />
-                        </InputLeftElement>
-                        <Input
-                          placeholder="Usuário"
-                          name="user"
-                          leftElement={true}
-                        />
-                      </InputGroup>
-                    </FormControl>
-                    <FormControl mt={5}>
-                      <InputGroup size={"lg"}>
-                        <InputLeftElement>
-                          <Icon as={AiOutlineKey} />
-                        </InputLeftElement>
-                        <Input
-                          placeholder="Senha"
-                          type={"password"}
-                          name="password"
-                          leftElement={true}
-                        />
-                      </InputGroup>
-                    </FormControl>
-                    <Button
-                      colorScheme={"blue"}
-                      leftIcon={<AiOutlineLogin />}
-                      isFullWidth
-                      mt={5}
-                      size="lg"
-                      type="submit"
-                    >
-                      Login
-                    </Button>
-                  </Flex>
-                </Form>
-              </Box>
-            </Grid>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-
-      <Modal isOpen={show} onClose={() => setShow(false)} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <Form
-            onSubmit={handleAuth}
-            ref={formRef}
-            initialData={{
-              company_id: company?.id || "",
-              code: "",
-            }}
-          >
-            <ModalHeader>Configurar Empresa</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Stack spacing={3}>
-                <FormControl>
-                  <FormLabel>ID da Empresa</FormLabel>
-                  <Input name="company_id" />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Código de Ativação</FormLabel>
-                  <Input name="code" />
-                </FormControl>
-              </Stack>
-            </ModalBody>
-
-            <ModalFooter>
-              <Button
-                colorScheme={"blue"}
-                leftIcon={<AiOutlineSave />}
-                type="submit"
-                isLoading={
-                  loading?.action === "auth" && loading.loading === true
-                }
-              >
-                Salvar
-              </Button>
-            </ModalFooter>
-          </Form>
-        </ModalContent>
-      </Modal>
     </Fragment>
   );
 }
