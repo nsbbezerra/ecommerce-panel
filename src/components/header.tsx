@@ -84,6 +84,7 @@ import { api } from "../configs/index";
 import pt_br from "date-fns/locale/pt-BR";
 import { format, differenceInDays } from "date-fns";
 import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.svg";
 
@@ -111,6 +112,7 @@ type CompanyProps = {
 };
 
 export default function Header() {
+  const navigate = useNavigate();
   const btnRef = useRef(null);
   const cancelRef = useRef(null);
   const toast = useToast();
@@ -260,6 +262,7 @@ export default function Header() {
                 colorScheme="blue"
                 variant={"ghost"}
                 size="sm"
+                onClick={() => navigate("/")}
               >
                 Início
               </Button>
@@ -268,6 +271,7 @@ export default function Header() {
                 colorScheme="blue"
                 variant={"ghost"}
                 size="sm"
+                onClick={() => navigate("/empresa")}
               >
                 Empresa
               </Button>

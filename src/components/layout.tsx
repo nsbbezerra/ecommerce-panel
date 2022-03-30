@@ -18,7 +18,7 @@ export default function Layout() {
       >
         <Header />
         <Box w="100%" h="100%" overflow="auto" py={5}>
-          <Scrollbars>
+          <Scrollbars autoHide>
             <Container maxW={"8xl"}>
               <Routing />
             </Container>
