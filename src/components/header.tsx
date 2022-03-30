@@ -45,6 +45,7 @@ import {
   Avatar,
   Tag,
   Icon,
+  Skeleton,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
@@ -98,7 +99,7 @@ interface AuthData {
 
 type LoadingProps = {
   loading: boolean;
-  action: "login" | "auth";
+  action: "login" | "auth" | "finding";
 };
 
 type CompanyProps = {
@@ -123,11 +124,28 @@ export default function Header() {
   const [loading, setLoading] = useState<LoadingProps>();
   const [company, setCompany] = useState<CompanyProps>();
 
+  async function findCompanyInformation(id: string) {
+    setLoading({ action: "finding", loading: true });
+    try {
+      const response = await api.get(`/findCompanyById/${id}`);
+      setCompany(response.data);
+      setLoading({ action: "finding", loading: false });
+    } catch (error) {
+      setLoading({ action: "finding", loading: false });
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
   useEffect(() => {
     const result = localStorage.getItem("company");
     if (result) {
       const companyParsed = JSON.parse(result || "");
-      setCompany(companyParsed);
+      findCompanyInformation(companyParsed.id);
     }
   }, []);
 
@@ -146,13 +164,43 @@ export default function Header() {
     });
   }
 
-  const handleLogin: SubmitHandler<LoginData> = (data) => {
-    console.log(data);
+  const handleLogin: SubmitHandler<LoginData> = async (data) => {
+    try {
+      const schema = Yup.object().shape({
+        user: Yup.string().required("Insira o seu usuário"),
+        password: Yup.string().required("Insira sua senha"),
+      });
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
+      setLoading({ action: "login", loading: true });
+
+      const response = await api.post(`/login/${company?.id}`, {
+        user: data.user,
+        password: data.password,
+      });
+
+      sessionStorage.setItem("user", JSON.stringify(response.data));
+
+      setLogin(false);
+
+      setLoading({ action: "login", loading: false });
+    } catch (error) {
+      setLoading({ action: "login", loading: false });
+      if (error instanceof Yup.ValidationError) {
+        error.inner.forEach((err) => {
+          showToast(err.message, "error", "Erro");
+        });
+      }
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      }
+    }
   };
 
   const handleAuth: SubmitHandler<AuthData> = async (data) => {
-    console.log(data);
-
     try {
       const schema = Yup.object().shape({
         company_id: Yup.string().required("Insira o ID da empresa"),
@@ -174,7 +222,7 @@ export default function Header() {
 
       localStorage.setItem("company", JSON.stringify(response.data));
 
-      setCompany(response.data);
+      findCompanyInformation(response.data.id);
 
       setLoading({ action: "auth", loading: false });
       setShow(false);
@@ -186,9 +234,15 @@ export default function Header() {
         });
       }
       if (axios.isAxiosError(error) && error.message) {
-        console.log(error);
+        showToast(error.response?.data.message, "error", "Erro");
       }
     }
+  };
+
+  const logout = () => {
+    sessionStorage.clear();
+    setAlert(false);
+    setLogin(true);
   };
 
   return (
@@ -446,7 +500,7 @@ export default function Header() {
               </Button>
               <Button
                 colorScheme="blue"
-                onClick={() => setAlert(false)}
+                onClick={() => logout()}
                 ml={3}
                 leftIcon={<AiOutlineCheck />}
               >
@@ -474,60 +528,72 @@ export default function Header() {
                   <Image src={logo} w="50%" />
                 </Flex>
 
-                <Stack mt={3} p={3}>
-                  <Text fontSize="xs">
-                    <strong>ID da Empresa:</strong> {company?.id || ""}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Nome da Empresa:</strong>{" "}
-                    {company?.fantasy_name || ""}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Código de Ativação:</strong>{" "}
-                    {company?.company_code || ""}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Data de Expiração:</strong>{" "}
-                    {format(
-                      new Date(company?.expires_code_date || new Date()),
-                      "dd/MM/yyyy 'às' HH:mm'h'",
-                      {
-                        locale: pt_br,
-                      }
-                    )}
-                  </Text>
-                  <Text fontSize="xs">
-                    <strong>Status da Ativação:</strong>{" "}
-                    {new Date(company?.expires_code_date || new Date()) <
-                    new Date() ? (
-                      <Tag colorScheme={"red"} size="sm">
-                        Expirou há{" "}
-                        {differenceInDays(
-                          new Date(),
-                          new Date(company?.expires_code_date || new Date())
-                        )}
-                      </Tag>
-                    ) : (
-                      <Tag colorScheme={"green"} size="sm">
-                        Expira em{" "}
-                        {differenceInDays(
-                          new Date(company?.expires_code_date || new Date()),
-                          new Date()
-                        )}
-                      </Tag>
-                    )}
-                  </Text>
+                {loading?.action === "finding" && loading.loading === true ? (
+                  <Stack mt={3} p={3}>
+                    <Skeleton w="100%" h={5} />
+                    <Skeleton w="100%" h={5} />
+                    <Skeleton w="100%" h={5} />
+                    <Skeleton w="100%" h={5} />
+                    <Skeleton w="100%" h={5} />
+                    <Skeleton w="100%" h={5} />
+                  </Stack>
+                ) : (
+                  <Stack mt={3} p={3}>
+                    <Text fontSize="xs">
+                      <strong>ID da Empresa:</strong> {company?.id || ""}
+                    </Text>
+                    <Text fontSize="xs">
+                      <strong>Nome da Empresa:</strong>{" "}
+                      {company?.fantasy_name || ""}
+                    </Text>
+                    <Text fontSize="xs">
+                      <strong>Código de Ativação:</strong>{" "}
+                      {company?.company_code || ""}
+                    </Text>
+                    <Text fontSize="xs">
+                      <strong>Data de Expiração:</strong>{" "}
+                      {format(
+                        new Date(company?.expires_code_date || new Date()),
+                        "dd/MM/yyyy 'às' HH:mm'h'",
+                        {
+                          locale: pt_br,
+                        }
+                      )}
+                    </Text>
+                    <Text fontSize="xs">
+                      <strong>Status da Ativação:</strong>{" "}
+                      {new Date(company?.expires_code_date || new Date()) <
+                      new Date() ? (
+                        <Tag colorScheme={"red"} size="sm">
+                          Expirou há{" "}
+                          {differenceInDays(
+                            new Date(),
+                            new Date(company?.expires_code_date || new Date())
+                          )}
+                        </Tag>
+                      ) : (
+                        <Tag colorScheme={"green"} size="sm">
+                          Expira em{" "}
+                          {differenceInDays(
+                            new Date(company?.expires_code_date || new Date()),
+                            new Date()
+                          )}{" "}
+                          dias
+                        </Tag>
+                      )}
+                    </Text>
 
-                  <Button
-                    size="sm"
-                    leftIcon={<AiOutlineShop />}
-                    variant="outline"
-                    colorScheme={"blue"}
-                    onClick={() => setShow(true)}
-                  >
-                    Configurar Empresa
-                  </Button>
-                </Stack>
+                    <Button
+                      size="sm"
+                      leftIcon={<AiOutlineShop />}
+                      variant="outline"
+                      colorScheme={"blue"}
+                      onClick={() => setShow(true)}
+                    >
+                      Configurar Empresa
+                    </Button>
+                  </Stack>
+                )}
               </Box>
 
               <Box>
@@ -572,6 +638,9 @@ export default function Header() {
                       mt={5}
                       size="lg"
                       type="submit"
+                      isLoading={
+                        loading?.action === "login" && loading.loading === true
+                      }
                     >
                       Login
                     </Button>
