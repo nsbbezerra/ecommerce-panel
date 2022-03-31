@@ -84,292 +84,294 @@ export default function Index() {
 
   return (
     <Fragment>
-      <Grid templateColumns={"1fr 1fr 1fr 1fr"} gap={5}>
-        <Flex
-          align={"center"}
+      <Box py={3}>
+        <Grid templateColumns={"1fr 1fr 1fr 1fr"} gap={5}>
+          <Flex
+            align={"center"}
+            borderWidth="1px"
+            shadow={"md"}
+            rounded="md"
+            p={2}
+          >
+            <Icon as={AiOutlineUser} fontSize="4xl" mx={3} />
+            <Stat ml={3}>
+              <StatLabel>Clientes Cadastrados</StatLabel>
+              <StatNumber>1000</StatNumber>
+            </Stat>
+          </Flex>
+          <Flex
+            align={"center"}
+            borderWidth="1px"
+            shadow={"md"}
+            rounded="md"
+            p={2}
+          >
+            <Icon as={AiOutlineUsergroupAdd} fontSize="4xl" mx={3} />
+            <Stat ml={3}>
+              <StatLabel>Funcionários Ativos</StatLabel>
+              <StatNumber>1000</StatNumber>
+            </Stat>
+          </Flex>
+          <Flex
+            align={"center"}
+            borderWidth="1px"
+            shadow={"md"}
+            rounded="md"
+            p={2}
+          >
+            <Icon as={AiOutlineTags} fontSize="4xl" mx={3} />
+            <Stat ml={3}>
+              <StatLabel>Produtos Ativos</StatLabel>
+              <StatNumber>1000</StatNumber>
+            </Stat>
+          </Flex>
+          <Flex
+            align={"center"}
+            borderWidth="1px"
+            shadow={"md"}
+            rounded="md"
+            p={2}
+          >
+            <Icon as={AiOutlineShopping} fontSize="4xl" mx={3} />
+            <Stat ml={3}>
+              <StatLabel>Vendas Realizadas</StatLabel>
+              <StatNumber>1000</StatNumber>
+            </Stat>
+          </Flex>
+        </Grid>
+
+        <Grid
+          templateColumns={"250px 1fr 1fr"}
+          gap={5}
           borderWidth="1px"
-          shadow={"md"}
           rounded="md"
-          p={2}
+          shadow={"md"}
+          p={3}
+          mt={5}
         >
-          <Icon as={AiOutlineUser} fontSize="4xl" mx={3} />
-          <Stat ml={3}>
-            <StatLabel>Clientes Cadastrados</StatLabel>
-            <StatNumber>1000</StatNumber>
-          </Stat>
-        </Flex>
-        <Flex
-          align={"center"}
+          <Box w="250px" h="250px">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data}>
+                <CartesianGrid stroke="0" />
+                <XAxis dataKey="name" fontSize={theme.fontSizes.xs} />
+                <YAxis fontSize={theme.fontSizes.xs} />
+                <Tooltip
+                  contentStyle={{
+                    background: useColorModeValue(
+                      "white",
+                      theme.colors.gray["900"]
+                    ),
+                    borderRadius: theme.radii.md,
+                  }}
+                />
+                <Legend />
+                <Bar
+                  dataKey="despesas"
+                  fill={useColorModeValue(
+                    theme.colors.red["600"],
+                    theme.colors.red["300"]
+                  )}
+                />
+                <Bar
+                  dataKey="receitas"
+                  fill={useColorModeValue(
+                    theme.colors.green["600"],
+                    theme.colors.green["300"]
+                  )}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+
+          <Box>
+            <Table size={"sm"} variant="striped" colorScheme={"green"}>
+              <TableCaption>
+                Receitas para Hoje{" "}
+                <Button size="xs" ml={2} colorScheme="blue">
+                  Veja Mais
+                </Button>
+              </TableCaption>
+              <Thead>
+                <Tr>
+                  <Th>DESCRIÇÃO</Th>
+                  <Th isNumeric>Valor</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </Box>
+
+          <Box>
+            <Table size={"sm"} variant="striped" colorScheme={"red"}>
+              <TableCaption>
+                Despesas para Hoje{" "}
+                <Button size="xs" ml={2} colorScheme="blue">
+                  Veja Mais
+                </Button>
+              </TableCaption>
+              <Thead>
+                <Tr>
+                  <Th>DESCRIÇÃO</Th>
+                  <Th isNumeric>Valor</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </Box>
+        </Grid>
+
+        <Grid
+          templateColumns={"250px 1fr"}
+          gap={5}
           borderWidth="1px"
-          shadow={"md"}
           rounded="md"
-          p={2}
-        >
-          <Icon as={AiOutlineUsergroupAdd} fontSize="4xl" mx={3} />
-          <Stat ml={3}>
-            <StatLabel>Funcionários Ativos</StatLabel>
-            <StatNumber>1000</StatNumber>
-          </Stat>
-        </Flex>
-        <Flex
-          align={"center"}
-          borderWidth="1px"
           shadow={"md"}
-          rounded="md"
-          p={2}
+          p={3}
+          mt={5}
         >
-          <Icon as={AiOutlineTags} fontSize="4xl" mx={3} />
-          <Stat ml={3}>
-            <StatLabel>Produtos Ativos</StatLabel>
-            <StatNumber>1000</StatNumber>
-          </Stat>
-        </Flex>
-        <Flex
-          align={"center"}
-          borderWidth="1px"
-          shadow={"md"}
-          rounded="md"
-          p={2}
-        >
-          <Icon as={AiOutlineShopping} fontSize="4xl" mx={3} />
-          <Stat ml={3}>
-            <StatLabel>Vendas Realizadas</StatLabel>
-            <StatNumber>1000</StatNumber>
-          </Stat>
-        </Flex>
-      </Grid>
+          <Box w="250px" h="250px">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data}>
+                <CartesianGrid stroke="0" />
+                <XAxis dataKey="name" fontSize={theme.fontSizes.xs} />
+                <YAxis fontSize={theme.fontSizes.xs} />
+                <Tooltip
+                  contentStyle={{
+                    background: useColorModeValue(
+                      "white",
+                      theme.colors.gray["900"]
+                    ),
+                    borderRadius: theme.radii.md,
+                  }}
+                />
+                <Legend />
+                <Bar
+                  dataKey="despesas"
+                  fill={useColorModeValue(
+                    theme.colors.red["600"],
+                    theme.colors.red["300"]
+                  )}
+                />
+                <Bar
+                  dataKey="receitas"
+                  fill={useColorModeValue(
+                    theme.colors.green["600"],
+                    theme.colors.green["300"]
+                  )}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
 
-      <Grid
-        templateColumns={"250px 1fr 1fr"}
-        gap={5}
-        borderWidth="1px"
-        rounded="md"
-        shadow={"md"}
-        p={3}
-        mt={5}
-      >
-        <Box w="250px" h="250px">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid stroke="0" />
-              <XAxis dataKey="name" fontSize={theme.fontSizes.xs} />
-              <YAxis fontSize={theme.fontSizes.xs} />
-              <Tooltip
-                contentStyle={{
-                  background: useColorModeValue(
-                    "white",
-                    theme.colors.gray["900"]
-                  ),
-                  borderRadius: theme.radii.md,
-                }}
-              />
-              <Legend />
-              <Bar
-                dataKey="despesas"
-                fill={useColorModeValue(
-                  theme.colors.red["600"],
-                  theme.colors.red["300"]
-                )}
-              />
-              <Bar
-                dataKey="receitas"
-                fill={useColorModeValue(
-                  theme.colors.green["600"],
-                  theme.colors.green["300"]
-                )}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-
-        <Box>
-          <Table size={"sm"} variant="striped" colorScheme={"green"}>
-            <TableCaption>
-              Receitas para Hoje{" "}
-              <Button size="xs" ml={2} colorScheme="blue">
-                Veja Mais
-              </Button>
-            </TableCaption>
-            <Thead>
-              <Tr>
-                <Th>DESCRIÇÃO</Th>
-                <Th isNumeric>Valor</Th>
-                <Th>Status</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </Box>
-
-        <Box>
-          <Table size={"sm"} variant="striped" colorScheme={"red"}>
-            <TableCaption>
-              Despesas para Hoje{" "}
-              <Button size="xs" ml={2} colorScheme="blue">
-                Veja Mais
-              </Button>
-            </TableCaption>
-            <Thead>
-              <Tr>
-                <Th>DESCRIÇÃO</Th>
-                <Th isNumeric>Valor</Th>
-                <Th>Status</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </Box>
-      </Grid>
-
-      <Grid
-        templateColumns={"250px 1fr"}
-        gap={5}
-        borderWidth="1px"
-        rounded="md"
-        shadow={"md"}
-        p={3}
-        mt={5}
-      >
-        <Box w="250px" h="250px">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid stroke="0" />
-              <XAxis dataKey="name" fontSize={theme.fontSizes.xs} />
-              <YAxis fontSize={theme.fontSizes.xs} />
-              <Tooltip
-                contentStyle={{
-                  background: useColorModeValue(
-                    "white",
-                    theme.colors.gray["900"]
-                  ),
-                  borderRadius: theme.radii.md,
-                }}
-              />
-              <Legend />
-              <Bar
-                dataKey="despesas"
-                fill={useColorModeValue(
-                  theme.colors.red["600"],
-                  theme.colors.red["300"]
-                )}
-              />
-              <Bar
-                dataKey="receitas"
-                fill={useColorModeValue(
-                  theme.colors.green["600"],
-                  theme.colors.green["300"]
-                )}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-
-        <Box>
-          <Table size={"sm"} variant="striped">
-            <TableCaption>
-              Últimas Vendas de Hoje{" "}
-              <Button size="xs" ml={2} colorScheme="blue">
-                Veja Mais
-              </Button>
-            </TableCaption>
-            <Thead>
-              <Tr>
-                <Th>DESCRIÇÃO</Th>
-                <Th isNumeric>Valor</Th>
-                <Th>Status</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>Recebimento de Aluguel</Td>
-                <Td isNumeric>R$ 1200,00</Td>
-                <Td>
-                  <Tag colorScheme={"yellow"}>Aguardando</Tag>
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </Box>
-      </Grid>
+          <Box>
+            <Table size={"sm"} variant="striped">
+              <TableCaption>
+                Últimas Vendas de Hoje{" "}
+                <Button size="xs" ml={2} colorScheme="blue">
+                  Veja Mais
+                </Button>
+              </TableCaption>
+              <Thead>
+                <Tr>
+                  <Th>DESCRIÇÃO</Th>
+                  <Th isNumeric>Valor</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>Recebimento de Aluguel</Td>
+                  <Td isNumeric>R$ 1200,00</Td>
+                  <Td>
+                    <Tag colorScheme={"yellow"}>Aguardando</Tag>
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </Box>
+        </Grid>
+      </Box>
     </Fragment>
   );
 }

@@ -30,13 +30,15 @@ import { Form } from "@unform/web";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from "yup";
 
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, QueryClient } from "react-query";
 import Input from "../components/Input";
 import InputMask from "../components/InputMask";
 import Select from "../components/Select";
 import { AiOutlinePicture, AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
 import { api } from "../configs";
+
+const queryClient = new QueryClient();
 
 type CompanyProps = {
   id: string;
@@ -54,7 +56,7 @@ type CompanyProps = {
   zip_code: string;
   cnpj: string;
   city: string;
-  thumbnail: string;
+  thumbnail?: string;
 };
 
 type LoadingProps = {
@@ -108,7 +110,7 @@ export default function Company() {
   }
 
   const { data, isLoading, error } = useQuery("company", fetchingData, {
-    refetchInterval: 2000,
+    refetchInterval: 5000,
   });
 
   useEffect(() => {
@@ -195,282 +197,303 @@ export default function Company() {
     }
   }
 
-  const mutation = useMutation((thumb: File) => {
-    let thumbData = new FormData();
-    thumbData.append("thumbnail", thumb);
-    return api.put(`/companyThumb/${company?.id}`, thumbData);
-  });
-
-  function handleUpdateFinish(message: string) {
-    showToast(message, "success", "Sucesso");
-    removeThumbnail();
-    setShowThumb(true);
-  }
+  const mutation = useMutation(
+    (thumb: File) => {
+      let thumbData = new FormData();
+      thumbData.append("thumbnail", thumb);
+      return api.put(`/companyThumb/${company?.id}`, thumbData);
+    },
+    {
+      onSuccess: async (data) => {
+        showToast(data.data.message, "success", "Sucesso");
+        queryClient.invalidateQueries("company");
+        removeThumbnail();
+        setShowThumb(true);
+      },
+    }
+  );
 
   return (
     <Fragment>
-      {isLoading ? (
-        <Grid templateColumns={"250px 1fr"} gap={10}>
-          <Skeleton w="250px" h="250px" />
-          <Stack spacing={3}>
-            <Skeleton h={10} />
-            <Skeleton h={10} />
-            <Skeleton h={10} />
-            <Skeleton h={10} />
-            <Skeleton h={10} />
-            <Skeleton h={10} />
-            <Skeleton h={10} />
-          </Stack>
-        </Grid>
-      ) : (
-        <Grid templateColumns={"250px 1fr"} gap={10}>
-          {showThumb ? (
-            <FormControl>
-              <FormLabel>Logo da Empresa</FormLabel>
-              <Flex direction={"column"} align="center" justify={"center"}>
-                <Box rounded="md" borderWidth={"1px"} w="250px" h="250px">
-                  <Image
-                    src={company?.thumbnail}
-                    w="250px"
-                    h="250px"
-                    objectFit={"contain"}
-                  />
-                </Box>
-
-                <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
-                  <PopoverTrigger>
-                    <IconButton
-                      aria-label="Alterar logo da empresa"
-                      icon={<FaTrashAlt />}
-                      colorScheme={"red"}
-                      mt={"-45px"}
-                      size="sm"
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent shadow={"md"}>
-                    <PopoverArrow />
-                    <PopoverCloseButton />
-                    <PopoverHeader>Atenção!</PopoverHeader>
-                    <PopoverBody>
-                      Tem certeza que deseja remover esta imagem?
-                    </PopoverBody>
-                    <PopoverFooter
-                      d="flex"
-                      alignItems="center"
-                      justifyContent="flex-end"
-                    >
-                      <ButtonGroup size="sm">
-                        <Button onClick={onClose}>Não</Button>
-                        <Button
-                          colorScheme="blue"
-                          onClick={() => setShowThumb(false)}
-                        >
-                          Sim
-                        </Button>
-                      </ButtonGroup>
-                    </PopoverFooter>
-                  </PopoverContent>
-                </Popover>
-              </Flex>
-            </FormControl>
-          ) : (
-            <>
-              {thumbnail ? (
+      <Box py={3}>
+        {isLoading ? (
+          <Grid templateColumns={"250px 1fr"} gap={10}>
+            <Skeleton w="250px" h="250px" />
+            <Stack spacing={3}>
+              <Skeleton h={10} />
+              <Skeleton h={10} />
+              <Skeleton h={10} />
+              <Skeleton h={10} />
+              <Skeleton h={10} />
+              <Skeleton h={10} />
+              <Skeleton h={10} />
+            </Stack>
+          </Grid>
+        ) : (
+          <Grid templateColumns={"280px 1fr"} gap={5}>
+            <Box
+              borderWidth={"1px"}
+              rounded="md"
+              shadow={"md"}
+              h="min-content"
+              p={3}
+            >
+              {showThumb ? (
                 <FormControl>
                   <FormLabel>Logo da Empresa</FormLabel>
                   <Flex
                     direction={"column"}
                     align="center"
                     justify={"center"}
-                    mb={3}
+                    pb={3}
                   >
-                    <Box rounded="md" borderWidth={"1px"} w="250px" h="250px">
+                    <Box rounded="md" w="250px" h="250px">
                       <Image
-                        src={preview}
+                        src={company?.thumbnail}
                         w="250px"
                         h="250px"
                         objectFit={"contain"}
+                        rounded="md"
                       />
                     </Box>
 
-                    <IconButton
-                      aria-label="Alterar logo da empresa"
-                      icon={<FaTrashAlt />}
-                      colorScheme={"red"}
-                      mt={"-45px"}
-                      size="sm"
-                      onClick={() => removeThumbnail()}
-                    />
+                    <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
+                      <PopoverTrigger>
+                        <IconButton
+                          aria-label="Alterar logo da empresa"
+                          icon={<FaTrashAlt />}
+                          colorScheme={"red"}
+                          mt={"-45px"}
+                          size="sm"
+                        />
+                      </PopoverTrigger>
+                      <PopoverContent shadow={"md"}>
+                        <PopoverArrow />
+                        <PopoverCloseButton />
+                        <PopoverHeader>Atenção!</PopoverHeader>
+                        <PopoverBody>
+                          Tem certeza que deseja remover esta imagem?
+                        </PopoverBody>
+                        <PopoverFooter
+                          d="flex"
+                          alignItems="center"
+                          justifyContent="flex-end"
+                        >
+                          <ButtonGroup size="sm">
+                            <Button onClick={onClose}>Não</Button>
+                            <Button
+                              colorScheme="blue"
+                              onClick={() => setShowThumb(false)}
+                            >
+                              Sim
+                            </Button>
+                          </ButtonGroup>
+                        </PopoverFooter>
+                      </PopoverContent>
+                    </Popover>
                   </Flex>
-                  <Button
-                    isFullWidth
-                    colorScheme={"blue"}
-                    leftIcon={<AiOutlineSave />}
-                    mt={3}
-                    isLoading={mutation.isLoading}
-                    onClick={() => {
-                      mutation.mutate(thumbnail, {
-                        onSuccess: (data) =>
-                          handleUpdateFinish(data.data.message),
-                      });
-                    }}
-                  >
-                    Salvar Imagem
-                  </Button>
                 </FormControl>
               ) : (
-                <FormControl>
-                  <FormLabel htmlFor="image">
-                    Insira uma imagem
-                    <Flex
-                      w="250px"
-                      h="250px"
-                      rounded={"md"}
-                      borderWidth="1px"
-                      borderStyle={"dashed"}
-                      direction="column"
-                      justify={"center"}
-                      align="center"
-                      cursor={"pointer"}
-                      _hover={{ borderWidth: "2px" }}
-                      mt={2}
-                    >
-                      <Icon as={AiOutlinePicture} fontSize="4xl" />
-                      <Text textAlign={"center"} fontSize="md" mt={2}>
-                        Insira uma imagem
-                      </Text>
-                      <ChakraInput
-                        type={"file"}
-                        id="image"
-                        d="none"
-                        onChange={(e) => {
-                          handleThumbnail(e.target.files);
-                        }}
-                      />
-                    </Flex>
-                  </FormLabel>
-                </FormControl>
-              )}
-            </>
-          )}
+                <>
+                  {thumbnail ? (
+                    <FormControl>
+                      <FormLabel>Logo da Empresa</FormLabel>
+                      <Flex
+                        direction={"column"}
+                        align="center"
+                        justify={"center"}
+                        mb={3}
+                      >
+                        <Box
+                          rounded="md"
+                          w="250px"
+                          h="250px"
+                          overflow={"hidden"}
+                        >
+                          <Image
+                            src={preview}
+                            w="250px"
+                            h="250px"
+                            objectFit={"contain"}
+                          />
+                        </Box>
 
-          <Box>
-            <Form ref={formRef} onSubmit={handleUpdate}>
-              <Stack spacing={3}>
-                <Grid templateColumns={"1fr 1fr"} gap={3}>
-                  <FormControl>
-                    <FormLabel>Razão Social</FormLabel>
-                    <Input name="name" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Nome Fantasia</FormLabel>
-                    <Input name="fantasy_name" />
-                  </FormControl>
-                </Grid>
-                <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
-                  <FormControl>
-                    <FormLabel>CNPJ</FormLabel>
-                    <InputMask mask="99.999.999/9999-99" name="cnpj" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Telefone</FormLabel>
-                    <InputMask mask="(99) 99999-9999" name="phone" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Email</FormLabel>
-                    <Input name="email" />
-                  </FormControl>
-                </Grid>
-                <Grid templateColumns={"1fr 1fr"} gap={3}>
-                  <FormControl>
-                    <FormLabel>Inscrição Municipal</FormLabel>
-                    <Input name="municipal_registration" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Inscrição Estadual</FormLabel>
-                    <Input name="state_registration" />
-                  </FormControl>
-                </Grid>
-                <Grid templateColumns={"3fr 1fr"} gap={3}>
-                  <FormControl>
-                    <FormLabel>Logradouro</FormLabel>
-                    <Input name="street" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Número</FormLabel>
-                    <Input name="number" />
-                  </FormControl>
-                </Grid>
-                <Grid templateColumns={"2fr 1fr"} gap={3}>
-                  <FormControl>
-                    <FormLabel>Complemento</FormLabel>
-                    <Input name="comp" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Bairro</FormLabel>
-                    <Input name="district" />
-                  </FormControl>
-                </Grid>
-                <Grid templateColumns={"1fr 2fr 1fr"} gap={3}>
-                  <FormControl>
-                    <FormLabel>CEP</FormLabel>
-                    <InputMask mask={"99999-999"} name="zip_code" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Cidade</FormLabel>
-                    <Input name="city" />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Estado</FormLabel>
-                    <Select name="state">
-                      <option value="AC">AC</option>
-                      <option value="AL">AL</option>
-                      <option value="AP">AP</option>
-                      <option value="AM">AM</option>
-                      <option value="BA">BA</option>
-                      <option value="CE">CE</option>
-                      <option value="DF">DF</option>
-                      <option value="ES">ES</option>
-                      <option value="GO">GO</option>
-                      <option value="MA">MA</option>
-                      <option value="MT">MT</option>
-                      <option value="MS">MS</option>
-                      <option value="MG">MG</option>
-                      <option value="PA">PA</option>
-                      <option value="PB">PB</option>
-                      <option value="PR">PR</option>
-                      <option value="PE">PE</option>
-                      <option value="PI">PI</option>
-                      <option value="RJ">RJ</option>
-                      <option value="RN">RN</option>
-                      <option value="RS">RS</option>
-                      <option value="RO">RO</option>
-                      <option value="RR">RR</option>
-                      <option value="SC">SC</option>
-                      <option value="SP">SP</option>
-                      <option value="SE">SE</option>
-                      <option value="TO">TO</option>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Button
-                  leftIcon={<AiOutlineSave />}
-                  colorScheme="blue"
-                  isFullWidth={false}
-                  size="lg"
-                  type="submit"
-                  w="fit-content"
-                  isLoading={
-                    loading?.action === "save" && loading.loading === true
-                  }
-                >
-                  Salvar
-                </Button>
-              </Stack>
-            </Form>
-          </Box>
-        </Grid>
-      )}
+                        <IconButton
+                          aria-label="Alterar logo da empresa"
+                          icon={<FaTrashAlt />}
+                          colorScheme={"red"}
+                          mt={"-45px"}
+                          size="sm"
+                          onClick={() => removeThumbnail()}
+                        />
+                      </Flex>
+                      <Button
+                        isFullWidth
+                        colorScheme={"blue"}
+                        leftIcon={<AiOutlineSave />}
+                        mt={3}
+                        isLoading={mutation.isLoading}
+                        onClick={() => {
+                          mutation.mutate(thumbnail);
+                        }}
+                      >
+                        Salvar Imagem
+                      </Button>
+                    </FormControl>
+                  ) : (
+                    <FormControl>
+                      <FormLabel htmlFor="image">
+                        Insira uma imagem
+                        <Flex
+                          w="250px"
+                          h="250px"
+                          rounded={"md"}
+                          borderWidth="1px"
+                          borderStyle={"dashed"}
+                          direction="column"
+                          justify={"center"}
+                          align="center"
+                          cursor={"pointer"}
+                          _hover={{ borderWidth: "2px" }}
+                          mt={2}
+                        >
+                          <Icon as={AiOutlinePicture} fontSize="4xl" />
+                          <Text textAlign={"center"} fontSize="md" mt={2}>
+                            Insira uma imagem
+                          </Text>
+                          <ChakraInput
+                            type={"file"}
+                            id="image"
+                            d="none"
+                            onChange={(e) => {
+                              handleThumbnail(e.target.files);
+                            }}
+                          />
+                        </Flex>
+                      </FormLabel>
+                    </FormControl>
+                  )}
+                </>
+              )}
+            </Box>
+            <Box shadow={"md"} rounded="md" borderWidth={"1px"} p={3}>
+              <Form ref={formRef} onSubmit={handleUpdate}>
+                <Stack spacing={3}>
+                  <Grid templateColumns={"1fr 1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Razão Social</FormLabel>
+                      <Input name="name" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Nome Fantasia</FormLabel>
+                      <Input name="fantasy_name" />
+                    </FormControl>
+                  </Grid>
+                  <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>CNPJ</FormLabel>
+                      <InputMask mask="99.999.999/9999-99" name="cnpj" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Telefone</FormLabel>
+                      <InputMask mask="(99) 99999-9999" name="phone" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Email</FormLabel>
+                      <Input name="email" />
+                    </FormControl>
+                  </Grid>
+                  <Grid templateColumns={"1fr 1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Inscrição Municipal</FormLabel>
+                      <Input name="municipal_registration" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Inscrição Estadual</FormLabel>
+                      <Input name="state_registration" />
+                    </FormControl>
+                  </Grid>
+                  <Grid templateColumns={"3fr 1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Logradouro</FormLabel>
+                      <Input name="street" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Número</FormLabel>
+                      <Input name="number" />
+                    </FormControl>
+                  </Grid>
+                  <Grid templateColumns={"2fr 1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Complemento</FormLabel>
+                      <Input name="comp" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Bairro</FormLabel>
+                      <Input name="district" />
+                    </FormControl>
+                  </Grid>
+                  <Grid templateColumns={"1fr 2fr 1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>CEP</FormLabel>
+                      <InputMask mask={"99999-999"} name="zip_code" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Cidade</FormLabel>
+                      <Input name="city" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Estado</FormLabel>
+                      <Select name="state">
+                        <option value="AC">AC</option>
+                        <option value="AL">AL</option>
+                        <option value="AP">AP</option>
+                        <option value="AM">AM</option>
+                        <option value="BA">BA</option>
+                        <option value="CE">CE</option>
+                        <option value="DF">DF</option>
+                        <option value="ES">ES</option>
+                        <option value="GO">GO</option>
+                        <option value="MA">MA</option>
+                        <option value="MT">MT</option>
+                        <option value="MS">MS</option>
+                        <option value="MG">MG</option>
+                        <option value="PA">PA</option>
+                        <option value="PB">PB</option>
+                        <option value="PR">PR</option>
+                        <option value="PE">PE</option>
+                        <option value="PI">PI</option>
+                        <option value="RJ">RJ</option>
+                        <option value="RN">RN</option>
+                        <option value="RS">RS</option>
+                        <option value="RO">RO</option>
+                        <option value="RR">RR</option>
+                        <option value="SC">SC</option>
+                        <option value="SP">SP</option>
+                        <option value="SE">SE</option>
+                        <option value="TO">TO</option>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Button
+                    leftIcon={<AiOutlineSave />}
+                    colorScheme="blue"
+                    isFullWidth={false}
+                    size="lg"
+                    type="submit"
+                    w="fit-content"
+                    isLoading={
+                      loading?.action === "save" && loading.loading === true
+                    }
+                  >
+                    Salvar
+                  </Button>
+                </Stack>
+              </Form>
+            </Box>
+          </Grid>
+        )}
+      </Box>
     </Fragment>
   );
 }

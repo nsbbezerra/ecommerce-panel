@@ -252,7 +252,11 @@ export default function Header() {
       <Box h="60px" w={"100%"} shadow="md" borderBottomWidth={"1px"}>
         <Flex align={"center"} justify="space-between" h="100%" px={7}>
           <HStack>
-            <Image src={logo} h="40px" />
+            {company?.thumbnail ? (
+              <Avatar src={company.thumbnail} />
+            ) : (
+              <Image src={logo} h="40px" />
+            )}
 
             <Box h="45px" borderRightWidth={"1px"} px={1} />
 
@@ -361,7 +365,7 @@ export default function Header() {
                 variant={"ghost"}
                 size="sm"
               >
-                Notas Ficais
+                Notas Fiscais
               </Button>
             </HStack>
           </HStack>
