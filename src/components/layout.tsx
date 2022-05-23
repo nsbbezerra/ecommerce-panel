@@ -47,7 +47,10 @@ export default function Layout() {
         >
           <Container maxW={"8xl"} h="100%">
             <Flex h="100%" justify={"space-between"} align="center">
-              <Text fontSize={"xs"}>
+              <Text
+                fontSize={"xs"}
+                d={["none", "none", "block", "block", "block"]}
+              >
                 Sistema desenvolvido por:{" "}
                 <Link fontWeight={"semibold"}>NK Informática</Link>,
                 desenvolvedor responsável: <strong>Natanael Bezerra</strong>

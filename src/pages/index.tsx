@@ -85,7 +85,16 @@ export default function Index() {
   return (
     <Fragment>
       <Box py={3}>
-        <Grid templateColumns={"1fr 1fr 1fr 1fr"} gap={5}>
+        <Grid
+          templateColumns={[
+            "repeat(1, 1fr)",
+            "repeat(2, 1fr)",
+            "repeat(2, 1fr)",
+            "repeat(4, 1fr)",
+            "repeat(4, 1fr)",
+          ]}
+          gap={5}
+        >
           <Flex
             align={"center"}
             borderWidth="1px"
@@ -141,7 +150,13 @@ export default function Index() {
         </Grid>
 
         <Grid
-          templateColumns={"250px 1fr 1fr"}
+          templateColumns={[
+            "1fr",
+            "1fr",
+            "1fr 1fr",
+            "250px 1fr 1fr",
+            "250px 1fr 1fr",
+          ]}
           gap={5}
           borderWidth="1px"
           rounded="md"
@@ -281,7 +296,13 @@ export default function Index() {
         </Grid>
 
         <Grid
-          templateColumns={"250px 1fr"}
+          templateColumns={[
+            "1fr",
+            "1fr",
+            "250px 1fr",
+            "250px 1fr",
+            "250px 1fr",
+          ]}
           gap={5}
           borderWidth="1px"
           rounded="md"

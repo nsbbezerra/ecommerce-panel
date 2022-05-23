@@ -217,7 +217,16 @@ export default function Company() {
     <Fragment>
       <Box py={3}>
         {isLoading ? (
-          <Grid templateColumns={"250px 1fr"} gap={10}>
+          <Grid
+            templateColumns={[
+              "1fr",
+              "1fr",
+              "280px 1fr",
+              "280px 1fr",
+              "280px 1fr",
+            ]}
+            gap={10}
+          >
             <Skeleton w="250px" h="250px" />
             <Stack spacing={3}>
               <Skeleton h={10} />
@@ -230,13 +239,23 @@ export default function Company() {
             </Stack>
           </Grid>
         ) : (
-          <Grid templateColumns={"280px 1fr"} gap={5}>
+          <Grid
+            templateColumns={[
+              "1fr",
+              "1fr",
+              "280px 1fr",
+              "280px 1fr",
+              "280px 1fr",
+            ]}
+            gap={5}
+          >
             <Box
               borderWidth={"1px"}
               rounded="md"
               shadow={"md"}
               h="min-content"
               p={3}
+              w="280px"
             >
               {showThumb ? (
                 <FormControl>
@@ -379,17 +398,35 @@ export default function Company() {
             <Box shadow={"md"} rounded="md" borderWidth={"1px"} p={3}>
               <Form ref={formRef} onSubmit={handleUpdate}>
                 <Stack spacing={3}>
-                  <Grid templateColumns={"1fr 1fr"} gap={3}>
+                  <Grid
+                    templateColumns={[
+                      "1fr",
+                      "1fr",
+                      "1fr",
+                      "1fr 1fr",
+                      "1fr 1fr",
+                    ]}
+                    gap={3}
+                  >
                     <FormControl>
                       <FormLabel>Razão Social</FormLabel>
-                      <Input name="name" />
+                      <Input name="name" autoFocus />
                     </FormControl>
                     <FormControl>
                       <FormLabel>Nome Fantasia</FormLabel>
                       <Input name="fantasy_name" />
                     </FormControl>
                   </Grid>
-                  <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
+                  <Grid
+                    templateColumns={[
+                      "1fr",
+                      "1fr",
+                      "1fr",
+                      "1fr 1fr 1fr",
+                      "1fr 1fr 1fr",
+                    ]}
+                    gap={3}
+                  >
                     <FormControl>
                       <FormLabel>CNPJ</FormLabel>
                       <InputMask mask="99.999.999/9999-99" name="cnpj" />
@@ -413,7 +450,16 @@ export default function Company() {
                       <Input name="state_registration" />
                     </FormControl>
                   </Grid>
-                  <Grid templateColumns={"3fr 1fr"} gap={3}>
+                  <Grid
+                    templateColumns={[
+                      "1fr",
+                      "3fr 1fr",
+                      "3fr 1fr",
+                      "3fr 1fr",
+                      "3fr 1fr",
+                    ]}
+                    gap={3}
+                  >
                     <FormControl>
                       <FormLabel>Logradouro</FormLabel>
                       <Input name="street" />
@@ -423,7 +469,16 @@ export default function Company() {
                       <Input name="number" />
                     </FormControl>
                   </Grid>
-                  <Grid templateColumns={"2fr 1fr"} gap={3}>
+                  <Grid
+                    templateColumns={[
+                      "1fr",
+                      "2fr 1fr",
+                      "2fr 1fr",
+                      "2fr 1fr",
+                      "2fr 1fr",
+                    ]}
+                    gap={3}
+                  >
                     <FormControl>
                       <FormLabel>Complemento</FormLabel>
                       <Input name="comp" />
@@ -433,7 +488,16 @@ export default function Company() {
                       <Input name="district" />
                     </FormControl>
                   </Grid>
-                  <Grid templateColumns={"1fr 2fr 1fr"} gap={3}>
+                  <Grid
+                    templateColumns={[
+                      "1fr",
+                      "1fr 2fr 1fr",
+                      "1fr 2fr 1fr",
+                      "1fr 2fr 1fr",
+                      "1fr 2fr 1fr",
+                    ]}
+                    gap={3}
+                  >
                     <FormControl>
                       <FormLabel>CEP</FormLabel>
                       <InputMask mask={"99999-999"} name="zip_code" />

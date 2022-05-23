@@ -73,6 +73,7 @@ import {
   AiOutlineLogin,
   AiOutlineSave,
   AiOutlineShop,
+  AiOutlineMenu,
 } from "react-icons/ai";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { FaRegSun, FaRegMoon } from "react-icons/fa";
@@ -120,6 +121,7 @@ export default function Header() {
   const { toggleColorMode, colorMode } = useColorMode();
   const [drawer, setDrawer] = useState<boolean>(false);
   const [alert, setAlert] = useState<boolean>(false);
+  const [globalMenu, setGlobalMenu] = useState<boolean>(false);
 
   const [login, setLogin] = useState<boolean>(true);
   const [show, setShow] = useState<boolean>(false);
@@ -253,14 +255,18 @@ export default function Header() {
         <Flex align={"center"} justify="space-between" h="100%" px={7}>
           <HStack>
             {company?.thumbnail ? (
-              <Avatar src={company.thumbnail} />
+              <Avatar
+                src={company.thumbnail}
+                borderWidth="1px"
+                borderColor={"GrayText"}
+              />
             ) : (
               <Image src={logo} h="40px" />
             )}
 
             <Box h="45px" borderRightWidth={"1px"} px={1} />
 
-            <HStack pl={3}>
+            <HStack pl={3} d={["none", "none", "none", "none", "flex"]}>
               <Button
                 leftIcon={<AiOutlineHome />}
                 colorScheme="blue"
@@ -291,8 +297,18 @@ export default function Header() {
                   Colaboradores
                 </MenuButton>
                 <MenuList>
-                  <MenuItem icon={<AiOutlineSave />}>Cadastro</MenuItem>
-                  <MenuItem icon={<AiOutlineTool />}>Gerenciar</MenuItem>
+                  <MenuItem
+                    icon={<AiOutlineSave />}
+                    onClick={() => navigate("/criar_colaborador")}
+                  >
+                    Cadastro
+                  </MenuItem>
+                  <MenuItem
+                    icon={<AiOutlineTool />}
+                    onClick={() => navigate("/listar_colaboradores")}
+                  >
+                    Gerenciar
+                  </MenuItem>
                 </MenuList>
               </Menu>
               <Button
@@ -371,6 +387,15 @@ export default function Header() {
           </HStack>
 
           <HStack>
+            <Tooltip hasArrow label="Menu Global">
+              <IconButton
+                aria-label="Abrir menu global"
+                icon={<AiOutlineMenu />}
+                onClick={() => setGlobalMenu(true)}
+                colorScheme="blue"
+                d={["flex", "flex", "flex", "flex", "none"]}
+              />
+            </Tooltip>
             <Tooltip hasArrow label="Alterar o tema">
               <IconButton
                 aria-label="Alterar o tema do aplicativo"
@@ -482,6 +507,22 @@ export default function Header() {
               Salvar
             </Button>
           </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer
+        isOpen={globalMenu}
+        placement="left"
+        onClose={() => setGlobalMenu(false)}
+        finalFocusRef={btnRef}
+        size="xs"
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Menu Global</DrawerHeader>
+
+          <DrawerBody></DrawerBody>
         </DrawerContent>
       </Drawer>
 
