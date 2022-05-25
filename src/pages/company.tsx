@@ -210,6 +210,11 @@ export default function Company() {
         removeThumbnail();
         setShowThumb(true);
       },
+      onError: (err) => {
+        if (axios.isAxiosError(error) && error.message) {
+          showToast(error.response?.data.message, "error", "Erro");
+        }
+      },
     }
   );
 

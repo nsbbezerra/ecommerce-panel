@@ -1,27 +1,17 @@
 import { useRef, useEffect, ReactNode } from "react";
 import { useField } from "@unform/core";
-import {
-  Select as ChakraSelect,
-  SelectProps as ChakraSelectProps,
-} from "@chakra-ui/select";
+import { RadioGroup, RadioGroupProps } from "@chakra-ui/radio";
+import { Stack } from "@chakra-ui/layout";
 
 interface Props {
   name: string;
-  rightElement?: boolean;
-  leftElement?: boolean;
   children: ReactNode;
 }
 
-type InputProps = ChakraSelectProps & Props;
+type InputProps = RadioGroupProps & Props;
 
-export default function Select({
-  name,
-  rightElement = false,
-  leftElement = false,
-  children,
-  ...rest
-}: InputProps) {
-  const inputRef = useRef<HTMLSelectElement>(null);
+export default function Radio({ name, children, ...rest }: InputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { fieldName, defaultValue, registerField } = useField(name);
 
@@ -42,14 +32,8 @@ export default function Select({
   }, [fieldName, registerField]);
 
   return (
-    <ChakraSelect
-      {...rest}
-      ref={inputRef}
-      defaultValue={defaultValue}
-      pl={leftElement ? 10 : ""}
-      pr={rightElement ? 10 : ""}
-    >
-      {children}
-    </ChakraSelect>
+    <RadioGroup {...rest} ref={inputRef} defaultValue={defaultValue}>
+      <Stack>{children}</Stack>
+    </RadioGroup>
   );
 }
