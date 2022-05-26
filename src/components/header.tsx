@@ -46,6 +46,7 @@ import {
   Tag,
   Icon,
   Skeleton,
+  MenuGroup,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
@@ -59,14 +60,12 @@ import {
   AiOutlineImport,
   AiOutlineLogout,
   AiOutlinePercentage,
-  AiOutlinePicture,
   AiOutlineProfile,
   AiOutlineRise,
   AiOutlineShopping,
   AiOutlineTag,
   AiOutlineTags,
   AiOutlineTool,
-  AiOutlineUnorderedList,
   AiOutlineUser,
   AiOutlineUsergroupAdd,
   AiOutlineKey,
@@ -316,6 +315,7 @@ export default function Header() {
                 colorScheme="blue"
                 variant={"ghost"}
                 size="sm"
+                onClick={() => navigate("/clientes")}
               >
                 Clientes
               </Button>
@@ -331,19 +331,24 @@ export default function Header() {
                   Produtos
                 </MenuButton>
                 <MenuList>
-                  <MenuItem icon={<AiOutlineUnorderedList />}>
-                    Listagem
-                  </MenuItem>
+                  <MenuGroup title="Cadastro">
+                    <MenuItem
+                      icon={<AiOutlineTag />}
+                      onClick={() => navigate("/categorias")}
+                    >
+                      Categorias
+                    </MenuItem>
+                    <MenuItem icon={<AiOutlineTags />}>Sub-Categorias</MenuItem>
+                    <MenuItem icon={<AiOutlineTags />}>Produtos</MenuItem>
+                    <MenuItem icon={<AiOutlineTags />}>Tags</MenuItem>
+                    <MenuItem icon={<AiOutlineAppstoreAdd />}>
+                      Itens Adicionais
+                    </MenuItem>
+                  </MenuGroup>
                   <MenuDivider />
-                  <MenuItem icon={<AiOutlineTag />}>Categorias</MenuItem>
-                  <MenuItem icon={<AiOutlineTags />}>Sub-Categorias</MenuItem>
-                  <MenuItem icon={<AiOutlinePicture />}>Imagens</MenuItem>
-                  <MenuItem icon={<AiOutlineTags />}>Tags</MenuItem>
-                  <MenuItem icon={<AiOutlineAppstoreAdd />}>
-                    Itens Adicionais
-                  </MenuItem>
-                  <MenuDivider />
-                  <MenuItem icon={<AiOutlineImport />}>Importar XML</MenuItem>
+                  <MenuGroup title="Faturamento">
+                    <MenuItem icon={<AiOutlineImport />}>Importar XML</MenuItem>
+                  </MenuGroup>
                 </MenuList>
               </Menu>
               <Button
@@ -618,7 +623,8 @@ export default function Header() {
                           {differenceInDays(
                             new Date(),
                             new Date(company?.expires_code_date || new Date())
-                          )}
+                          )}{" "}
+                          dias
                         </Tag>
                       ) : (
                         <Tag colorScheme={"green"} size="sm">
