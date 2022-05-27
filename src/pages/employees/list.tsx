@@ -225,8 +225,8 @@ const ListEmployee = () => {
         setPermission("");
       },
       onError: (err) => {
-        if (axios.isAxiosError(error) && error.message) {
-          showToast(error.response?.data.message, "error", "Erro");
+        if (axios.isAxiosError(err) && err.message) {
+          showToast(err.response?.data.message, "error", "Erro");
         }
       },
     }
@@ -234,7 +234,6 @@ const ListEmployee = () => {
 
   const mutationAuth = useMutation(
     (data: AuthUpdateProps) => {
-      console.log(data);
       return api.put(`/changeAuthInfo/${employee?.id}`, data, {
         headers: { "x-access-authorization": user?.token || "" },
       });
@@ -246,8 +245,8 @@ const ListEmployee = () => {
         setModalInfo(false);
       },
       onError: (err) => {
-        if (axios.isAxiosError(error) && error.message) {
-          showToast(error.response?.data.message, "error", "Erro");
+        if (axios.isAxiosError(err) && err.message) {
+          showToast(err.response?.data.message, "error", "Erro");
         }
       },
     }
@@ -289,13 +288,7 @@ const ListEmployee = () => {
   return (
     <Fragment>
       <Box py={3}>
-        <Box
-          borderWidth={"1px"}
-          rounded="md"
-          shadow={"md"}
-          h="min-content"
-          p={3}
-        >
+        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
           {isLoading ? (
             <Stack spacing={3}>
               <Skeleton h={7} />

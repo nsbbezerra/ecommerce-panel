@@ -114,14 +114,15 @@ const Clients = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
       paginateGood(data, configs.pagination);
       setPages(Math.ceil(data.length / configs.pagination));
     }
   }, [data]);
 
   useEffect(() => {
-    paginateGood(data, configs.pagination);
+    if (data) {
+      paginateGood(data, configs.pagination);
+    }
   }, [page]);
 
   const search = (id: string) => {
@@ -133,13 +134,7 @@ const Clients = () => {
   return (
     <Fragment>
       <Box py={3}>
-        <Box
-          borderWidth={"1px"}
-          rounded="md"
-          shadow={"md"}
-          h="min-content"
-          p={3}
-        >
+        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
           {isLoading ? (
             <Stack spacing={3}>
               <Skeleton h={7} />

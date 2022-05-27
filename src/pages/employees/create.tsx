@@ -109,13 +109,7 @@ const EmployeeCreate = () => {
   return (
     <Fragment>
       <Box py={3}>
-        <Box
-          borderWidth={"1px"}
-          rounded="md"
-          shadow={"md"}
-          h="min-content"
-          p={3}
-        >
+        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
           <Form onSubmit={handleCreate} ref={formRef}>
             <Stack spacing={3}>
               <Grid

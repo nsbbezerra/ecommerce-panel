@@ -211,8 +211,8 @@ export default function Company() {
         setShowThumb(true);
       },
       onError: (err) => {
-        if (axios.isAxiosError(error) && error.message) {
-          showToast(error.response?.data.message, "error", "Erro");
+        if (axios.isAxiosError(err) && err.message) {
+          showToast(err.response?.data.message, "error", "Erro");
         }
       },
     }
@@ -257,7 +257,6 @@ export default function Company() {
             <Box
               borderWidth={"1px"}
               rounded="md"
-              shadow={"md"}
               h="min-content"
               p={3}
               w="280px"
@@ -400,7 +399,7 @@ export default function Company() {
                 </>
               )}
             </Box>
-            <Box shadow={"md"} rounded="md" borderWidth={"1px"} p={3}>
+            <Box rounded="md" borderWidth={"1px"} p={3}>
               <Form ref={formRef} onSubmit={handleUpdate}>
                 <Stack spacing={3}>
                   <Grid

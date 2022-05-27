@@ -95,52 +95,28 @@ export default function Index() {
           ]}
           gap={5}
         >
-          <Flex
-            align={"center"}
-            borderWidth="1px"
-            shadow={"md"}
-            rounded="md"
-            p={2}
-          >
+          <Flex align={"center"} borderWidth="1px" rounded="md" p={2}>
             <Icon as={AiOutlineUser} fontSize="4xl" mx={3} />
             <Stat ml={3}>
               <StatLabel>Clientes Cadastrados</StatLabel>
               <StatNumber>1000</StatNumber>
             </Stat>
           </Flex>
-          <Flex
-            align={"center"}
-            borderWidth="1px"
-            shadow={"md"}
-            rounded="md"
-            p={2}
-          >
+          <Flex align={"center"} borderWidth="1px" rounded="md" p={2}>
             <Icon as={AiOutlineUsergroupAdd} fontSize="4xl" mx={3} />
             <Stat ml={3}>
               <StatLabel>Funcionários Ativos</StatLabel>
               <StatNumber>1000</StatNumber>
             </Stat>
           </Flex>
-          <Flex
-            align={"center"}
-            borderWidth="1px"
-            shadow={"md"}
-            rounded="md"
-            p={2}
-          >
+          <Flex align={"center"} borderWidth="1px" rounded="md" p={2}>
             <Icon as={AiOutlineTags} fontSize="4xl" mx={3} />
             <Stat ml={3}>
               <StatLabel>Produtos Ativos</StatLabel>
               <StatNumber>1000</StatNumber>
             </Stat>
           </Flex>
-          <Flex
-            align={"center"}
-            borderWidth="1px"
-            shadow={"md"}
-            rounded="md"
-            p={2}
-          >
+          <Flex align={"center"} borderWidth="1px" rounded="md" p={2}>
             <Icon as={AiOutlineShopping} fontSize="4xl" mx={3} />
             <Stat ml={3}>
               <StatLabel>Vendas Realizadas</StatLabel>
@@ -160,7 +136,6 @@ export default function Index() {
           gap={5}
           borderWidth="1px"
           rounded="md"
-          shadow={"md"}
           p={3}
           mt={5}
         >
@@ -306,7 +281,6 @@ export default function Index() {
           gap={5}
           borderWidth="1px"
           rounded="md"
-          shadow={"md"}
           p={3}
           mt={5}
         >
