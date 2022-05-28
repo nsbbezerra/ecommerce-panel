@@ -207,7 +207,7 @@ const RegisterCategories = () => {
         type="submit"
         isLoading={loading}
       >
-        Salvar
+        Cadastrar
       </Button>
     </Form>
   );

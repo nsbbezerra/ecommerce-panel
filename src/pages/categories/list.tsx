@@ -171,7 +171,9 @@ const ListCategories = () => {
   }, [data]);
 
   useEffect(() => {
-    paginateGood(data, configs.pagination);
+    if (data) {
+      paginateGood(data, configs.pagination);
+    }
   }, [page]);
 
   useEffect(() => {

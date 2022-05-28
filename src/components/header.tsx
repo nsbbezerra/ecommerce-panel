@@ -250,7 +250,7 @@ export default function Header() {
 
   return (
     <Fragment>
-      <Box h="60px" w={"100%"} shadow="md" borderBottomWidth={"1px"}>
+      <Box h="60px" w={"100%"} shadow="sm" borderBottomWidth={"1px"}>
         <Flex align={"center"} justify="space-between" h="100%" px={7}>
           <HStack>
             {company?.thumbnail ? (
@@ -338,7 +338,12 @@ export default function Header() {
                     >
                       Categorias
                     </MenuItem>
-                    <MenuItem icon={<AiOutlineTags />}>Sub-Categorias</MenuItem>
+                    <MenuItem
+                      icon={<AiOutlineTags />}
+                      onClick={() => navigate("/sub_categorias")}
+                    >
+                      Sub-Categorias
+                    </MenuItem>
                     <MenuItem icon={<AiOutlineTags />}>Produtos</MenuItem>
                     <MenuItem icon={<AiOutlineTags />}>Tags</MenuItem>
                     <MenuItem icon={<AiOutlineAppstoreAdd />}>

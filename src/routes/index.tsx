@@ -5,6 +5,7 @@ import Clients from "../pages/clients";
 import Company from "../pages/company";
 import EmployeeCreate from "../pages/employees/create";
 import ListEmployee from "../pages/employees/list";
+import IndexSubCategories from "../pages/sub_categories";
 
 export default function Routing() {
   return (
@@ -15,6 +16,7 @@ export default function Routing() {
       <Route path="/listar_colaboradores" element={<ListEmployee />} />
       <Route path="/clientes" element={<Clients />} />
       <Route path="/categorias" element={<IndexCategories />} />
+      <Route path="/sub_categorias" element={<IndexSubCategories />} />
     </Routes>
   );
 }

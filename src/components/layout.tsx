@@ -43,7 +43,7 @@ export default function Layout() {
         <Box
           h="100%"
           borderTopWidth={"1px"}
-          boxShadow="0px -3px 5px rgba(0,0,0,.08)"
+          boxShadow="0px -1px 3px rgba(0,0,0,.08)"
         >
           <Container maxW={"8xl"} h="100%">
             <Flex h="100%" justify={"space-between"} align="center">
@@ -60,37 +60,31 @@ export default function Layout() {
                   aria-label="Facebook"
                   icon={<AiOutlineFacebook />}
                   size="xs"
-                  colorScheme={"facebook"}
                 />
                 <IconButton
                   aria-label="Instagram"
                   icon={<AiOutlineInstagram />}
                   size="xs"
-                  colorScheme={"purple"}
                 />
                 <IconButton
                   aria-label="Whatsapp"
                   icon={<AiOutlineWhatsApp />}
                   size="xs"
-                  colorScheme={"whatsapp"}
                 />
                 <IconButton
                   aria-label="Twitter"
                   icon={<AiOutlineTwitter />}
                   size="xs"
-                  colorScheme={"twitter"}
                 />
                 <IconButton
                   aria-label="Telegram"
                   icon={<FaTelegramPlane />}
                   size="xs"
-                  colorScheme={"telegram"}
                 />
                 <IconButton
                   aria-label="Linkedin"
                   icon={<AiOutlineLinkedin />}
                   size="xs"
-                  colorScheme={"linkedin"}
                 />
               </HStack>
             </Flex>
