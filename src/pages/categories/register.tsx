@@ -186,7 +186,7 @@ const RegisterCategories = () => {
         <Stack spacing={3}>
           <FormControl isRequired>
             <FormLabel>Título</FormLabel>
-            <Input placeholder="Título" name="title" />
+            <Input placeholder="Título" name="title" autoFocus />
           </FormControl>
           <FormControl>
             <FormLabel>Descrição</FormLabel>
