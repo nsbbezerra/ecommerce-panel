@@ -344,8 +344,12 @@ export default function Header() {
                     >
                       Sub-Categorias
                     </MenuItem>
-                    <MenuItem icon={<AiOutlineTags />}>Produtos</MenuItem>
-                    <MenuItem icon={<AiOutlineTags />}>Tags</MenuItem>
+                    <MenuItem
+                      icon={<AiOutlineTags />}
+                      onClick={() => navigate("/produtos")}
+                    >
+                      Produtos
+                    </MenuItem>
                     <MenuItem icon={<AiOutlineAppstoreAdd />}>
                       Itens Adicionais
                     </MenuItem>
