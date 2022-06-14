@@ -246,6 +246,7 @@ export default function Header() {
     sessionStorage.clear();
     setAlert(false);
     setLogin(true);
+    navigate("/");
   };
 
   return (

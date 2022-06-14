@@ -12,7 +12,6 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  Input as ChakraInput,
   HStack,
   NumberInput,
   NumberInputField,
@@ -25,7 +24,6 @@ import {
   useToast,
   useColorModeValue,
   theme,
-  Select as ChakraSelect,
   Tooltip,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
@@ -67,16 +65,6 @@ type ProductProps = {
   width: number;
   unity: number;
   details: string;
-  taxes: TaxesProps;
-  tags: TagsProps[];
-  thumbnail: string;
-};
-
-type TagsProps = {
-  title: string;
-};
-
-type TaxesProps = {
   cfop: string;
   ncm: string;
   icms_rate: number;
@@ -102,6 +90,12 @@ type TaxesProps = {
   cofins_rate: number;
   cofins_base_calc: number;
   cest: string;
+  tags: TagsProps[];
+  thumbnail: string;
+};
+
+type TagsProps = {
+  title: string;
 };
 
 type CategoryProps = {
@@ -206,14 +200,23 @@ const RegisterProduct = () => {
 
   return (
     <Fragment>
-      <Tabs onChange={(e) => setIndex(e)} index={index}>
+      <Tabs
+        onChange={(e) => setIndex(e)}
+        index={index}
+        isFitted
+        variant={"enclosed-colored"}
+      >
         <TabList>
-          <Tab>Dados</Tab>
-          <Tab>Fiscal</Tab>
-          <Tab>Preço</Tab>
-          <Tab>Frete</Tab>
-          <Tab isDisabled>Imagens</Tab>
-          <Tab isDisabled>Adicionais</Tab>
+          <Tab roundedTop={"md"}>Dados</Tab>
+          <Tab roundedTop={"md"}>Fiscal</Tab>
+          <Tab roundedTop={"md"}>Preço</Tab>
+          <Tab roundedTop={"md"}>Frete</Tab>
+          <Tab roundedTop={"md"} isDisabled>
+            Imagens
+          </Tab>
+          <Tab roundedTop={"md"} isDisabled>
+            Adicionais
+          </Tab>
         </TabList>
         <Form ref={formRef} onSubmit={handleSubmit}>
           <TabPanels>
@@ -465,21 +468,24 @@ const RegisterProduct = () => {
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>CEST</FormLabel>
-                    <ChakraInput placeholder="CEST" />
+                    <Input placeholder="CEST" name="cest" />
                   </FormControl>
                   <FormControl>
                     <FormLabel>NCM</FormLabel>
-                    <ChakraInput placeholder="NCM" />
+                    <Input placeholder="NCM" name="ncm" />
                   </FormControl>
                   <FormControl>
                     <FormLabel>CFOP</FormLabel>
-                    <ChakraInput placeholder="CFOP" />
+                    <Input placeholder="CFOP" name="cfop" />
                   </FormControl>
                 </Grid>
                 <Grid templateColumns={"repeat(4, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>ICMS Origem</FormLabel>
-                    <ChakraSelect placeholder="Selecione uma opção">
+                    <Select
+                      placeholder="Selecione uma opção"
+                      name="icms_origin"
+                    >
                       <option value={"0"}>0 - Nacional</option>
                       <option value={"1"}>
                         1 - Estrangeira (importação direta)
@@ -509,11 +515,11 @@ const RegisterProduct = () => {
                         8 - Nacional, mercadoria ou bem com Conteúdo de
                         Importação superior a 70%;
                       </option>
-                    </ChakraSelect>
+                    </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel>ICMS CSOSN</FormLabel>
-                    <ChakraSelect placeholder="Selecione uma opção">
+                    <Select name="icms_csosn" placeholder="Selecione uma opção">
                       <option value={"101"}>
                         101 - Tributada pelo Simples Nacional com permissão de
                         crédito
@@ -550,15 +556,18 @@ const RegisterProduct = () => {
                         tributária (substituído) ou por antecipação
                       </option>
                       <option value={"900"}>900 - Outros</option>
-                    </ChakraSelect>
+                    </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel>ICMS Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="ICMS Alíquota" />
+                    <Input name="icms_rate" placeholder="ICMS Alíquota" />
                   </FormControl>
                   <FormControl>
                     <FormLabel>ICMS Base de Cálculo</FormLabel>
-                    <ChakraInput placeholder="ICMS Base de Cálculo" />
+                    <Input
+                      name="icms_base_calc"
+                      placeholder="ICMS Base de Cálculo"
+                    />
                   </FormControl>
                 </Grid>
                 <Grid templateColumns={"repeat(4, 1fr)"} gap={3}>
@@ -567,16 +576,25 @@ const RegisterProduct = () => {
                       <Tooltip label="Margem de valor agregado" hasArrow>
                         <Text>ICMS MVA (%)</Text>
                       </Tooltip>
-                      <ChakraInput placeholder="Margem de valor agregado" />
+                      <Input
+                        name="icms_marg_val_agregate"
+                        placeholder="Margem de valor agregado"
+                      />
                     </FormLabel>
                   </FormControl>
                   <FormControl>
                     <FormLabel>ICMS ST Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="ICMS ST Alíquota (%)" />
+                    <Input
+                      name="icms_st_rate"
+                      placeholder="ICMS ST Alíquota (%)"
+                    />
                   </FormControl>
                   <FormControl>
                     <FormLabel>ICMS ST Modalidade de Cálculo (%)</FormLabel>
-                    <ChakraSelect placeholder="Selecione uma opção">
+                    <Select
+                      name="icms_st_mod_bc"
+                      placeholder="Selecione uma opção"
+                    >
                       <option value={"0"}>
                         Preço tabelado ou máximo sugerido
                       </option>
@@ -585,39 +603,54 @@ const RegisterProduct = () => {
                       <option value={"3"}>Lista Neutra (valor)</option>
                       <option value={"4"}>Margem Valor Agregado (%)</option>
                       <option value={"5"}>Pauta (valor)</option>
-                    </ChakraSelect>
+                    </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel>ICMS ST Base de Cálculo</FormLabel>
-                    <ChakraInput placeholder="ICMS ST Base de Cálculo" />
+                    <Input
+                      name="imcs_st_base_calc"
+                      placeholder="ICMS ST Base de Cálculo"
+                    />
                   </FormControl>
                 </Grid>
                 <Grid templateColumns={"repeat(5, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>FCP Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="FCP Alíquota (%)" />
+                    <Input name="fcp_rate" placeholder="FCP Alíquota (%)" />
                   </FormControl>
                   <FormControl>
                     <FormLabel>FCP ST Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="FCP ST Alíquota (%)" />
+                    <Input
+                      name="fcp_st_rate"
+                      placeholder="FCP ST Alíquota (%)"
+                    />
                   </FormControl>
                   <FormControl>
                     <FormLabel>FCP Ret. Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="FCP Ret. Alíquota (%)" />
+                    <Input
+                      name="fcp_ret_rate"
+                      placeholder="FCP Ret. Alíquota (%)"
+                    />
                   </FormControl>
                   <FormControl>
                     <FormLabel>FCP Base de Cálculo</FormLabel>
-                    <ChakraInput placeholder="FCP Base de Cálculo" />
+                    <Input
+                      name="fcp_base_calc"
+                      placeholder="FCP Base de Cálculo"
+                    />
                   </FormControl>
                   <FormControl>
                     <FormLabel>FCP ST Base de Cálculo</FormLabel>
-                    <ChakraInput placeholder="FCP ST Base de Cálculo" />
+                    <Input
+                      name="fcp_st_base_calc"
+                      placeholder="FCP ST Base de Cálculo"
+                    />
                   </FormControl>
                 </Grid>
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>IPI CST</FormLabel>
-                    <ChakraSelect placeholder="Selecione uma opção">
+                    <Select name="ipi_cst" placeholder="Selecione uma opção">
                       <option value={""}>Nenhum</option>
                       <option value={"00"}>
                         00 – Entrada com Recuperação de Crédito
@@ -639,51 +672,60 @@ const RegisterProduct = () => {
                       <option value={"54"}>54 – Saída Imune</option>
                       <option value={"55"}>55 – Saída com Suspensão</option>
                       <option value={"99"}>99 – Outras Saídas</option>
-                    </ChakraSelect>
+                    </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel>IPI Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="IPI Alíquota (%)" />
+                    <Input name="ipi_rate" placeholder="IPI Alíquota (%)" />
                   </FormControl>
                   <FormControl>
                     <FormLabel>IPI Código</FormLabel>
-                    <ChakraInput placeholder="IPI Código" />
+                    <Input name="ipi_code" placeholder="IPI Código" />
                   </FormControl>
                 </Grid>
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>PIS CST</FormLabel>
-                    <ChakraSelect placeholder="Selecione uma opção">
+                    <Select name="pis_cst" placeholder="Selecione uma opção">
                       {dataTrib.map((dt) => (
                         <option key={dt.code}>{dt.desc}</option>
                       ))}
-                    </ChakraSelect>
+                    </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel>PIS Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="PIS Alíquota (%)" />
+                    <Input name="pis_rate" placeholder="PIS Alíquota (%)" />
                   </FormControl>
                   <FormControl>
                     <FormLabel>PIS Base de Cálculo</FormLabel>
-                    <ChakraInput placeholder="PIS Base de Cálculo" />
+                    <Input
+                      name="pis_base_calc"
+                      placeholder="PIS Base de Cálculo"
+                    />
                   </FormControl>
                 </Grid>
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>COFINS CST</FormLabel>
-                    <ChakraSelect placeholder="Selecione uma opção">
+                    <Select name="cofins_cst" placeholder="Selecione uma opção">
                       {dataTrib.map((dt) => (
                         <option key={dt.code}>{dt.desc}</option>
                       ))}
-                    </ChakraSelect>
+                    </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel>COFINS Alíquota (%)</FormLabel>
-                    <ChakraInput placeholder="COFINS Alíquota (%)" />
+                    <Input
+                      name="cofins_rate"
+                      placeholder="COFINS Alíquota (%)"
+                    />
                   </FormControl>
                   <FormControl>
                     <FormLabel>COFINS Base de Cálculo</FormLabel>
-                    <ChakraInput placeholder="COFINS Base de Cálculo" />
+                    <Input
+                      name="cofins_base_calc"
+                      placeholder="COFINS Base de Cálculo"
+                    />
                   </FormControl>
                 </Grid>
                 <Button
