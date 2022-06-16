@@ -25,6 +25,10 @@ import {
   useColorModeValue,
   theme,
   Tooltip,
+  Select as ChakraSelect,
+  Divider,
+  Input as ChakraInput,
+  Table,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
@@ -32,11 +36,18 @@ import * as Yup from "yup";
 import Select from "../../components/Select";
 import Input from "../../components/Input";
 import TextArea from "../../components/textArea";
-import { AiOutlinePlus } from "react-icons/ai";
+import {
+  AiOutlineCalculator,
+  AiOutlinePlus,
+  AiOutlineSave,
+} from "react-icons/ai";
 import { FaRuler, FaTrashAlt } from "react-icons/fa";
 import RichTextEditor from "react-rte";
 import { CgArrowRight } from "react-icons/cg";
 import { dataTrib } from "../../configs/data";
+import MaskedInput from "react-input-mask";
+import axios from "axios";
+import { api } from "../../configs";
 
 type CostValueProps = {
   title: string;
@@ -124,6 +135,12 @@ type WidthProps = {
   width: string;
 };
 
+type ShippingProps = {
+  Codigo: string;
+  Valor: string;
+  PrazoEntrega: string;
+};
+
 const RegisterProduct = () => {
   const toast = useToast();
   const formRef = useRef<FormHandles>(null);
@@ -132,6 +149,24 @@ const RegisterProduct = () => {
   const [width, setWidth] = useState<WidthProps[]>([]);
   const [widthNumber, setWidthNumber] = useState<string>("");
   const [text, setText] = useState(RichTextEditor.createEmptyValue());
+  const [cost, setCost] = useState<number>(0);
+  const [otherCost, setOtherCost] = useState<number>(0);
+  const [sale, setSale] = useState<number>(0);
+  const [marge, setMarge] = useState<number>(0);
+  const [cardTax, setCardTax] = useState<number>(0);
+  const [tax, setTax] = useState<number>(0);
+  const [comission, setComission] = useState<number>(0);
+  const [freightValue, setFreightValue] = useState<number>(0);
+  const [originCep, setOriginCep] = useState<string>("");
+  const [destinyCep, setDestinyCep] = useState<string>("");
+  const [weight, setWeight] = useState<string>("");
+  const [format, setFormat] = useState<string>("");
+  const [length, setLength] = useState<number>(0);
+  const [widthFreight, setWidthFreight] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
+  const [diameter, setDiameter] = useState<number>(0);
+  const [shipping, setShipping] = useState<ShippingProps[]>();
+  const [loadingShipping, setLoadingShipping] = useState<boolean>(false);
 
   function showToast(
     message: string,
@@ -149,36 +184,12 @@ const RegisterProduct = () => {
   }
 
   const handleSubmit: SubmitHandler = async (data, { reset }) => {
-    console.log(data);
+    try {
+      console.log(data);
+    } catch (error) {
+      console.log((error as Error).cause, "Errou");
+    }
   };
-
-  const SelectUni = () => (
-    <Select name="unit_desc" placeholder="Selecione uma opção">
-      <option value="KG">Quilograma</option>
-      <option value="GR">Grama</option>
-      <option value="UN">Unidade</option>
-      <option value="MT">Metro</option>
-      <option value="CM">Centímetro</option>
-      <option value="MM">Milímetro</option>
-      <option value="PC">Peça</option>
-      <option value="CX">Caixa</option>
-      <option value="DZ">Duzia</option>
-      <option value="EM">Embalagem</option>
-      <option value="FD">Fardo</option>
-      <option value="KT">KIT</option>
-      <option value="JG">Jogo</option>
-      <option value="PT">Pacote</option>
-      <option value="LATA">Lata</option>
-      <option value="LT">Litro</option>
-      <option value="ML">Mililitro</option>
-      <option value="SC">Saco</option>
-      <option value="ROLO">Rolo</option>
-      <option value="VD">Vidro</option>
-      <option value="CE">Centro</option>
-      <option value="CJ">Conjunto</option>
-      <option value="GF">Garrafa</option>
-    </Select>
-  );
 
   const handleWidth = () => {
     let myWidths = width;
@@ -198,6 +209,43 @@ const RegisterProduct = () => {
     setWidth(result);
   };
 
+  const calcSaleVale = () => {
+    let costPrices = cost + otherCost + freightValue;
+    let calcTaxes = costPrices * (tax / 100);
+    let calcCardTax = costPrices * (cardTax / 100);
+    let comissionCalc = costPrices * (comission / 100);
+    let totalCalcs = costPrices + calcTaxes + calcCardTax + comissionCalc;
+    let calcMarge = totalCalcs * (marge / 100);
+    let finalCalc = totalCalcs + calcMarge;
+    setSale(parseFloat(finalCalc.toFixed(2)));
+  };
+
+  async function calcShipping() {
+    setLoadingShipping(true);
+    try {
+      const response = await api.post("/shipping", {
+        weight,
+        format,
+        length,
+        width: widthFreight,
+        height,
+        diameter,
+        originCep,
+        destinyCep,
+      });
+      setShipping(response.data);
+      setLoadingShipping(true);
+    } catch (error) {
+      setLoadingShipping(true);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
   return (
     <Fragment>
       <Tabs
@@ -211,12 +259,8 @@ const RegisterProduct = () => {
           <Tab roundedTop={"md"}>Fiscal</Tab>
           <Tab roundedTop={"md"}>Preço</Tab>
           <Tab roundedTop={"md"}>Frete</Tab>
-          <Tab roundedTop={"md"} isDisabled>
-            Imagens
-          </Tab>
-          <Tab roundedTop={"md"} isDisabled>
-            Adicionais
-          </Tab>
+          <Tab roundedTop={"md"}>Imagens</Tab>
+          <Tab roundedTop={"md"}>Adicionais</Tab>
         </TabList>
         <Form ref={formRef} onSubmit={handleSubmit}>
           <TabPanels>
@@ -274,9 +318,38 @@ const RegisterProduct = () => {
                   </FormControl>
                 </Grid>
                 <FormControl isRequired>
+                  <FormLabel>Unidade de Medida</FormLabel>
+                  <Select name="unit_desc" placeholder="Selecione uma opção">
+                    <option value="KG">Quilograma</option>
+                    <option value="GR">Grama</option>
+                    <option value="UN">Unidade</option>
+                    <option value="MT">Metro</option>
+                    <option value="CM">Centímetro</option>
+                    <option value="MM">Milímetro</option>
+                    <option value="PC">Peça</option>
+                    <option value="CX">Caixa</option>
+                    <option value="DZ">Duzia</option>
+                    <option value="EM">Embalagem</option>
+                    <option value="FD">Fardo</option>
+                    <option value="KT">KIT</option>
+                    <option value="JG">Jogo</option>
+                    <option value="PT">Pacote</option>
+                    <option value="LATA">Lata</option>
+                    <option value="LT">Litro</option>
+                    <option value="ML">Mililitro</option>
+                    <option value="SC">Saco</option>
+                    <option value="ROLO">Rolo</option>
+                    <option value="VD">Vidro</option>
+                    <option value="CE">Centro</option>
+                    <option value="CJ">Conjunto</option>
+                    <option value="GF">Garrafa</option>
+                  </Select>
+                </FormControl>
+                <FormControl isRequired>
                   <FormLabel>Cálculo de Medidas</FormLabel>
                   <Tabs
-                    variant={"soft-rounded"}
+                    mt={2}
+                    variant="enclosed"
                     size="sm"
                     defaultIndex={indexUnit}
                     onChange={(e) => setIndexUnit(e)}
@@ -292,16 +365,10 @@ const RegisterProduct = () => {
                     <TabPanels>
                       <TabPanel>
                         <Grid
-                          templateColumns={"1fr 1fr 1fr"}
+                          templateColumns={"1fr 1fr"}
                           gap={3}
                           position="relative"
                         >
-                          {indexUnit === 0 && (
-                            <FormControl isRequired>
-                              <FormLabel>Unidade de Medida</FormLabel>
-                              <SelectUni />
-                            </FormControl>
-                          )}
                           <FormControl>
                             <FormLabel>Largura</FormLabel>
                             <HStack>
@@ -367,13 +434,7 @@ const RegisterProduct = () => {
                         </Grid>
                       </TabPanel>
                       <TabPanel>
-                        <Grid templateColumns={"1fr 1fr"} gap={3}>
-                          {indexUnit === 1 && (
-                            <FormControl isRequired>
-                              <FormLabel>Unidade de Medida</FormLabel>
-                              <SelectUni />
-                            </FormControl>
-                          )}
+                        <Grid templateColumns={"1fr"} gap={3}>
                           <FormControl>
                             <FormLabel>Comprimento (Metros)</FormLabel>
                             <Input name="length" placeholder="Comprimento" />
@@ -381,30 +442,19 @@ const RegisterProduct = () => {
                         </Grid>
                       </TabPanel>
                       <TabPanel>
-                        <Grid templateColumns={"1fr 1fr"} gap={3}>
-                          {indexUnit === 2 && (
-                            <FormControl isRequired>
-                              <FormLabel>Unidade de Medida</FormLabel>
-                              <SelectUni />
-                            </FormControl>
-                          )}
+                        <Grid templateColumns={"1fr"} gap={3}>
                           <FormControl>
                             <FormLabel>Total de Unidades</FormLabel>
                             <Input
                               name="unity"
                               placeholder="Total de Unidades"
+                              type="number"
                             />
                           </FormControl>
                         </Grid>
                       </TabPanel>
                       <TabPanel>
-                        <Grid templateColumns={"1fr 1fr"} gap={3}>
-                          {indexUnit === 3 && (
-                            <FormControl isRequired>
-                              <FormLabel>Unidade de Medida</FormLabel>
-                              <SelectUni />
-                            </FormControl>
-                          )}
+                        <Grid templateColumns={"1fr"} gap={3}>
                           <FormControl>
                             <FormLabel>Peso (Kg)</FormLabel>
                             <Input name="weight" placeholder="Peso" />
@@ -412,13 +462,7 @@ const RegisterProduct = () => {
                         </Grid>
                       </TabPanel>
                       <TabPanel>
-                        <Grid templateColumns={"1fr 1fr"} gap={3}>
-                          {indexUnit === 4 && (
-                            <FormControl isRequired>
-                              <FormLabel>Unidade de Medida</FormLabel>
-                              <SelectUni />
-                            </FormControl>
-                          )}
+                        <Grid templateColumns={"1fr"} gap={3}>
                           <FormControl>
                             <FormLabel>Volume (Lt / Ml)</FormLabel>
                             <Input name="liter" placeholder="Volume" />
@@ -428,6 +472,7 @@ const RegisterProduct = () => {
                     </TabPanels>
                   </Tabs>
                 </FormControl>
+                <Divider />
                 <FormControl>
                   <FormLabel>Detalhes do Produto</FormLabel>
                   <RichTextEditor
@@ -435,7 +480,6 @@ const RegisterProduct = () => {
                     onChange={(e) => setText(e)}
                     placeholder="Insira seu texto aqui"
                     editorStyle={{
-                      minHeight: "200px",
                       background: "transparent",
                     }}
                     rootStyle={{
@@ -613,6 +657,7 @@ const RegisterProduct = () => {
                     />
                   </FormControl>
                 </Grid>
+                <Divider />
                 <Grid templateColumns={"repeat(5, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>FCP Alíquota (%)</FormLabel>
@@ -647,6 +692,7 @@ const RegisterProduct = () => {
                     />
                   </FormControl>
                 </Grid>
+                <Divider />
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>IPI CST</FormLabel>
@@ -683,6 +729,7 @@ const RegisterProduct = () => {
                     <Input name="ipi_code" placeholder="IPI Código" />
                   </FormControl>
                 </Grid>
+                <Divider />
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>PIS CST</FormLabel>
@@ -704,6 +751,7 @@ const RegisterProduct = () => {
                     />
                   </FormControl>
                 </Grid>
+                <Divider />
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl>
                     <FormLabel>COFINS CST</FormLabel>
@@ -739,10 +787,227 @@ const RegisterProduct = () => {
               </Stack>
             </TabPanel>
             <TabPanel>
-              <p>three!</p>
+              <Grid templateColumns={"repeat(5,1fr)"} gap={3} alignItems="end">
+                <FormControl>
+                  <FormLabel>Valor de Custo (R$)</FormLabel>
+                  <ChakraInput
+                    placeholder="Valor de Custo (R$)"
+                    type={"number"}
+                    value={cost}
+                    onChange={(e) => setCost(parseFloat(e.target.value))}
+                    name="cost"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Outros Custos (R$)</FormLabel>
+                  <ChakraInput
+                    placeholder="Outros Custos (R$)"
+                    type={"number"}
+                    value={otherCost}
+                    onChange={(e) => setOtherCost(parseFloat(e.target.value))}
+                    name="other_cost"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Valor do Frete (R$)</FormLabel>
+                  <ChakraInput
+                    placeholder="Margem de Lucro Desejada (%)"
+                    type={"number"}
+                    value={freightValue}
+                    onChange={(e) =>
+                      setFreightValue(parseFloat(e.target.value))
+                    }
+                    name="freight_value"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Impostos (%)</FormLabel>
+                  <ChakraInput
+                    placeholder="Impostos (%)"
+                    type={"number"}
+                    value={tax}
+                    onChange={(e) => setTax(parseFloat(e.target.value))}
+                    name="tax_value"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Taxa de Cartão (%)</FormLabel>
+                  <ChakraInput
+                    placeholder="Taxa de Cartão (%)"
+                    type={"number"}
+                    value={cardTax}
+                    onChange={(e) => setCardTax(parseFloat(e.target.value))}
+                    name="tax_card"
+                  />
+                </FormControl>
+              </Grid>
+              <Grid
+                templateColumns={"repeat(4,1fr)"}
+                gap={3}
+                alignItems="end"
+                mt={3}
+              >
+                <FormControl>
+                  <FormLabel>Comissões (%)</FormLabel>
+                  <ChakraInput
+                    placeholder="Comissões (%)"
+                    type={"number"}
+                    value={comission}
+                    onChange={(e) => setComission(parseFloat(e.target.value))}
+                    name="comission"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Margem de Lucro Desejada (%)</FormLabel>
+                  <ChakraInput
+                    placeholder="Margem de Lucro Desejada (%)"
+                    type={"number"}
+                    value={marge}
+                    onChange={(e) => setMarge(parseFloat(e.target.value))}
+                    name="marge"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Preço de Venda (R$)</FormLabel>
+                  <ChakraInput
+                    placeholder="Preço de Venda (R$)"
+                    type={"number"}
+                    value={sale}
+                    onChange={(e) => setSale(parseFloat(e.target.value))}
+                    name="sale_value"
+                  />
+                </FormControl>
+                <Button
+                  leftIcon={<AiOutlineCalculator />}
+                  colorScheme="blue"
+                  variant="outline"
+                  onClick={() => calcSaleVale()}
+                >
+                  Calcular
+                </Button>
+              </Grid>
+              <Button
+                rightIcon={<CgArrowRight />}
+                isFullWidth={false}
+                w="fit-content"
+                onClick={() => setIndex(3)}
+                mt={3}
+              >
+                Próximo
+              </Button>
             </TabPanel>
             <TabPanel>
-              <p>three!</p>
+              <Stack spacing={3}>
+                <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+                  <FormControl>
+                    <FormLabel>Peso (kg)</FormLabel>
+                    <ChakraInput
+                      placeholder="Peso (kg)"
+                      name="freight_weight"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Formato</FormLabel>
+                    <ChakraSelect
+                      placeholder="Selecione um opção"
+                      name="format"
+                      value={format}
+                      onChange={(e) => setFormat(e.target.value)}
+                    >
+                      <option value={1}>Caixa / Pacote</option>
+                      <option value={2}>Rolo / Prisma</option>
+                      <option value={3}>Envelope</option>
+                    </ChakraSelect>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Comprimento (cm)</FormLabel>
+                    <ChakraInput
+                      placeholder="Comprimento (cm)"
+                      name="freight_lenght"
+                      value={length}
+                      onChange={(e) => setLength(parseFloat(e.target.value))}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+                  <FormControl>
+                    <FormLabel>Altura (cm)</FormLabel>
+                    <ChakraInput
+                      placeholder="Altura (cm)"
+                      name="freight_height"
+                      value={height}
+                      onChange={(e) => setHeight(parseFloat(e.target.value))}
+                      type="number"
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Largura (cm)</FormLabel>
+                    <ChakraInput
+                      placeholder="Largura (cm)"
+                      name="freight_width"
+                      value={widthFreight}
+                      onChange={(e) =>
+                        setWidthFreight(parseFloat(e.target.value))
+                      }
+                      type="number"
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Diâmetro (cm)</FormLabel>
+                    <ChakraInput
+                      placeholder="Diâmetro (cm)"
+                      name="freight_diameter"
+                      value={diameter}
+                      onChange={(e) => setDiameter(parseFloat(e.target.value))}
+                      type="number"
+                    />
+                  </FormControl>
+                </Grid>
+
+                <Divider />
+
+                <FormControl>
+                  <FormLabel>Simular Frete</FormLabel>
+                  <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+                    <ChakraInput
+                      as={MaskedInput}
+                      mask="99999-999"
+                      placeholder="CEP de Origem"
+                      name="freight_cep_origin"
+                      value={originCep}
+                      onChange={(e) => setOriginCep(e.target.value)}
+                    />
+                    <ChakraInput
+                      as={MaskedInput}
+                      mask="99999-999"
+                      placeholder="CEP de Destino"
+                      value={destinyCep}
+                      onChange={(e) => setDestinyCep(e.target.value)}
+                      name="freight_cep_destiny"
+                    />
+                    <Button
+                      leftIcon={<AiOutlineCalculator />}
+                      onClick={() => calcShipping()}
+                      isLoading={loadingShipping}
+                    >
+                      Calcular Frete
+                    </Button>
+                  </Grid>
+                </FormControl>
+                {shipping?.length !== 0 && <Table></Table>}
+                <Divider />
+                <Button
+                  leftIcon={<AiOutlineSave />}
+                  size="lg"
+                  colorScheme={"blue"}
+                  w="fit-content"
+                  type="submit"
+                >
+                  Salvar Produto
+                </Button>
+              </Stack>
             </TabPanel>
           </TabPanels>
         </Form>

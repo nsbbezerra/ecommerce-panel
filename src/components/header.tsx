@@ -249,6 +249,140 @@ export default function Header() {
     navigate("/");
   };
 
+  const MenuItems = () => (
+    <HStack pl={3} d={["none", "none", "none", "none", "flex"]}>
+      <Button
+        leftIcon={<AiOutlineHome />}
+        colorScheme="blue"
+        variant={"ghost"}
+        size="sm"
+        onClick={() => navigate("/")}
+      >
+        Início
+      </Button>
+      <Button
+        leftIcon={<AiOutlineShop />}
+        colorScheme="blue"
+        variant={"ghost"}
+        size="sm"
+        onClick={() => navigate("/empresa")}
+      >
+        Empresa
+      </Button>
+      <Menu>
+        <MenuButton
+          as={Button}
+          rightIcon={<MdKeyboardArrowDown />}
+          leftIcon={<AiOutlineUsergroupAdd />}
+          colorScheme="blue"
+          variant={"ghost"}
+          size="sm"
+        >
+          Colaboradores
+        </MenuButton>
+        <MenuList>
+          <MenuItem
+            icon={<AiOutlineSave />}
+            onClick={() => navigate("/criar_colaborador")}
+          >
+            Cadastro
+          </MenuItem>
+          <MenuItem
+            icon={<AiOutlineTool />}
+            onClick={() => navigate("/listar_colaboradores")}
+          >
+            Gerenciar
+          </MenuItem>
+        </MenuList>
+      </Menu>
+      <Button
+        leftIcon={<AiOutlineUser />}
+        colorScheme="blue"
+        variant={"ghost"}
+        size="sm"
+        onClick={() => navigate("/clientes")}
+      >
+        Clientes
+      </Button>
+      <Menu>
+        <MenuButton
+          as={Button}
+          rightIcon={<MdKeyboardArrowDown />}
+          leftIcon={<AiOutlineTags />}
+          colorScheme="blue"
+          variant={"ghost"}
+          size="sm"
+        >
+          Produtos
+        </MenuButton>
+        <MenuList>
+          <MenuGroup title="Cadastro">
+            <MenuItem
+              icon={<AiOutlineTag />}
+              onClick={() => navigate("/categorias")}
+            >
+              Categorias
+            </MenuItem>
+            <MenuItem
+              icon={<AiOutlineTags />}
+              onClick={() => navigate("/sub_categorias")}
+            >
+              Sub-Categorias
+            </MenuItem>
+            <MenuItem
+              icon={<AiOutlineTags />}
+              onClick={() => navigate("/produtos")}
+            >
+              Produtos
+            </MenuItem>
+            <MenuItem icon={<AiOutlineAppstoreAdd />}>
+              Itens Adicionais
+            </MenuItem>
+          </MenuGroup>
+          <MenuDivider />
+          <MenuGroup title="Faturamento">
+            <MenuItem icon={<AiOutlineImport />}>Importar XML</MenuItem>
+          </MenuGroup>
+        </MenuList>
+      </Menu>
+      <Button
+        leftIcon={<AiOutlineShopping />}
+        colorScheme="blue"
+        variant={"ghost"}
+        size="sm"
+      >
+        Vendas
+      </Button>
+      <Menu>
+        <MenuButton
+          as={Button}
+          rightIcon={<MdKeyboardArrowDown />}
+          leftIcon={<AiOutlineAreaChart />}
+          colorScheme="blue"
+          variant={"ghost"}
+          size="sm"
+        >
+          Financeiro
+        </MenuButton>
+        <MenuList>
+          <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
+          <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
+          <MenuDivider />
+          <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
+          <MenuItem icon={<AiOutlineProfile />}>Cupons de Desconto</MenuItem>
+        </MenuList>
+      </Menu>
+      <Button
+        leftIcon={<AiOutlineFileText />}
+        colorScheme="blue"
+        variant={"ghost"}
+        size="sm"
+      >
+        Notas Fiscais
+      </Button>
+    </HStack>
+  );
+
   return (
     <Fragment>
       <Box h="60px" w={"100%"} shadow="sm" borderBottomWidth={"1px"}>
@@ -265,142 +399,8 @@ export default function Header() {
             )}
 
             <Box h="45px" borderRightWidth={"1px"} px={1} />
-
-            <HStack pl={3} d={["none", "none", "none", "none", "flex"]}>
-              <Button
-                leftIcon={<AiOutlineHome />}
-                colorScheme="blue"
-                variant={"ghost"}
-                size="sm"
-                onClick={() => navigate("/")}
-              >
-                Início
-              </Button>
-              <Button
-                leftIcon={<AiOutlineShop />}
-                colorScheme="blue"
-                variant={"ghost"}
-                size="sm"
-                onClick={() => navigate("/empresa")}
-              >
-                Empresa
-              </Button>
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  rightIcon={<MdKeyboardArrowDown />}
-                  leftIcon={<AiOutlineUsergroupAdd />}
-                  colorScheme="blue"
-                  variant={"ghost"}
-                  size="sm"
-                >
-                  Colaboradores
-                </MenuButton>
-                <MenuList>
-                  <MenuItem
-                    icon={<AiOutlineSave />}
-                    onClick={() => navigate("/criar_colaborador")}
-                  >
-                    Cadastro
-                  </MenuItem>
-                  <MenuItem
-                    icon={<AiOutlineTool />}
-                    onClick={() => navigate("/listar_colaboradores")}
-                  >
-                    Gerenciar
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-              <Button
-                leftIcon={<AiOutlineUser />}
-                colorScheme="blue"
-                variant={"ghost"}
-                size="sm"
-                onClick={() => navigate("/clientes")}
-              >
-                Clientes
-              </Button>
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  rightIcon={<MdKeyboardArrowDown />}
-                  leftIcon={<AiOutlineTags />}
-                  colorScheme="blue"
-                  variant={"ghost"}
-                  size="sm"
-                >
-                  Produtos
-                </MenuButton>
-                <MenuList>
-                  <MenuGroup title="Cadastro">
-                    <MenuItem
-                      icon={<AiOutlineTag />}
-                      onClick={() => navigate("/categorias")}
-                    >
-                      Categorias
-                    </MenuItem>
-                    <MenuItem
-                      icon={<AiOutlineTags />}
-                      onClick={() => navigate("/sub_categorias")}
-                    >
-                      Sub-Categorias
-                    </MenuItem>
-                    <MenuItem
-                      icon={<AiOutlineTags />}
-                      onClick={() => navigate("/produtos")}
-                    >
-                      Produtos
-                    </MenuItem>
-                    <MenuItem icon={<AiOutlineAppstoreAdd />}>
-                      Itens Adicionais
-                    </MenuItem>
-                  </MenuGroup>
-                  <MenuDivider />
-                  <MenuGroup title="Faturamento">
-                    <MenuItem icon={<AiOutlineImport />}>Importar XML</MenuItem>
-                  </MenuGroup>
-                </MenuList>
-              </Menu>
-              <Button
-                leftIcon={<AiOutlineShopping />}
-                colorScheme="blue"
-                variant={"ghost"}
-                size="sm"
-              >
-                Vendas
-              </Button>
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  rightIcon={<MdKeyboardArrowDown />}
-                  leftIcon={<AiOutlineAreaChart />}
-                  colorScheme="blue"
-                  variant={"ghost"}
-                  size="sm"
-                >
-                  Financeiro
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
-                  <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
-                  <MenuDivider />
-                  <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
-                  <MenuItem icon={<AiOutlineProfile />}>
-                    Cupons de Desconto
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-              <Button
-                leftIcon={<AiOutlineFileText />}
-                colorScheme="blue"
-                variant={"ghost"}
-                size="sm"
-              >
-                Notas Fiscais
-              </Button>
-            </HStack>
+            <MenuItems />
           </HStack>
-
           <HStack>
             <Tooltip hasArrow label="Menu Global">
               <IconButton
@@ -537,7 +537,9 @@ export default function Header() {
           <DrawerCloseButton />
           <DrawerHeader>Menu Global</DrawerHeader>
 
-          <DrawerBody></DrawerBody>
+          <DrawerBody>
+            <MenuItems />
+          </DrawerBody>
         </DrawerContent>
       </Drawer>
 

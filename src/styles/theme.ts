@@ -14,7 +14,7 @@ const customTheme = extendTheme({
         },
       },
     },
-    FormLabel: { baseStyle: { mb: 0 } },
+    FormLabel: { baseStyle: { mb: 0, fontWeight: "600" } },
   },
 });
 
