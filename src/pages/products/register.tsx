@@ -1064,7 +1064,9 @@ const RegisterProduct = () => {
                       isDisabled={!isTributed}
                     >
                       {dataTrib.map((dt) => (
-                        <option key={dt.code}>{dt.desc}</option>
+                        <option key={dt.code} value={dt.code}>
+                          {dt.desc}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>
@@ -1095,7 +1097,9 @@ const RegisterProduct = () => {
                       isDisabled={!isTributed}
                     >
                       {dataTrib.map((dt) => (
-                        <option key={dt.code}>{dt.desc}</option>
+                        <option key={dt.code} value={dt.code}>
+                          {dt.desc}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>
