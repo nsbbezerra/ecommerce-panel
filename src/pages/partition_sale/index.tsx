@@ -217,6 +217,48 @@ export default function PartitionSale() {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (idCategory !== "") {
+      async function findItems() {
+        try {
+          const response = await api.get(
+            `/showItemsPartitionSale/${idCategory}`
+          );
+          setItems(response.data);
+        } catch (error) {
+          if (axios.isAxiosError(error) && error.message) {
+            showToast(error.response?.data.message, "error", "Erro");
+          } else {
+            let message = (error as Error).message;
+            showToast(message, "error", "Erro");
+          }
+        }
+      }
+      findItems();
+    }
+  }, [idCategory]);
+
+  async function deleteItem(id: string) {
+    try {
+      setLoadingCategory(true);
+      const response = await api.delete(`/deleteItemPartition/${id}`, {
+        headers: { "x-access-authorization": auth?.token || "" },
+      });
+      showToast(response.data.message, "success", "Sucesso");
+      const updated = items?.filter((obj) => obj.id !== id);
+      setItems(updated);
+      setLoadingCategory(false);
+    } catch (error) {
+      setLoadingCategory(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
   return (
     <Fragment>
       <Box py={3}>
@@ -264,44 +306,7 @@ export default function PartitionSale() {
                         <Stack>
                           {categories.map((cat) => (
                             <Radio key={cat.id} value={cat.id}>
-                              <HStack>
-                                <Text>{cat.name}</Text>
-                                <Popover placement="right">
-                                  <PopoverTrigger>
-                                    <IconButton
-                                      aria-label="Remover categoria"
-                                      icon={<FaTrashAlt />}
-                                      size="xs"
-                                      variant="link"
-                                      colorScheme={"red"}
-                                    />
-                                  </PopoverTrigger>
-                                  <PopoverContent shadow={"lg"}>
-                                    <PopoverHeader fontWeight="semibold">
-                                      Confirmação
-                                    </PopoverHeader>
-                                    <PopoverArrow />
-                                    <PopoverCloseButton />
-                                    <PopoverBody>
-                                      Tem certeza que deseja remover esta
-                                      categoria?
-                                    </PopoverBody>
-                                    <PopoverFooter
-                                      display="flex"
-                                      justifyContent="flex-end"
-                                    >
-                                      <ButtonGroup size="sm">
-                                        <Button
-                                          colorScheme="blue"
-                                          leftIcon={<AiOutlineSave />}
-                                        >
-                                          Sim
-                                        </Button>
-                                      </ButtonGroup>
-                                    </PopoverFooter>
-                                  </PopoverContent>
-                                </Popover>
-                              </HStack>
+                              {cat.name}
                             </Radio>
                           ))}
                         </Stack>
@@ -356,7 +361,7 @@ export default function PartitionSale() {
                 rounded="md"
                 mb={3}
               >
-                ITENS DA VENDA PARTICIONADA
+                ITENS DA VENDA FRACIONADA
               </Flex>
               <Box borderWidth="1px" rounded="md" py={2} px={4}>
                 <Form ref={formItemsRef} onSubmit={handleSubmitItems}>
@@ -452,6 +457,8 @@ export default function PartitionSale() {
                                     <Button
                                       colorScheme="blue"
                                       leftIcon={<AiOutlineSave />}
+                                      isLoading={loadingCategory}
+                                      onClick={() => deleteItem(itm.id)}
                                     >
                                       Sim
                                     </Button>

@@ -20,7 +20,7 @@ export default function Routing() {
       <Route path="/categorias" element={<IndexCategories />} />
       <Route path="/sub_categorias" element={<IndexSubCategories />} />
       <Route path="/produtos" element={<IndexProducts />} />
-      <Route path="/venda_particionada" element={<PartitionSale />} />
+      <Route path="/venda_fracionada" element={<PartitionSale />} />
     </Routes>
   );
 }

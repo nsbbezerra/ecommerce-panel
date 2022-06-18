@@ -67,7 +67,13 @@ type ProductProps = {
   sale_value: number;
   active: boolean;
   in_promotion: boolean;
-  type_unit: "square_meter" | "meter" | "unity" | "weight" | "liter";
+  type_unit:
+    | "square_meter"
+    | "meter"
+    | "unity"
+    | "weight"
+    | "liter"
+    | "without";
   unit_desc: string;
   inventory: number;
   weight: number;
@@ -272,7 +278,8 @@ export default function ListProduct() {
                           (pro.type_unit === "meter" &&
                             `${pro.length} ${pro.unit_desc}`) ||
                           (pro.type_unit === "weight" &&
-                            `${pro.weight} ${pro.unit_desc}`)}
+                            `${pro.weight} ${pro.unit_desc}`) ||
+                          (pro.type_unit === "without" && "Venda sem Estoque")}
                       </Td>
                       <Td isNumeric>
                         {parseFloat(pro.sale_value.toString()).toLocaleString(

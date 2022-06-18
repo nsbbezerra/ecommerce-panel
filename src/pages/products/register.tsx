@@ -34,12 +34,12 @@ import {
   Th,
   Tbody,
   Td,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
   Image,
   Switch,
 } from "@chakra-ui/react";
@@ -118,7 +118,7 @@ type ProductProps = {
   tags: TagsProps[];
   thumbnail: string;
   type_sale: string;
-  sale_options: number;
+  sale_options: string;
   sale_options_category: string;
 };
 
@@ -168,13 +168,29 @@ type ImageProps = {
   image: string;
 };
 
+type PropsCategoryPartition = {
+  id: string;
+  name: string;
+};
+
+type AdicionalItemsProps = {
+  id: string;
+  name: string;
+  value: number;
+};
+
 const RegisterProduct = () => {
   const toast = useToast();
   const formRef = useRef<FormHandles>(null);
+  const cancelRef = useRef(null);
 
   const [categories, setCategories] = useState<CategoryProps[]>();
   const [subCategories, setSubCategories] = useState<SubCategoryProps[]>();
+  const [partitionCategories, setPartitionCategories] =
+    useState<PropsCategoryPartition[]>();
   const [images, setImages] = useState<ImageProps[]>();
+  const [adicionalItems, setAdictionalItems] =
+    useState<AdicionalItemsProps[]>();
 
   const [index, setIndex] = useState<number>(0);
   const [indexUnit, setIndexUnit] = useState<number>(2);
@@ -212,6 +228,8 @@ const RegisterProduct = () => {
   const [productImage, setProductImage] = useState<any>(undefined);
 
   const [productId, setProductId] = useState<string>("");
+  const [nameItem, setNameItem] = useState<string>("");
+  const [valueItem, setValueItem] = useState<number>(0);
 
   async function findCategories(id: string, token: string) {
     try {
@@ -219,6 +237,22 @@ const RegisterProduct = () => {
         headers: { "x-access-authorization": token || "" },
       });
       setCategories(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  async function findPartitionItems(id: string, token: string) {
+    try {
+      const response = await api.get(`/showCategoryPartitionSale/${id}`, {
+        headers: { "x-access-authorization": token || "" },
+      });
+      setPartitionCategories(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
@@ -253,6 +287,7 @@ const RegisterProduct = () => {
 
     if (companyParse && userParse) {
       findCategories(companyParse.id, userParse.token);
+      findPartitionItems(companyParse.id, userParse.token);
       setAuth({ id: companyParse.id, token: userParse.token });
     } else {
       showToast(
@@ -324,6 +359,9 @@ const RegisterProduct = () => {
 
       case 4:
         return "liter";
+
+      case 5:
+        return "without";
 
       default:
         return "unity";
@@ -441,6 +479,9 @@ const RegisterProduct = () => {
           cofins_base_calc: data.cofins_base_calc,
           cest: data.cest,
           isTributed: isTributed,
+          type_sale: data.type_sale,
+          sale_options: data.sale_options,
+          sale_options_category: data.sale_options_category,
         },
         {
           headers: { "x-access-authorization": auth?.token || "" },
@@ -539,6 +580,7 @@ const RegisterProduct = () => {
       showToast(response.data.message, "success", "Sucesso");
 
       setLoadingThumbnail(false);
+      setModal(true);
     } catch (error) {
       setLoadingThumbnail(false);
       if (axios.isAxiosError(error) && error.message) {
@@ -571,6 +613,7 @@ const RegisterProduct = () => {
       setLoadingImage(false);
       removeProductImage();
       setProductImage(undefined);
+      setModal(true);
     } catch (error) {
       setLoadingImage(false);
       if (axios.isAxiosError(error) && error.message) {
@@ -582,20 +625,62 @@ const RegisterProduct = () => {
     }
   }
 
+  async function storeAddctionalItems() {
+    if (productId === "") {
+      showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
+      return false;
+    }
+    if (nameItem === "") {
+      showToast("Insira o nome do item adicional", "warning", "Atenção");
+      return false;
+    }
+    setLoading(true);
+    try {
+      const response = await api.post(
+        `/adictionalItems/${productId}`,
+        {
+          name: nameItem,
+          value: valueItem,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+
+      showToast(response.data.message, "success", "Sucesso");
+      setAdictionalItems(response.data.items);
+      setNameItem("");
+      setValueItem(0);
+      setModal(true);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  function handleCloseModal() {
+    setProductId("");
+    setIndex(0);
+    setModal(false);
+    clear();
+  }
+
   return (
     <Fragment>
-      <Tabs
-        onChange={(e) => setIndex(e)}
-        index={index}
-        variant={"enclosed-colored"}
-      >
+      <Tabs onChange={(e) => setIndex(e)} index={index} variant={"enclosed"}>
         <TabList>
-          <Tab roundedTop={"md"}>Dados</Tab>
-          <Tab roundedTop={"md"}>Tributação</Tab>
-          <Tab roundedTop={"md"}>Preço</Tab>
-          <Tab roundedTop={"md"}>Frete</Tab>
-          <Tab roundedTop={"md"}>Imagens</Tab>
-          <Tab roundedTop={"md"}>Venda Particionada / Adicionais</Tab>
+          <Tab>Dados</Tab>
+          <Tab>Tributação</Tab>
+          <Tab>Preço</Tab>
+          <Tab>Frete</Tab>
+          <Tab>Imagens</Tab>
+          <Tab>Itens Adicionais</Tab>
         </TabList>
         <Form ref={formRef} onSubmit={handleSubmit}>
           <TabPanels>
@@ -706,6 +791,7 @@ const RegisterProduct = () => {
                       <Tab>Unidade</Tab>
                       <Tab>Peso</Tab>
                       <Tab>Litro</Tab>
+                      <Tab>Sem Estoque</Tab>
                     </TabList>
 
                     <TabPanels>
@@ -814,6 +900,19 @@ const RegisterProduct = () => {
                             <Input name="liter" placeholder="Volume" />
                           </FormControl>
                         </Grid>
+                      </TabPanel>
+                      <TabPanel>
+                        <Flex
+                          borderWidth={"1px"}
+                          rounded="md"
+                          p={4}
+                          justify="center"
+                          align="center"
+                          textAlign={"center"}
+                        >
+                          Produto não possui estoque definido, pode efetuar
+                          venda sem estoque.
+                        </Flex>
                       </TabPanel>
                     </TabPanels>
                   </Tabs>
@@ -1305,6 +1404,46 @@ const RegisterProduct = () => {
                   Calcular
                 </Button>
               </Grid>
+
+              <Flex
+                bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+                p={1}
+                justify="center"
+                align={"center"}
+                rounded="md"
+                mb={3}
+                mt={5}
+              >
+                VENDA FRACIONADA
+              </Flex>
+
+              <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
+                <FormControl isRequired>
+                  <FormLabel>Fracionar Venda?</FormLabel>
+                  <Select name="type_sale" placeholder="Selecione uma opção">
+                    <option value="unique">Não</option>
+                    <option value="partition">Sim</option>
+                  </Select>
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Total de Partes</FormLabel>
+                  <Input placeholder="Total de Partes" name="sale_options" />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Categoria de Itens</FormLabel>
+                  <Select
+                    name="sale_options_category"
+                    placeholder="Selecione uma opção"
+                  >
+                    {partitionCategories?.map((pt) => (
+                      <option value={pt.id} key={pt.id}>
+                        {pt.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
               <Button
                 rightIcon={<CgArrowRight />}
                 isFullWidth={false}
@@ -1440,16 +1579,28 @@ const RegisterProduct = () => {
                   </Table>
                 )}
                 <Divider />
-                <Button
-                  leftIcon={<AiOutlineSave />}
-                  size="lg"
-                  colorScheme={"blue"}
-                  w="fit-content"
-                  type="submit"
-                  isLoading={loading}
-                >
-                  Salvar Produto
-                </Button>
+                <HStack spacing={4}>
+                  <Button
+                    leftIcon={<AiOutlineSave />}
+                    size="lg"
+                    colorScheme={"blue"}
+                    w="fit-content"
+                    type="submit"
+                    isLoading={loading}
+                  >
+                    Salvar Produto
+                  </Button>
+                  <Button
+                    rightIcon={<CgArrowRight />}
+                    isFullWidth={false}
+                    w="fit-content"
+                    onClick={() => setIndex(4)}
+                    mt={3}
+                    size="lg"
+                  >
+                    Próximo
+                  </Button>
+                </HStack>
               </Stack>
             </TabPanel>
             <TabPanel>
@@ -1651,26 +1802,102 @@ const RegisterProduct = () => {
                   </Grid>
                 </Box>
               </Grid>
+              <Button
+                rightIcon={<CgArrowRight />}
+                isFullWidth={false}
+                w="fit-content"
+                onClick={() => setIndex(5)}
+                mt={3}
+              >
+                Próximo
+              </Button>
+            </TabPanel>
+            <TabPanel>
+              <Grid templateColumns={"2fr 1fr 150px"} gap={3} alignItems="end">
+                <FormControl>
+                  <FormLabel>Nome do Item</FormLabel>
+                  <ChakraInput
+                    placeholder="Nome do Item"
+                    value={nameItem}
+                    onChange={(e) => setNameItem(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Valor do Item (R$)</FormLabel>
+                  <ChakraInput
+                    placeholder="Valor do Item (R$)"
+                    type="number"
+                    value={valueItem}
+                    onChange={(e) => setValueItem(parseFloat(e.target.value))}
+                  />
+                </FormControl>
+                <Button
+                  leftIcon={<AiOutlineSave />}
+                  colorScheme="blue"
+                  isLoading={loading}
+                  onClick={() => storeAddctionalItems()}
+                >
+                  Salvar
+                </Button>
+              </Grid>
+
+              <Table size="sm" mt={5}>
+                <Thead>
+                  <Tr>
+                    <Th>Nome do Item</Th>
+                    <Th isNumeric>Preço</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {adicionalItems?.map((add) => (
+                    <Tr key={add.id}>
+                      <Td>{add.name}</Td>
+                      <Td>
+                        {parseFloat(add.value.toString()).toLocaleString(
+                          "pt-br",
+                          {
+                            style: "currency",
+                            currency: "BRL",
+                          }
+                        )}
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
             </TabPanel>
           </TabPanels>
         </Form>
       </Tabs>
 
-      <Modal
+      <AlertDialog
         isOpen={modal}
         onClose={() => setModal(false)}
-        size="6xl"
-        closeOnEsc={false}
-        closeOnOverlayClick={false}
-        scrollBehavior="outside"
+        leastDestructiveRef={cancelRef}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Salvar Imagens</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={5}></ModalBody>
-        </ModalContent>
-      </Modal>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Atenção
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Deseja finalizar o cadastro das informações agora?
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button onClick={() => setModal(false)}>Não</Button>
+              <Button
+                colorScheme="blue"
+                onClick={() => handleCloseModal()}
+                ml={3}
+              >
+                Sim
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Fragment>
   );
 };

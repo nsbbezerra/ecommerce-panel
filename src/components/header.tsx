@@ -50,7 +50,6 @@ import {
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
-  AiOutlineAppstoreAdd,
   AiOutlineAreaChart,
   AiOutlineCheck,
   AiOutlineClose,
@@ -74,6 +73,7 @@ import {
   AiOutlineShop,
   AiOutlineMenu,
   AiOutlinePartition,
+  AiOutlineBarcode,
 } from "react-icons/ai";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { FaRegSun, FaRegMoon } from "react-icons/fa";
@@ -336,16 +336,15 @@ export default function Header() {
             >
               Produtos
             </MenuItem>
-            <MenuItem icon={<AiOutlineAppstoreAdd />}>
-              Itens Adicionais
-            </MenuItem>
+            <MenuDivider />
             <MenuItem
               icon={<AiOutlinePartition />}
-              onClick={() => navigate("/venda_particionada")}
+              onClick={() => navigate("/venda_fracionada")}
             >
-              Venda Particionada
+              Venda Fracionada
             </MenuItem>
             <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
+            <MenuItem icon={<AiOutlineProfile />}>Cupons de Desconto</MenuItem>
           </MenuGroup>
           <MenuDivider />
           <MenuGroup title="Faturamento">
@@ -375,9 +374,8 @@ export default function Header() {
         <MenuList>
           <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
           <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
-          <MenuDivider />
-          <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
-          <MenuItem icon={<AiOutlineProfile />}>Cupons de Desconto</MenuItem>
+          <MenuItem icon={<AiOutlinePercentage />}>Comissões</MenuItem>
+          <MenuItem icon={<AiOutlineBarcode />}>Pagamentos</MenuItem>
         </MenuList>
       </Menu>
       <Button
