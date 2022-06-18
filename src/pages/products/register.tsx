@@ -160,12 +160,18 @@ type AuthProps = {
   token: string;
 };
 
+type ImageProps = {
+  id: string;
+  image: string;
+};
+
 const RegisterProduct = () => {
   const toast = useToast();
   const formRef = useRef<FormHandles>(null);
 
   const [categories, setCategories] = useState<CategoryProps[]>();
   const [subCategories, setSubCategories] = useState<SubCategoryProps[]>();
+  const [images, setImages] = useState<ImageProps[]>();
 
   const [index, setIndex] = useState<number>(0);
   const [indexUnit, setIndexUnit] = useState<number>(2);
@@ -192,6 +198,9 @@ const RegisterProduct = () => {
   const [loadingShipping, setLoadingShipping] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [isTributed, setIsTributed] = useState<boolean>(true);
+
+  const [loadingThumbnail, setLoadingThumbnail] = useState<boolean>(false);
+  const [loadingImage, setLoadingImage] = useState<boolean>(false);
 
   const [auth, setAuth] = useState<AuthProps>();
 
@@ -499,6 +508,60 @@ const RegisterProduct = () => {
       setLoadingShipping(false);
     } catch (error) {
       setLoadingShipping(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  async function storeThumbnail() {
+    if (!thumbnail) {
+      showToast("Selecione uma imagem para salvar", "warning", "Atenção");
+      return false;
+    }
+    setLoadingThumbnail(true);
+    try {
+      let data = new FormData();
+      data.append("thumbnail", thumbnail);
+
+      const response = await api.put(`/productsThumbnail/${productId}`, data);
+
+      showToast(response.data.message, "success", "Sucesso");
+
+      setLoadingThumbnail(false);
+    } catch (error) {
+      setLoadingThumbnail(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  async function storeImageProduct() {
+    if (!productImage) {
+      showToast("Selecione uma imagem para salvar", "warning", "Atenção");
+      return false;
+    }
+    setLoadingImage(true);
+    try {
+      let data = new FormData();
+      data.append("image", productImage);
+
+      const response = await api.post(`/storeImagesProduct/${productId}`, data);
+
+      showToast(response.data.message, "success", "Sucesso");
+      setImages(response.data.images);
+      setLoadingImage(false);
+      removeProductImage();
+      setProductImage(undefined);
+    } catch (error) {
+      setLoadingImage(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
       } else {
@@ -1387,7 +1450,7 @@ const RegisterProduct = () => {
         size="6xl"
         closeOnEsc={false}
         closeOnOverlayClick={false}
-        scrollBehavior="inside"
+        scrollBehavior="outside"
       >
         <ModalOverlay />
         <ModalContent>
@@ -1446,6 +1509,8 @@ const RegisterProduct = () => {
                         size={"sm"}
                         leftIcon={<AiOutlineSave />}
                         opacity={0.85}
+                        isLoading={loadingThumbnail}
+                        onClick={() => storeThumbnail()}
                       >
                         Salvar
                       </Button>
@@ -1496,6 +1561,19 @@ const RegisterProduct = () => {
                   gap={2}
                   justifyContent="center"
                 >
+                  {images?.map((img) => (
+                    <Box
+                      key={img.id}
+                      w="260px"
+                      h="260px"
+                      rounded="md"
+                      borderWidth={"1px"}
+                      overflow="hidden"
+                      position={"relative"}
+                    >
+                      <Image w="260px" h="260px" src={img.image} />
+                    </Box>
+                  ))}
                   {productImage ? (
                     <Box
                       w="260px"
@@ -1535,6 +1613,8 @@ const RegisterProduct = () => {
                           size={"sm"}
                           leftIcon={<AiOutlineSave />}
                           opacity={0.85}
+                          isLoading={loadingImage}
+                          onClick={() => storeImageProduct()}
                         >
                           Salvar
                         </Button>
