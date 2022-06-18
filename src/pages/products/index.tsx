@@ -11,6 +11,7 @@ import { Fragment, useState } from "react";
 import { AiOutlineOrderedList, AiOutlineSave } from "react-icons/ai";
 
 import Register from "./register";
+import List from "./list";
 
 const IndexProducts = () => {
   const [index, setIndex] = useState<number>(0);
@@ -36,7 +37,7 @@ const IndexProducts = () => {
             </TabList>
 
             <TabPanels>
-              <TabPanel></TabPanel>
+              <TabPanel>{index === 0 && <List />}</TabPanel>
               <TabPanel>{index === 1 && <Register />}</TabPanel>
             </TabPanels>
           </Tabs>

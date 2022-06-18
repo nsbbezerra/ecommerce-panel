@@ -1571,7 +1571,12 @@ const RegisterProduct = () => {
                       overflow="hidden"
                       position={"relative"}
                     >
-                      <Image w="260px" h="260px" src={img.image} />
+                      <Image
+                        w="260px"
+                        h="260px"
+                        src={img.image}
+                        objectFit="cover"
+                      />
                     </Box>
                   ))}
                   {productImage ? (

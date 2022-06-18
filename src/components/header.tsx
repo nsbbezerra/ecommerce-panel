@@ -338,6 +338,7 @@ export default function Header() {
             <MenuItem icon={<AiOutlineAppstoreAdd />}>
               Itens Adicionais
             </MenuItem>
+            <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
           </MenuGroup>
           <MenuDivider />
           <MenuGroup title="Faturamento">

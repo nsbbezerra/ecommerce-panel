@@ -35,7 +35,7 @@ import {
 import axios from "axios";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { GiCardboardBox } from "react-icons/gi";
-import { useQuery } from "react-query";
+import { useQuery, useMutation, QueryClient } from "react-query";
 import { api, configs } from "../../configs";
 import * as Icons from "react-icons/all";
 import {
@@ -50,7 +50,6 @@ import { Form } from "@unform/web";
 import * as Yup from "yup";
 import Input from "../../components/Input";
 import TextArea from "../../components/textArea";
-import { useMutation, QueryClient } from "react-query";
 import { icons } from "../../configs/icons";
 
 const queryClient = new QueryClient();
