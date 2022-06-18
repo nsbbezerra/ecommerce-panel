@@ -117,6 +117,9 @@ type ProductProps = {
   cest: string;
   tags: TagsProps[];
   thumbnail: string;
+  type_sale: string;
+  sale_options: number;
+  sale_options_category: string;
 };
 
 type TagsProps = {
@@ -518,6 +521,10 @@ const RegisterProduct = () => {
   }
 
   async function storeThumbnail() {
+    if (productId === "") {
+      showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
+      return false;
+    }
     if (!thumbnail) {
       showToast("Selecione uma imagem para salvar", "warning", "Atenção");
       return false;
@@ -544,6 +551,10 @@ const RegisterProduct = () => {
   }
 
   async function storeImageProduct() {
+    if (productId === "") {
+      showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
+      return false;
+    }
     if (!productImage) {
       showToast("Selecione uma imagem para salvar", "warning", "Atenção");
       return false;
@@ -576,7 +587,6 @@ const RegisterProduct = () => {
       <Tabs
         onChange={(e) => setIndex(e)}
         index={index}
-        isFitted
         variant={"enclosed-colored"}
       >
         <TabList>
@@ -584,6 +594,8 @@ const RegisterProduct = () => {
           <Tab roundedTop={"md"}>Tributação</Tab>
           <Tab roundedTop={"md"}>Preço</Tab>
           <Tab roundedTop={"md"}>Frete</Tab>
+          <Tab roundedTop={"md"}>Imagens</Tab>
+          <Tab roundedTop={"md"}>Venda Particionada / Adicionais</Tab>
         </TabList>
         <Form ref={formRef} onSubmit={handleSubmit}>
           <TabPanels>
@@ -1440,146 +1452,21 @@ const RegisterProduct = () => {
                 </Button>
               </Stack>
             </TabPanel>
-          </TabPanels>
-        </Form>
-      </Tabs>
-
-      <Modal
-        isOpen={modal}
-        onClose={() => setModal(false)}
-        size="6xl"
-        closeOnEsc={false}
-        closeOnOverlayClick={false}
-        scrollBehavior="outside"
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Salvar Imagens</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={5}>
-            <Grid templateColumns={"260px 1fr"} gap={5}>
-              <Box>
-                <Flex
-                  bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                  p={1}
-                  justify="center"
-                  align={"center"}
-                  rounded="md"
-                  mb={3}
-                >
-                  IMAGEM PRINCIPAL
-                </Flex>
-
-                {thumbnail ? (
-                  <Box
-                    w="260px"
-                    h="260px"
-                    rounded={"md"}
-                    borderWidth="1px"
-                    position={"relative"}
-                    overflow="hidden"
+            <TabPanel>
+              <Grid templateColumns={"260px 1fr"} gap={5}>
+                <Box>
+                  <Flex
+                    bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+                    p={1}
+                    justify="center"
+                    align={"center"}
+                    rounded="md"
+                    mb={3}
                   >
-                    <Image
-                      w="260px"
-                      h="260px"
-                      objectFit={"cover"}
-                      src={previewThumbnail}
-                    />
-                    <Grid
-                      templateColumns={"1fr 1fr"}
-                      position="absolute"
-                      bottom={0}
-                      left={0}
-                      right={0}
-                      zIndex={100}
-                    >
-                      <Button
-                        colorScheme={"red"}
-                        rounded="none"
-                        size={"sm"}
-                        leftIcon={<FaTrashAlt />}
-                        onClick={() => removeThumbnail()}
-                        opacity={0.85}
-                      >
-                        Excluir
-                      </Button>
-                      <Button
-                        colorScheme={"blue"}
-                        rounded="none"
-                        size={"sm"}
-                        leftIcon={<AiOutlineSave />}
-                        opacity={0.85}
-                        isLoading={loadingThumbnail}
-                        onClick={() => storeThumbnail()}
-                      >
-                        Salvar
-                      </Button>
-                    </Grid>
-                  </Box>
-                ) : (
-                  <FormLabel
-                    display={"flex"}
-                    rounded={"md"}
-                    overflow="hidden"
-                    position={"relative"}
-                    borderWidth="1px"
-                    borderStyle={"dashed"}
-                    borderColor={useColorModeValue("gray.900", "gray.100")}
-                    _hover={{ borderWidth: "2px" }}
-                    w="260px"
-                    h="260px"
-                    justifyContent={"center"}
-                    alignItems="center"
-                    flexDirection={"column"}
-                    gap={3}
-                    cursor="pointer"
-                  >
-                    <ChakraInput
-                      type={"file"}
-                      display="none"
-                      onChange={(e) => handelThumbnail(e.target.files)}
-                    />
-                    <Icon as={AiOutlinePicture} fontSize="4xl" />
-                    <Text userSelect={"none"}>Insira sua imagem aqui</Text>
-                  </FormLabel>
-                )}
-              </Box>
-              <Box>
-                <Flex
-                  bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                  p={1}
-                  justify="center"
-                  align={"center"}
-                  rounded="md"
-                  mb={3}
-                >
-                  MAIS IMAGENS DO PRODUTO
-                </Flex>
+                    IMAGEM PRINCIPAL
+                  </Flex>
 
-                <Grid
-                  templateColumns={"repeat(auto-fit, minmax(260px, 260px))"}
-                  gap={2}
-                  justifyContent="center"
-                >
-                  {images?.map((img) => (
-                    <Box
-                      key={img.id}
-                      w="260px"
-                      h="260px"
-                      rounded="md"
-                      borderWidth={"1px"}
-                      overflow="hidden"
-                      position={"relative"}
-                    >
-                      <Image
-                        w="260px"
-                        h="260px"
-                        src={img.image}
-                        objectFit="cover"
-                      />
-                    </Box>
-                  ))}
-                  {productImage ? (
+                  {thumbnail ? (
                     <Box
                       w="260px"
                       h="260px"
@@ -1592,7 +1479,7 @@ const RegisterProduct = () => {
                         w="260px"
                         h="260px"
                         objectFit={"cover"}
-                        src={previewProductImage}
+                        src={previewThumbnail}
                       />
                       <Grid
                         templateColumns={"1fr 1fr"}
@@ -1607,7 +1494,7 @@ const RegisterProduct = () => {
                           rounded="none"
                           size={"sm"}
                           leftIcon={<FaTrashAlt />}
-                          onClick={() => removeProductImage()}
+                          onClick={() => removeThumbnail()}
                           opacity={0.85}
                         >
                           Excluir
@@ -1618,8 +1505,8 @@ const RegisterProduct = () => {
                           size={"sm"}
                           leftIcon={<AiOutlineSave />}
                           opacity={0.85}
-                          isLoading={loadingImage}
-                          onClick={() => storeImageProduct()}
+                          isLoading={loadingThumbnail}
+                          onClick={() => storeThumbnail()}
                         >
                           Salvar
                         </Button>
@@ -1646,16 +1533,142 @@ const RegisterProduct = () => {
                       <ChakraInput
                         type={"file"}
                         display="none"
-                        onChange={(e) => handelProductImage(e.target.files)}
+                        onChange={(e) => handelThumbnail(e.target.files)}
                       />
                       <Icon as={AiOutlinePicture} fontSize="4xl" />
                       <Text userSelect={"none"}>Insira sua imagem aqui</Text>
                     </FormLabel>
                   )}
-                </Grid>
-              </Box>
-            </Grid>
-          </ModalBody>
+                </Box>
+                <Box>
+                  <Flex
+                    bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+                    p={1}
+                    justify="center"
+                    align={"center"}
+                    rounded="md"
+                    mb={3}
+                  >
+                    MAIS IMAGENS DO PRODUTO
+                  </Flex>
+
+                  <Grid
+                    templateColumns={"repeat(auto-fit, minmax(260px, 260px))"}
+                    gap={2}
+                    justifyContent="center"
+                  >
+                    {images?.map((img) => (
+                      <Box
+                        key={img.id}
+                        w="260px"
+                        h="260px"
+                        rounded="md"
+                        borderWidth={"1px"}
+                        overflow="hidden"
+                        position={"relative"}
+                      >
+                        <Image
+                          w="260px"
+                          h="260px"
+                          src={img.image}
+                          objectFit="cover"
+                        />
+                      </Box>
+                    ))}
+                    {productImage ? (
+                      <Box
+                        w="260px"
+                        h="260px"
+                        rounded={"md"}
+                        borderWidth="1px"
+                        position={"relative"}
+                        overflow="hidden"
+                      >
+                        <Image
+                          w="260px"
+                          h="260px"
+                          objectFit={"cover"}
+                          src={previewProductImage}
+                        />
+                        <Grid
+                          templateColumns={"1fr 1fr"}
+                          position="absolute"
+                          bottom={0}
+                          left={0}
+                          right={0}
+                          zIndex={100}
+                        >
+                          <Button
+                            colorScheme={"red"}
+                            rounded="none"
+                            size={"sm"}
+                            leftIcon={<FaTrashAlt />}
+                            onClick={() => removeProductImage()}
+                            opacity={0.85}
+                          >
+                            Excluir
+                          </Button>
+                          <Button
+                            colorScheme={"blue"}
+                            rounded="none"
+                            size={"sm"}
+                            leftIcon={<AiOutlineSave />}
+                            opacity={0.85}
+                            isLoading={loadingImage}
+                            onClick={() => storeImageProduct()}
+                          >
+                            Salvar
+                          </Button>
+                        </Grid>
+                      </Box>
+                    ) : (
+                      <FormLabel
+                        display={"flex"}
+                        rounded={"md"}
+                        overflow="hidden"
+                        position={"relative"}
+                        borderWidth="1px"
+                        borderStyle={"dashed"}
+                        borderColor={useColorModeValue("gray.900", "gray.100")}
+                        _hover={{ borderWidth: "2px" }}
+                        w="260px"
+                        h="260px"
+                        justifyContent={"center"}
+                        alignItems="center"
+                        flexDirection={"column"}
+                        gap={3}
+                        cursor="pointer"
+                      >
+                        <ChakraInput
+                          type={"file"}
+                          display="none"
+                          onChange={(e) => handelProductImage(e.target.files)}
+                        />
+                        <Icon as={AiOutlinePicture} fontSize="4xl" />
+                        <Text userSelect={"none"}>Insira sua imagem aqui</Text>
+                      </FormLabel>
+                    )}
+                  </Grid>
+                </Box>
+              </Grid>
+            </TabPanel>
+          </TabPanels>
+        </Form>
+      </Tabs>
+
+      <Modal
+        isOpen={modal}
+        onClose={() => setModal(false)}
+        size="6xl"
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        scrollBehavior="outside"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Salvar Imagens</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}></ModalBody>
         </ModalContent>
       </Modal>
     </Fragment>

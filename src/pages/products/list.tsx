@@ -39,8 +39,10 @@ import {
 import axios from "axios";
 import { Fragment, useEffect, useState } from "react";
 import {
+  AiOutlineAppstoreAdd,
   AiOutlineCalculator,
   AiOutlineEdit,
+  AiOutlinePartition,
   AiOutlinePercentage,
   AiOutlinePicture,
   AiOutlinePlus,
@@ -72,6 +74,7 @@ type ProductProps = {
   liter: number;
   length: number;
   isTributed: boolean;
+  type_sale: "unique" | "partition";
 };
 
 export default function ListProduct() {
@@ -304,6 +307,12 @@ export default function ListProduct() {
                               Alterar Frete
                             </MenuItem>
                             <MenuDivider />
+                            <MenuItem icon={<AiOutlineAppstoreAdd />}>
+                              Items Adicionais
+                            </MenuItem>
+                            <MenuItem icon={<AiOutlinePartition />}>
+                              Venda Particionada
+                            </MenuItem>
                             <MenuItem icon={<AiOutlineCalculator />}>
                               Promoções
                             </MenuItem>
