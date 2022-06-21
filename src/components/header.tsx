@@ -251,7 +251,11 @@ export default function Header() {
   };
 
   const MenuItems = () => (
-    <HStack pl={3} d={["none", "none", "none", "none", "flex"]}>
+    <Flex
+      gap={2}
+      pl={3}
+      direction={["column", "column", "column", "column", "row"]}
+    >
       <Button
         leftIcon={<AiOutlineHome />}
         colorScheme="blue"
@@ -270,7 +274,7 @@ export default function Header() {
       >
         Empresa
       </Button>
-      <Menu>
+      <Menu placement="auto">
         <MenuButton
           as={Button}
           rightIcon={<MdKeyboardArrowDown />}
@@ -305,7 +309,7 @@ export default function Header() {
       >
         Clientes
       </Button>
-      <Menu>
+      <Menu placement="auto">
         <MenuButton
           as={Button}
           rightIcon={<MdKeyboardArrowDown />}
@@ -360,7 +364,7 @@ export default function Header() {
       >
         Vendas
       </Button>
-      <Menu>
+      <Menu placement="auto">
         <MenuButton
           as={Button}
           rightIcon={<MdKeyboardArrowDown />}
@@ -386,7 +390,7 @@ export default function Header() {
       >
         Notas Fiscais
       </Button>
-    </HStack>
+    </Flex>
   );
 
   return (
@@ -405,7 +409,9 @@ export default function Header() {
             )}
 
             <Box h="45px" borderRightWidth={"1px"} px={1} />
-            <MenuItems />
+            <Box d={["none", "none", "none", "none", "block"]}>
+              <MenuItems />
+            </Box>
           </HStack>
           <HStack>
             <Tooltip hasArrow label="Menu Global">

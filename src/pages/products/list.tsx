@@ -30,11 +30,15 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
   MenuDivider,
   Tag,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useState } from "react";
@@ -45,7 +49,6 @@ import {
   AiOutlinePartition,
   AiOutlinePercentage,
   AiOutlinePicture,
-  AiOutlinePlus,
   AiOutlineTool,
 } from "react-icons/ai";
 import { GiCardboardBox } from "react-icons/gi";
@@ -91,10 +94,12 @@ export default function ListProduct() {
   const [search, setSearch] = useState<string>("all");
   const [textSearch, setTextSearch] = useState<string>("");
 
-  const [allProducts, setAllProducts] = useState<ProductProps[]>();
   const [products, setProducts] = useState<ProductProps[]>();
   const [page, setPage] = useState<number>(0);
   const [pages, setPages] = useState<number>(0);
+  const [loadingModal, setLoadingModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [modalTax, setModalTax] = useState<boolean>(true);
 
   function handleSearch(type: string) {
     setTextSearch("");
@@ -143,25 +148,68 @@ export default function ListProduct() {
     refetchInterval: 4000,
   });
 
+  function filterSearch(array: ProductProps[]) {
+    if (search === "all") {
+      paginateGood(array, configs.pagination);
+      setPages(Math.ceil(array.length / configs.pagination));
+    } else if (search === "active") {
+      let resultActive = array.filter((obj) => obj.active === true);
+      paginateGood(resultActive, configs.pagination);
+      setPages(Math.ceil(resultActive.length / configs.pagination));
+    } else if (search === "locked") {
+      let resultLocked = array.filter((obj) => obj.active === false);
+      paginateGood(resultLocked, configs.pagination);
+      setPages(Math.ceil(resultLocked.length / configs.pagination));
+    } else if (search === "promotional") {
+      let resultPromo = array.filter((obj) => obj.in_promotion === true);
+      paginateGood(resultPromo, configs.pagination);
+      setPages(Math.ceil(resultPromo.length / configs.pagination));
+    } else if (search === "name") {
+      if (textSearch === "") {
+        paginateGood(array, configs.pagination);
+        setPages(Math.ceil(array.length / configs.pagination));
+      } else {
+        let resultName = array.filter((obj) =>
+          obj.title.toLowerCase().includes(textSearch.toLowerCase())
+        );
+        paginateGood(resultName, configs.pagination);
+        setPages(Math.ceil(resultName.length / configs.pagination));
+      }
+    }
+  }
+
   useEffect(() => {
-    console.log(data);
     if (data) {
-      setAllProducts(data);
+      filterSearch(data);
+    }
+  }, [search]);
+
+  useEffect(() => {
+    if (data) {
+      filterSearch(data);
     }
   }, [data]);
 
   useEffect(() => {
-    if (allProducts) {
-      paginateGood(allProducts, configs.pagination);
-      setPages(Math.ceil(data.length / configs.pagination));
-    }
-  }, [allProducts]);
-
-  useEffect(() => {
-    if (allProducts) {
-      paginateGood(allProducts, configs.pagination);
+    if (products) {
+      paginateGood(products, configs.pagination);
     }
   }, [page]);
+
+  function handleSearchName(text: string) {
+    setTextSearch(text);
+    if (text === "") {
+      paginateGood(data, configs.pagination);
+      setPages(Math.ceil(data.length / configs.pagination));
+    } else {
+      let allProducts: ProductProps[] = data;
+      let result = allProducts.filter((obj) =>
+        obj.title.toLowerCase().includes(text.toLowerCase())
+      );
+      paginateGood(result, configs.pagination);
+      setPages(Math.ceil(result.length / configs.pagination));
+    }
+  }
 
   return (
     <Fragment>
@@ -197,6 +245,8 @@ export default function ListProduct() {
         <ChakraInput
           placeholder="Digite para Buscar"
           isDisabled={search === "name" ? false : true}
+          value={textSearch}
+          onChange={(e) => handleSearchName(e.target.value)}
         />
       </Grid>
       <Divider mt={5} mb={5} />
@@ -353,6 +403,26 @@ export default function ListProduct() {
           </Flex>
         </Fragment>
       )}
+
+      <Modal isOpen={modalTax} onClose={() => setModalTax(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Tributação</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody></ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={() => setModalTax(false)}
+            >
+              Close
+            </Button>
+            <Button variant="ghost">Secondary Action</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Fragment>
   );
 }

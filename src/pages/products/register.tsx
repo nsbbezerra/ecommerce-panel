@@ -580,7 +580,6 @@ const RegisterProduct = () => {
       showToast(response.data.message, "success", "Sucesso");
 
       setLoadingThumbnail(false);
-      setModal(true);
     } catch (error) {
       setLoadingThumbnail(false);
       if (axios.isAxiosError(error) && error.message) {
@@ -613,7 +612,6 @@ const RegisterProduct = () => {
       setLoadingImage(false);
       removeProductImage();
       setProductImage(undefined);
-      setModal(true);
     } catch (error) {
       setLoadingImage(false);
       if (axios.isAxiosError(error) && error.message) {
@@ -651,7 +649,6 @@ const RegisterProduct = () => {
       setAdictionalItems(response.data.items);
       setNameItem("");
       setValueItem(0);
-      setModal(true);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -673,7 +670,12 @@ const RegisterProduct = () => {
 
   return (
     <Fragment>
-      <Tabs onChange={(e) => setIndex(e)} index={index} variant={"enclosed"}>
+      <Tabs
+        onChange={(e) => setIndex(e)}
+        index={index}
+        variant={"enclosed-colored"}
+        size="lg"
+      >
         <TabList>
           <Tab>Dados</Tab>
           <Tab>Tributação</Tab>
@@ -755,6 +757,7 @@ const RegisterProduct = () => {
                     <option value="GR">Grama</option>
                     <option value="UN">Unidade</option>
                     <option value="MT">Metro</option>
+                    <option value="M²">Metro Quadrado</option>
                     <option value="CM">Centímetro</option>
                     <option value="MM">Milímetro</option>
                     <option value="PC">Peça</option>
@@ -1882,16 +1885,15 @@ const RegisterProduct = () => {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Deseja finalizar o cadastro das informações agora?
+              A partir deste ponto você poderá inserir as{" "}
+              <strong>Imagens dos produtos</strong> e os{" "}
+              <strong>Itens Adicionais (se for o caso)</strong>, deseja inserir
+              estes itens?
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button onClick={() => setModal(false)}>Não</Button>
-              <Button
-                colorScheme="blue"
-                onClick={() => handleCloseModal()}
-                ml={3}
-              >
+              <Button onClick={() => handleCloseModal()}>Não</Button>
+              <Button colorScheme="blue" onClick={() => setModal(false)} ml={3}>
                 Sim
               </Button>
             </AlertDialogFooter>
