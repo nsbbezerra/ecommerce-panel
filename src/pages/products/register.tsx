@@ -34,14 +34,15 @@ import {
   Th,
   Tbody,
   Td,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
   Image,
   Switch,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
@@ -51,17 +52,22 @@ import Input from "../../components/Input";
 import TextArea from "../../components/textArea";
 import {
   AiOutlineCalculator,
+  AiOutlineCheck,
   AiOutlinePicture,
   AiOutlinePlus,
   AiOutlineSave,
 } from "react-icons/ai";
 import { FaRuler, FaTrashAlt } from "react-icons/fa";
 import RichTextEditor from "react-rte";
-import { CgArrowRight } from "react-icons/cg";
 import { dataTrib } from "../../configs/data";
 import MaskedInput from "react-input-mask";
 import axios from "axios";
 import { api } from "../../configs";
+import { MdHelpOutline } from "react-icons/md";
+
+import imageHelp from "../../assets/correios.png";
+import imageRolo from "../../assets/rolo.png";
+import imageEnv from "../../assets/envelope.png";
 
 type CostValueProps = {
   title: string;
@@ -90,6 +96,14 @@ type ProductProps = {
   width: number;
   unity: number;
   details: string;
+  tags: TagsProps[];
+  thumbnail: string;
+  type_sale: string;
+  sale_options: string;
+  sale_options_category: string;
+};
+
+type TaxProps = {
   cfop: string;
   ncm: string;
   icms_rate: number;
@@ -115,11 +129,7 @@ type ProductProps = {
   cofins_rate: number;
   cofins_base_calc: number;
   cest: string;
-  tags: TagsProps[];
-  thumbnail: string;
-  type_sale: string;
-  sale_options: string;
-  sale_options_category: string;
+  isTributed: boolean;
 };
 
 type TagsProps = {
@@ -182,7 +192,7 @@ type AdicionalItemsProps = {
 const RegisterProduct = () => {
   const toast = useToast();
   const formRef = useRef<FormHandles>(null);
-  const cancelRef = useRef(null);
+  const formRefTax = useRef<FormHandles>(null);
 
   const [categories, setCategories] = useState<CategoryProps[]>();
   const [subCategories, setSubCategories] = useState<SubCategoryProps[]>();
@@ -192,7 +202,6 @@ const RegisterProduct = () => {
   const [adicionalItems, setAdictionalItems] =
     useState<AdicionalItemsProps[]>();
 
-  const [index, setIndex] = useState<number>(0);
   const [indexUnit, setIndexUnit] = useState<number>(2);
   const [width, setWidth] = useState<WidthProps[]>([]);
   const [widthNumber, setWidthNumber] = useState<string>("");
@@ -208,7 +217,7 @@ const RegisterProduct = () => {
   const [originCep, setOriginCep] = useState<string>("");
   const [destinyCep, setDestinyCep] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
-  const [format, setFormat] = useState<string>("");
+  const [format, setFormat] = useState<number>(0);
   const [length, setLength] = useState<number>(0);
   const [widthFreight, setWidthFreight] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
@@ -223,13 +232,17 @@ const RegisterProduct = () => {
 
   const [auth, setAuth] = useState<AuthProps>();
 
-  const [modal, setModal] = useState<boolean>(false);
   const [thumbnail, setThumbnail] = useState<any>(undefined);
   const [productImage, setProductImage] = useState<any>(undefined);
 
   const [productId, setProductId] = useState<string>("");
   const [nameItem, setNameItem] = useState<string>("");
   const [valueItem, setValueItem] = useState<number>(0);
+
+  const [modalTaxes, setModalTaxes] = useState<boolean>(false);
+  const [modalImages, setModalImages] = useState<boolean>(false);
+  const [modalAdictional, setModalAdictional] = useState<boolean>(false);
+  const [modalHelp, setModalHelp] = useState<boolean>(false);
 
   async function findCategories(id: string, token: string) {
     try {
@@ -379,7 +392,7 @@ const RegisterProduct = () => {
     setSale(0);
     setWidth([]);
     setWeight("");
-    setFormat("");
+    setFormat(0);
     setLength(0);
     setWidthFreight(0);
     setHeight(0);
@@ -387,6 +400,9 @@ const RegisterProduct = () => {
     setOriginCep("");
     setDestinyCep("");
     setText(RichTextEditor.createEmptyValue());
+    setShipping([]);
+    setAdictionalItems([]);
+    setImages([]);
   }
 
   const handleSubmit: SubmitHandler<ProductProps> = async (data, { reset }) => {
@@ -453,32 +469,6 @@ const RegisterProduct = () => {
           details: text.toString("html"),
           tags: "none",
           shipping: JSON.stringify(shippingValues),
-          cfop: data.cfop,
-          ncm: data.ncm,
-          icms_rate: data.icms_rate,
-          icms_origin: data.icms_origin,
-          icms_csosn: data.icms_csosn,
-          icms_st_rate: data.icms_st_rate,
-          icms_marg_val_agregate: data.icms_marg_val_agregate,
-          icms_st_mod_bc: data.icms_st_mod_bc,
-          icms_base_calc: data.icms_base_calc,
-          imcs_st_base_calc: data.imcs_st_base_calc,
-          fcp_rate: data.fcp_rate,
-          fcp_st_rate: data.fcp_st_rate,
-          fcp_ret_rate: data.fcp_ret_rate,
-          fcp_base_calc: data.fcp_base_calc,
-          fcp_st_base_calc: data.fcp_st_base_calc,
-          ipi_cst: data.ipi_cst,
-          ipi_rate: data.ipi_rate,
-          ipi_code: data.ipi_code,
-          pis_cst: data.pis_cst,
-          pis_rate: data.pis_rate,
-          pis_base_calc: data.pis_base_calc,
-          cofins_cst: data.cofins_cst,
-          cofins_rate: data.cofins_rate,
-          cofins_base_calc: data.cofins_base_calc,
-          cest: data.cest,
-          isTributed: isTributed,
           type_sale: data.type_sale,
           sale_options: data.sale_options,
           sale_options_category: data.sale_options_category,
@@ -490,9 +480,8 @@ const RegisterProduct = () => {
       setProductId(response.data.product.id);
       showToast(response.data.message, "success", "Sucesso");
       setLoading(false);
-      clear();
       reset();
-      setModal(true);
+      setModalTaxes(true);
     } catch (error) {
       setLoading(false);
       if (error instanceof Yup.ValidationError) {
@@ -661,301 +650,644 @@ const RegisterProduct = () => {
     }
   }
 
-  function handleCloseModal() {
-    setProductId("");
-    setIndex(0);
-    setModal(false);
+  const saveTaxes: SubmitHandler<TaxProps> = async (data, { reset }) => {
+    if (productId === "") {
+      showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
+      return false;
+    }
+
+    try {
+      setLoadingImage(true);
+      const response = await api.post(
+        `/storeProductTaxes/${productId}`,
+        {
+          cfop: data.cfop,
+          ncm: data.ncm,
+          icms_rate: data.icms_rate,
+          icms_origin: data.icms_origin,
+          icms_csosn: data.icms_csosn,
+          icms_st_rate: data.icms_st_rate,
+          icms_marg_val_agregate: data.icms_marg_val_agregate,
+          icms_st_mod_bc: data.icms_st_mod_bc,
+          icms_base_calc: data.icms_base_calc,
+          imcs_st_base_calc: data.imcs_st_base_calc,
+          fcp_rate: data.fcp_rate,
+          fcp_st_rate: data.fcp_st_rate,
+          fcp_ret_rate: data.fcp_ret_rate,
+          fcp_base_calc: data.fcp_base_calc,
+          fcp_st_base_calc: data.fcp_st_base_calc,
+          ipi_cst: data.ipi_cst,
+          ipi_rate: data.ipi_rate,
+          ipi_code: data.ipi_code,
+          pis_cst: data.pis_cst,
+          pis_rate: data.pis_rate,
+          pis_base_calc: data.pis_base_calc,
+          cofins_cst: data.cofins_cst,
+          cofins_rate: data.cofins_rate,
+          cofins_base_calc: data.cofins_base_calc,
+          cest: data.cest,
+          isTributed: isTributed,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+      setLoadingImage(false);
+      showToast(response.data.message, "success", "Sucesso");
+      setModalTaxes(false);
+      setModalImages(true);
+      reset();
+    } catch (error) {
+      setLoadingImage(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+        console.log(error.response?.data.error.message);
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
+
+  function handleCloseImages() {
+    setThumbnail(undefined);
+    setProductImage(undefined);
+    removeProductImage();
+    removeThumbnail();
+    setModalImages(false);
+    setModalAdictional(true);
+  }
+
+  function handleCloseFinish() {
     clear();
+    setModalAdictional(false);
   }
 
   return (
     <Fragment>
-      <Tabs
-        onChange={(e) => setIndex(e)}
-        index={index}
-        variant={"enclosed-colored"}
-        size="lg"
-      >
-        <TabList>
-          <Tab>Dados</Tab>
-          <Tab>Tributação</Tab>
-          <Tab>Preço</Tab>
-          <Tab>Frete</Tab>
-          <Tab>Imagens</Tab>
-          <Tab>Itens Adicionais</Tab>
-        </TabList>
-        <Form ref={formRef} onSubmit={handleSubmit}>
-          <TabPanels>
-            <TabPanel>
-              <Stack spacing={3}>
-                <Grid templateColumns={"1fr 1fr 3fr"} gap={3}>
-                  <FormControl isRequired>
-                    <FormLabel>Categoria</FormLabel>
-                    <Select
-                      placeholder="Selecione uma categoria"
-                      name="category_id"
-                      autoFocus
-                      isDisabled={categories?.length === 0 && true}
-                      onChange={(e) => findSubCategories(e.target.value)}
-                    >
-                      {categories?.map((cat) => (
-                        <option value={cat.id} key={cat.id}>
-                          {cat.title}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Sub Categoria</FormLabel>
-                    <Select
-                      placeholder="Selecione uma sub-categoria"
-                      name="sub_category_id"
-                      isDisabled={subCategories?.length === 0 && true}
-                    >
-                      {subCategories?.map((sub) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.title}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Nome do Produto</FormLabel>
-                    <Input name="title" placeholder="Nome do Produto" />
-                  </FormControl>
-                </Grid>
-                <FormControl>
-                  <FormLabel>Descrição Curta</FormLabel>
-                  <TextArea
-                    rows={3}
-                    placeholder="Descrição Curta"
-                    name="description"
-                    resize={"none"}
-                  />
-                </FormControl>
-                <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
-                  <FormControl isRequired>
-                    <FormLabel>SKU</FormLabel>
-                    <Input placeholder="SKU" name="sku" />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Código de Barras</FormLabel>
-                    <Input
-                      placeholder="Código de Barras / SEM GTIN"
-                      name="barcode"
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Código Interno</FormLabel>
-                    <Input placeholder="Código Interno" name="internal_code" />
-                  </FormControl>
-                </Grid>
-                <FormControl isRequired>
-                  <FormLabel>Unidade de Medida</FormLabel>
-                  <Select name="unit_desc" placeholder="Selecione uma opção">
-                    <option value="KG">Quilograma</option>
-                    <option value="GR">Grama</option>
-                    <option value="UN">Unidade</option>
-                    <option value="MT">Metro</option>
-                    <option value="M²">Metro Quadrado</option>
-                    <option value="CM">Centímetro</option>
-                    <option value="MM">Milímetro</option>
-                    <option value="PC">Peça</option>
-                    <option value="CX">Caixa</option>
-                    <option value="DZ">Duzia</option>
-                    <option value="EM">Embalagem</option>
-                    <option value="FD">Fardo</option>
-                    <option value="KT">KIT</option>
-                    <option value="JG">Jogo</option>
-                    <option value="PT">Pacote</option>
-                    <option value="LATA">Lata</option>
-                    <option value="LT">Litro</option>
-                    <option value="ML">Mililitro</option>
-                    <option value="SC">Saco</option>
-                    <option value="ROLO">Rolo</option>
-                    <option value="VD">Vidro</option>
-                    <option value="CE">Centro</option>
-                    <option value="CJ">Conjunto</option>
-                    <option value="GF">Garrafa</option>
-                  </Select>
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Cálculo de Medidas</FormLabel>
-                  <Tabs
-                    mt={2}
-                    variant="enclosed"
-                    size="sm"
-                    defaultIndex={indexUnit}
-                    onChange={(e) => setIndexUnit(e)}
-                  >
-                    <TabList>
-                      <Tab>Metro Quadrado</Tab>
-                      <Tab>Comprimento</Tab>
-                      <Tab>Unidade</Tab>
-                      <Tab>Peso</Tab>
-                      <Tab>Litro</Tab>
-                      <Tab>Sem Estoque</Tab>
-                    </TabList>
+      <Form ref={formRef} onSubmit={handleSubmit}>
+        <Stack spacing={3}>
+          <Grid templateColumns={"1fr 1fr 3fr"} gap={3}>
+            <FormControl isRequired>
+              <FormLabel>Categoria</FormLabel>
+              <Select
+                placeholder="Selecione uma categoria"
+                name="category_id"
+                autoFocus
+                isDisabled={categories?.length === 0 && true}
+                onChange={(e) => findSubCategories(e.target.value)}
+              >
+                {categories?.map((cat) => (
+                  <option value={cat.id} key={cat.id}>
+                    {cat.title}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Sub Categoria</FormLabel>
+              <Select
+                placeholder="Selecione uma sub-categoria"
+                name="sub_category_id"
+                isDisabled={subCategories?.length === 0 && true}
+              >
+                {subCategories?.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.title}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Nome do Produto</FormLabel>
+              <Input name="title" placeholder="Nome do Produto" />
+            </FormControl>
+          </Grid>
+          <FormControl>
+            <FormLabel>Descrição Curta</FormLabel>
+            <TextArea
+              rows={3}
+              placeholder="Descrição Curta"
+              name="description"
+              resize={"none"}
+            />
+          </FormControl>
+          <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
+            <FormControl isRequired>
+              <FormLabel>SKU</FormLabel>
+              <Input placeholder="SKU" name="sku" />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Código de Barras</FormLabel>
+              <Input placeholder="Código de Barras / SEM GTIN" name="barcode" />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Código Interno</FormLabel>
+              <Input placeholder="Código Interno" name="internal_code" />
+            </FormControl>
+          </Grid>
+          <FormControl isRequired>
+            <FormLabel>Unidade de Medida</FormLabel>
+            <Select name="unit_desc" placeholder="Selecione uma opção">
+              <option value="KG">Quilograma</option>
+              <option value="GR">Grama</option>
+              <option value="UN">Unidade</option>
+              <option value="MT">Metro</option>
+              <option value="M²">Metro Quadrado</option>
+              <option value="CM">Centímetro</option>
+              <option value="MM">Milímetro</option>
+              <option value="PC">Peça</option>
+              <option value="CX">Caixa</option>
+              <option value="DZ">Duzia</option>
+              <option value="EM">Embalagem</option>
+              <option value="FD">Fardo</option>
+              <option value="KT">KIT</option>
+              <option value="JG">Jogo</option>
+              <option value="PT">Pacote</option>
+              <option value="LATA">Lata</option>
+              <option value="LT">Litro</option>
+              <option value="ML">Mililitro</option>
+              <option value="SC">Saco</option>
+              <option value="ROLO">Rolo</option>
+              <option value="VD">Vidro</option>
+              <option value="CE">Centro</option>
+              <option value="CJ">Conjunto</option>
+              <option value="GF">Garrafa</option>
+            </Select>
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Cálculo de Medidas</FormLabel>
+            <Tabs
+              mt={2}
+              variant="enclosed"
+              size="sm"
+              defaultIndex={indexUnit}
+              onChange={(e) => setIndexUnit(e)}
+            >
+              <TabList>
+                <Tab>Metro Quadrado</Tab>
+                <Tab>Comprimento</Tab>
+                <Tab>Unidade</Tab>
+                <Tab>Peso</Tab>
+                <Tab>Litro</Tab>
+                <Tab>Sem Estoque</Tab>
+              </TabList>
 
-                    <TabPanels>
-                      <TabPanel>
-                        <Grid
-                          templateColumns={"1fr 1fr"}
-                          gap={3}
-                          position="relative"
+              <TabPanels>
+                <TabPanel>
+                  <Grid templateColumns={"1fr 1fr"} gap={3} position="relative">
+                    <FormControl>
+                      <FormLabel>Largura</FormLabel>
+                      <HStack>
+                        <NumberInput
+                          w="100%"
+                          value={widthNumber}
+                          onChange={(e) => setWidthNumber(e)}
                         >
-                          <FormControl>
-                            <FormLabel>Largura</FormLabel>
-                            <HStack>
-                              <NumberInput
-                                w="100%"
-                                value={widthNumber}
-                                onChange={(e) => setWidthNumber(e)}
-                              >
-                                <NumberInputField />
-                                <NumberInputStepper>
-                                  <NumberIncrementStepper />
-                                  <NumberDecrementStepper />
-                                </NumberInputStepper>
-                              </NumberInput>
-                              <IconButton
-                                aria-label="Inserir largura"
-                                icon={<AiOutlinePlus />}
-                                onClick={() => handleWidth()}
-                              />
-                            </HStack>
-                            <Box
-                              borderWidth={"1px"}
-                              rounded="md"
-                              py={1}
-                              mt={3}
-                              px={3}
-                            >
-                              {width?.length === 0 ? (
-                                <Text>Insira uma largura</Text>
-                              ) : (
-                                <Stack spacing={1}>
-                                  {width?.map((wd) => (
-                                    <HStack key={wd.id}>
-                                      <Icon as={FaRuler} />
-                                      <Text>{wd.width}m</Text>
-                                      <IconButton
-                                        aria-label="Remover Altura"
-                                        icon={<FaTrashAlt />}
-                                        variant="link"
-                                        colorScheme={"red"}
-                                        size="sm"
-                                        onClick={() => removeWidth(wd.id)}
-                                      />
-                                    </HStack>
-                                  ))}
-                                </Stack>
-                              )}
-                            </Box>
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>Altura</FormLabel>
-                            <Flex
-                              borderWidth={"1px"}
-                              rounded="md"
-                              p={4}
-                              justify={"center"}
-                              align="center"
-                              textAlign={"center"}
-                            >
-                              <Text>A Altura ficará a critério do cliente</Text>
-                            </Flex>
-                          </FormControl>
-                        </Grid>
-                      </TabPanel>
-                      <TabPanel>
-                        <Grid templateColumns={"1fr"} gap={3}>
-                          <FormControl>
-                            <FormLabel>Comprimento (Metros)</FormLabel>
-                            <Input name="length" placeholder="Comprimento" />
-                          </FormControl>
-                        </Grid>
-                      </TabPanel>
-                      <TabPanel>
-                        <Grid templateColumns={"1fr"} gap={3}>
-                          <FormControl>
-                            <FormLabel>Total de Unidades</FormLabel>
-                            <Input
-                              name="inventory"
-                              placeholder="Total de Unidades"
-                              type="number"
-                            />
-                          </FormControl>
-                        </Grid>
-                      </TabPanel>
-                      <TabPanel>
-                        <Grid templateColumns={"1fr"} gap={3}>
-                          <FormControl>
-                            <FormLabel>Peso (Kg)</FormLabel>
-                            <Input name="weight" placeholder="Peso" />
-                          </FormControl>
-                        </Grid>
-                      </TabPanel>
-                      <TabPanel>
-                        <Grid templateColumns={"1fr"} gap={3}>
-                          <FormControl>
-                            <FormLabel>Volume (Lt / Ml)</FormLabel>
-                            <Input name="liter" placeholder="Volume" />
-                          </FormControl>
-                        </Grid>
-                      </TabPanel>
-                      <TabPanel>
-                        <Flex
-                          borderWidth={"1px"}
-                          rounded="md"
-                          p={4}
-                          justify="center"
-                          align="center"
-                          textAlign={"center"}
-                        >
-                          Produto não possui estoque definido, pode efetuar
-                          venda sem estoque.
-                        </Flex>
-                      </TabPanel>
-                    </TabPanels>
-                  </Tabs>
-                </FormControl>
-                <Divider />
-                <FormControl>
-                  <FormLabel>Detalhes do Produto</FormLabel>
-                  <RichTextEditor
-                    value={text}
-                    onChange={(e) => setText(e)}
-                    placeholder="Insira seu texto aqui"
-                    editorStyle={{
-                      background: "transparent",
-                    }}
-                    rootStyle={{
-                      background: "transparent",
-                      borderColor: useColorModeValue(
-                        theme.colors.gray["300"],
-                        theme.colors.gray["600"]
-                      ),
-                    }}
-                    toolbarStyle={{
-                      borderColor: useColorModeValue(
-                        theme.colors.gray["300"],
-                        theme.colors.gray["600"]
-                      ),
-                    }}
-                  />
-                </FormControl>
-                <Button
-                  rightIcon={<CgArrowRight />}
-                  isFullWidth={false}
-                  w="fit-content"
-                  onClick={() => setIndex(1)}
-                >
-                  Próximo
-                </Button>
-              </Stack>
-            </TabPanel>
-            <TabPanel>
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                        <IconButton
+                          aria-label="Inserir largura"
+                          icon={<AiOutlinePlus />}
+                          onClick={() => handleWidth()}
+                        />
+                      </HStack>
+                      <Box
+                        borderWidth={"1px"}
+                        rounded="md"
+                        py={1}
+                        mt={3}
+                        px={3}
+                      >
+                        {width?.length === 0 ? (
+                          <Text>Insira uma largura</Text>
+                        ) : (
+                          <Stack spacing={1}>
+                            {width?.map((wd) => (
+                              <HStack key={wd.id}>
+                                <Icon as={FaRuler} />
+                                <Text>{wd.width}m</Text>
+                                <IconButton
+                                  aria-label="Remover Altura"
+                                  icon={<FaTrashAlt />}
+                                  variant="link"
+                                  colorScheme={"red"}
+                                  size="sm"
+                                  onClick={() => removeWidth(wd.id)}
+                                />
+                              </HStack>
+                            ))}
+                          </Stack>
+                        )}
+                      </Box>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Altura</FormLabel>
+                      <Flex
+                        borderWidth={"1px"}
+                        rounded="md"
+                        p={4}
+                        justify={"center"}
+                        align="center"
+                        textAlign={"center"}
+                      >
+                        <Text>A Altura ficará a critério do cliente</Text>
+                      </Flex>
+                    </FormControl>
+                  </Grid>
+                </TabPanel>
+                <TabPanel>
+                  <Grid templateColumns={"1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Comprimento (Metros)</FormLabel>
+                      <Input name="length" placeholder="Comprimento" />
+                    </FormControl>
+                  </Grid>
+                </TabPanel>
+                <TabPanel>
+                  <Grid templateColumns={"1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Total de Unidades</FormLabel>
+                      <Input
+                        name="inventory"
+                        placeholder="Total de Unidades"
+                        type="number"
+                      />
+                    </FormControl>
+                  </Grid>
+                </TabPanel>
+                <TabPanel>
+                  <Grid templateColumns={"1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Peso (Kg)</FormLabel>
+                      <Input name="weight" placeholder="Peso" />
+                    </FormControl>
+                  </Grid>
+                </TabPanel>
+                <TabPanel>
+                  <Grid templateColumns={"1fr"} gap={3}>
+                    <FormControl>
+                      <FormLabel>Volume (Lt / Ml)</FormLabel>
+                      <Input name="liter" placeholder="Volume" />
+                    </FormControl>
+                  </Grid>
+                </TabPanel>
+                <TabPanel>
+                  <Flex
+                    borderWidth={"1px"}
+                    rounded="md"
+                    p={4}
+                    justify="center"
+                    align="center"
+                    textAlign={"center"}
+                  >
+                    Produto não possui estoque definido, pode efetuar venda sem
+                    estoque.
+                  </Flex>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </FormControl>
+          <Divider />
+          <FormControl>
+            <FormLabel>Detalhes do Produto</FormLabel>
+            <RichTextEditor
+              value={text}
+              onChange={(e) => setText(e)}
+              placeholder="Insira seu texto aqui"
+              editorStyle={{
+                background: "transparent",
+              }}
+              rootStyle={{
+                background: "transparent",
+                borderColor: useColorModeValue(
+                  theme.colors.gray["300"],
+                  theme.colors.gray["600"]
+                ),
+              }}
+              toolbarStyle={{
+                borderColor: useColorModeValue(
+                  theme.colors.gray["300"],
+                  theme.colors.gray["600"]
+                ),
+              }}
+            />
+          </FormControl>
+
+          <Flex
+            bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+            p={1}
+            justify="center"
+            align={"center"}
+            rounded="md"
+          >
+            CÁLCULO DE PREÇO
+          </Flex>
+
+          <Grid templateColumns={"repeat(5,1fr)"} gap={3} alignItems="end">
+            <FormControl>
+              <FormLabel>Valor de Custo (R$)</FormLabel>
+              <ChakraInput
+                placeholder="Valor de Custo (R$)"
+                type={"number"}
+                value={cost}
+                onChange={(e) => setCost(parseFloat(e.target.value))}
+                name="cost"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Outros Custos (R$)</FormLabel>
+              <ChakraInput
+                placeholder="Outros Custos (R$)"
+                type={"number"}
+                value={otherCost}
+                onChange={(e) => setOtherCost(parseFloat(e.target.value))}
+                name="other_cost"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Valor do Frete (R$)</FormLabel>
+              <ChakraInput
+                placeholder="Margem de Lucro Desejada (%)"
+                type={"number"}
+                value={freightValue}
+                onChange={(e) => setFreightValue(parseFloat(e.target.value))}
+                name="freight_value"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Impostos (%)</FormLabel>
+              <ChakraInput
+                placeholder="Impostos (%)"
+                type={"number"}
+                value={tax}
+                onChange={(e) => setTax(parseFloat(e.target.value))}
+                name="tax_value"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Taxa de Cartão (%)</FormLabel>
+              <ChakraInput
+                placeholder="Taxa de Cartão (%)"
+                type={"number"}
+                value={cardTax}
+                onChange={(e) => setCardTax(parseFloat(e.target.value))}
+                name="tax_card"
+              />
+            </FormControl>
+          </Grid>
+          <Grid
+            templateColumns={"repeat(4,1fr)"}
+            gap={3}
+            alignItems="end"
+            mt={3}
+          >
+            <FormControl>
+              <FormLabel>Comissões (%)</FormLabel>
+              <ChakraInput
+                placeholder="Comissões (%)"
+                type={"number"}
+                value={comission}
+                onChange={(e) => setComission(parseFloat(e.target.value))}
+                name="comission"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Margem de Lucro Desejada (%)</FormLabel>
+              <ChakraInput
+                placeholder="Margem de Lucro Desejada (%)"
+                type={"number"}
+                value={marge}
+                onChange={(e) => setMarge(parseFloat(e.target.value))}
+                name="marge"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Preço de Venda (R$)</FormLabel>
+              <ChakraInput
+                placeholder="Preço de Venda (R$)"
+                type={"number"}
+                value={sale}
+                onChange={(e) => setSale(parseFloat(e.target.value))}
+                name="sale_value"
+              />
+            </FormControl>
+            <Button
+              leftIcon={<AiOutlineCalculator />}
+              colorScheme="blue"
+              variant="outline"
+              onClick={() => calcSaleVale()}
+            >
+              Calcular
+            </Button>
+          </Grid>
+
+          <Flex
+            bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+            p={1}
+            justify="center"
+            align={"center"}
+            rounded="md"
+          >
+            VENDA FRACIONADA
+          </Flex>
+
+          <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
+            <FormControl isRequired>
+              <FormLabel>Fracionar Venda?</FormLabel>
+              <Select name="type_sale" placeholder="Selecione uma opção">
+                <option value="unique">Não</option>
+                <option value="partition">Sim</option>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Total de Partes</FormLabel>
+              <Input placeholder="Total de Partes" name="sale_options" />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Categoria de Itens</FormLabel>
+              <Select
+                name="sale_options_category"
+                placeholder="Selecione uma opção"
+              >
+                {partitionCategories?.map((pt) => (
+                  <option value={pt.id} key={pt.id}>
+                    {pt.name}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Flex
+            bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+            p={1}
+            justify="center"
+            align={"center"}
+            rounded="md"
+          >
+            CÁLCULO DE FRETE
+          </Flex>
+
+          <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+            <FormControl>
+              <FormLabel>Peso (kg)</FormLabel>
+              <ChakraInput
+                placeholder="Peso (kg)"
+                name="freight_weight"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Formato</FormLabel>
+              <ChakraSelect
+                placeholder="Selecione um opção"
+                name="format"
+                value={format}
+                onChange={(e) => setFormat(parseInt(e.target.value))}
+              >
+                <option value={1}>Caixa / Pacote</option>
+                <option value={2}>Rolo / Prisma</option>
+                <option value={3}>Envelope</option>
+              </ChakraSelect>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Comprimento (cm)</FormLabel>
+              <ChakraInput
+                placeholder="Comprimento (cm)"
+                name="freight_lenght"
+                value={length}
+                onChange={(e) => setLength(parseFloat(e.target.value))}
+                type="number"
+              />
+            </FormControl>
+          </Grid>
+          <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+            <FormControl>
+              <FormLabel>Altura (cm)</FormLabel>
+              <ChakraInput
+                placeholder="Altura (cm)"
+                name="freight_height"
+                value={height}
+                onChange={(e) => setHeight(parseFloat(e.target.value))}
+                type="number"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Largura (cm)</FormLabel>
+              <ChakraInput
+                placeholder="Largura (cm)"
+                name="freight_width"
+                value={widthFreight}
+                onChange={(e) => setWidthFreight(parseFloat(e.target.value))}
+                type="number"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Diâmetro (cm)</FormLabel>
+              <ChakraInput
+                placeholder="Diâmetro (cm)"
+                name="freight_diameter"
+                value={diameter}
+                onChange={(e) => setDiameter(parseFloat(e.target.value))}
+                type="number"
+              />
+            </FormControl>
+          </Grid>
+
+          <Button
+            rightIcon={<MdHelpOutline />}
+            size="sm"
+            w="fit-content"
+            colorScheme={"yellow"}
+            onClick={() => setModalHelp(true)}
+          >
+            Ajuda
+          </Button>
+
+          <Divider />
+
+          <FormControl>
+            <FormLabel>Simular Frete</FormLabel>
+            <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+              <ChakraInput
+                as={MaskedInput}
+                mask="99999-999"
+                placeholder="CEP de Origem"
+                name="freight_cep_origin"
+                value={originCep}
+                onChange={(e) => setOriginCep(e.target.value)}
+              />
+              <ChakraInput
+                as={MaskedInput}
+                mask="99999-999"
+                placeholder="CEP de Destino"
+                value={destinyCep}
+                onChange={(e) => setDestinyCep(e.target.value)}
+                name="freight_cep_destiny"
+              />
+              <Button
+                leftIcon={<AiOutlineCalculator />}
+                onClick={() => calcShipping()}
+                isLoading={loadingShipping}
+              >
+                Calcular Frete
+              </Button>
+            </Grid>
+          </FormControl>
+          {shipping?.length !== 0 && (
+            <Table size={"sm"}>
+              <Thead>
+                <Tr>
+                  <Th>Tipo</Th>
+                  <Th>Prazo de Entrega</Th>
+                  <Th isNumeric>Valor</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {shipping?.map((ship) => (
+                  <Tr key={ship.Codigo}>
+                    <Td>
+                      {(ship.Codigo === "04014" && "SEDEX") ||
+                        (ship.Codigo === "04510" && "PAC")}
+                    </Td>
+                    <Td>{ship.PrazoEntrega} dias</Td>
+                    <Td isNumeric>R$ {ship.Valor}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          )}
+          <Button
+            leftIcon={<AiOutlineSave />}
+            size="lg"
+            colorScheme={"blue"}
+            w="fit-content"
+            type="submit"
+            isLoading={loading}
+          >
+            Salvar Produto
+          </Button>
+        </Stack>
+      </Form>
+
+      <Modal
+        isOpen={modalTaxes}
+        onClose={() => setModalTaxes(false)}
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        size="6xl"
+      >
+        <ModalOverlay />
+        <Form onSubmit={saveTaxes} ref={formRefTax}>
+          <ModalContent>
+            <ModalHeader>Tributação</ModalHeader>
+            <ModalBody>
               <Stack spacing={3}>
                 <Grid templateColumns={"1fr 1fr 1fr 1fr"} gap={3}>
                   <FormControl>
@@ -1297,330 +1629,157 @@ const RegisterProduct = () => {
                     />
                   </FormControl>
                 </Grid>
-                <Button
-                  rightIcon={<CgArrowRight />}
-                  isFullWidth={false}
-                  w="fit-content"
-                  onClick={() => setIndex(2)}
-                >
-                  Próximo
-                </Button>
               </Stack>
-            </TabPanel>
-            <TabPanel>
-              <Grid templateColumns={"repeat(5,1fr)"} gap={3} alignItems="end">
-                <FormControl>
-                  <FormLabel>Valor de Custo (R$)</FormLabel>
-                  <ChakraInput
-                    placeholder="Valor de Custo (R$)"
-                    type={"number"}
-                    value={cost}
-                    onChange={(e) => setCost(parseFloat(e.target.value))}
-                    name="cost"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Outros Custos (R$)</FormLabel>
-                  <ChakraInput
-                    placeholder="Outros Custos (R$)"
-                    type={"number"}
-                    value={otherCost}
-                    onChange={(e) => setOtherCost(parseFloat(e.target.value))}
-                    name="other_cost"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Valor do Frete (R$)</FormLabel>
-                  <ChakraInput
-                    placeholder="Margem de Lucro Desejada (%)"
-                    type={"number"}
-                    value={freightValue}
-                    onChange={(e) =>
-                      setFreightValue(parseFloat(e.target.value))
-                    }
-                    name="freight_value"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Impostos (%)</FormLabel>
-                  <ChakraInput
-                    placeholder="Impostos (%)"
-                    type={"number"}
-                    value={tax}
-                    onChange={(e) => setTax(parseFloat(e.target.value))}
-                    name="tax_value"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Taxa de Cartão (%)</FormLabel>
-                  <ChakraInput
-                    placeholder="Taxa de Cartão (%)"
-                    type={"number"}
-                    value={cardTax}
-                    onChange={(e) => setCardTax(parseFloat(e.target.value))}
-                    name="tax_card"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid
-                templateColumns={"repeat(4,1fr)"}
-                gap={3}
-                alignItems="end"
-                mt={3}
-              >
-                <FormControl>
-                  <FormLabel>Comissões (%)</FormLabel>
-                  <ChakraInput
-                    placeholder="Comissões (%)"
-                    type={"number"}
-                    value={comission}
-                    onChange={(e) => setComission(parseFloat(e.target.value))}
-                    name="comission"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Margem de Lucro Desejada (%)</FormLabel>
-                  <ChakraInput
-                    placeholder="Margem de Lucro Desejada (%)"
-                    type={"number"}
-                    value={marge}
-                    onChange={(e) => setMarge(parseFloat(e.target.value))}
-                    name="marge"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Preço de Venda (R$)</FormLabel>
-                  <ChakraInput
-                    placeholder="Preço de Venda (R$)"
-                    type={"number"}
-                    value={sale}
-                    onChange={(e) => setSale(parseFloat(e.target.value))}
-                    name="sale_value"
-                  />
-                </FormControl>
-                <Button
-                  leftIcon={<AiOutlineCalculator />}
-                  colorScheme="blue"
-                  variant="outline"
-                  onClick={() => calcSaleVale()}
-                >
-                  Calcular
-                </Button>
-              </Grid>
+            </ModalBody>
 
-              <Flex
-                bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                p={1}
-                justify="center"
-                align={"center"}
-                rounded="md"
-                mb={3}
-                mt={5}
-              >
-                VENDA FRACIONADA
-              </Flex>
-
-              <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
-                <FormControl isRequired>
-                  <FormLabel>Fracionar Venda?</FormLabel>
-                  <Select name="type_sale" placeholder="Selecione uma opção">
-                    <option value="unique">Não</option>
-                    <option value="partition">Sim</option>
-                  </Select>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Total de Partes</FormLabel>
-                  <Input placeholder="Total de Partes" name="sale_options" />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Categoria de Itens</FormLabel>
-                  <Select
-                    name="sale_options_category"
-                    placeholder="Selecione uma opção"
-                  >
-                    {partitionCategories?.map((pt) => (
-                      <option value={pt.id} key={pt.id}>
-                        {pt.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
+            <ModalFooter>
               <Button
-                rightIcon={<CgArrowRight />}
-                isFullWidth={false}
-                w="fit-content"
-                onClick={() => setIndex(3)}
-                mt={3}
+                colorScheme={"blue"}
+                leftIcon={<AiOutlineSave />}
+                type="submit"
+                isLoading={loadingImage}
               >
-                Próximo
+                Salvar
               </Button>
-            </TabPanel>
-            <TabPanel>
-              <Stack spacing={3}>
-                <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
-                  <FormControl>
-                    <FormLabel>Peso (kg)</FormLabel>
-                    <ChakraInput
-                      placeholder="Peso (kg)"
-                      name="freight_weight"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Formato</FormLabel>
-                    <ChakraSelect
-                      placeholder="Selecione um opção"
-                      name="format"
-                      value={format}
-                      onChange={(e) => setFormat(e.target.value)}
-                    >
-                      <option value={1}>Caixa / Pacote</option>
-                      <option value={2}>Rolo / Prisma</option>
-                      <option value={3}>Envelope</option>
-                    </ChakraSelect>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Comprimento (cm)</FormLabel>
-                    <ChakraInput
-                      placeholder="Comprimento (cm)"
-                      name="freight_lenght"
-                      value={length}
-                      onChange={(e) => setLength(parseFloat(e.target.value))}
-                      type="number"
-                    />
-                  </FormControl>
-                </Grid>
-                <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
-                  <FormControl>
-                    <FormLabel>Altura (cm)</FormLabel>
-                    <ChakraInput
-                      placeholder="Altura (cm)"
-                      name="freight_height"
-                      value={height}
-                      onChange={(e) => setHeight(parseFloat(e.target.value))}
-                      type="number"
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Largura (cm)</FormLabel>
-                    <ChakraInput
-                      placeholder="Largura (cm)"
-                      name="freight_width"
-                      value={widthFreight}
-                      onChange={(e) =>
-                        setWidthFreight(parseFloat(e.target.value))
-                      }
-                      type="number"
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Diâmetro (cm)</FormLabel>
-                    <ChakraInput
-                      placeholder="Diâmetro (cm)"
-                      name="freight_diameter"
-                      value={diameter}
-                      onChange={(e) => setDiameter(parseFloat(e.target.value))}
-                      type="number"
-                    />
-                  </FormControl>
-                </Grid>
+            </ModalFooter>
+          </ModalContent>
+        </Form>
+      </Modal>
 
-                <Divider />
+      <Modal
+        isOpen={modalImages}
+        onClose={() => handleCloseImages()}
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        size="6xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Imagens</ModalHeader>
+          <ModalBody>
+            <Grid templateColumns={"260px 1fr"} gap={5}>
+              <Box>
+                <Flex
+                  bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+                  p={1}
+                  justify="center"
+                  align={"center"}
+                  rounded="md"
+                  mb={3}
+                >
+                  IMAGEM PRINCIPAL
+                </Flex>
 
-                <FormControl>
-                  <FormLabel>Simular Frete</FormLabel>
-                  <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
-                    <ChakraInput
-                      as={MaskedInput}
-                      mask="99999-999"
-                      placeholder="CEP de Origem"
-                      name="freight_cep_origin"
-                      value={originCep}
-                      onChange={(e) => setOriginCep(e.target.value)}
+                {thumbnail ? (
+                  <Box
+                    w="260px"
+                    h="260px"
+                    rounded={"md"}
+                    borderWidth="1px"
+                    position={"relative"}
+                    overflow="hidden"
+                  >
+                    <Image
+                      w="260px"
+                      h="260px"
+                      objectFit={"cover"}
+                      src={previewThumbnail}
                     />
-                    <ChakraInput
-                      as={MaskedInput}
-                      mask="99999-999"
-                      placeholder="CEP de Destino"
-                      value={destinyCep}
-                      onChange={(e) => setDestinyCep(e.target.value)}
-                      name="freight_cep_destiny"
-                    />
-                    <Button
-                      leftIcon={<AiOutlineCalculator />}
-                      onClick={() => calcShipping()}
-                      isLoading={loadingShipping}
+                    <Grid
+                      templateColumns={"1fr 1fr"}
+                      position="absolute"
+                      bottom={0}
+                      left={0}
+                      right={0}
+                      zIndex={100}
                     >
-                      Calcular Frete
-                    </Button>
-                  </Grid>
-                </FormControl>
-                {shipping?.length !== 0 && (
-                  <Table size={"sm"}>
-                    <Thead>
-                      <Tr>
-                        <Th>Tipo</Th>
-                        <Th>Prazo de Entrega</Th>
-                        <Th isNumeric>Valor</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {shipping?.map((ship) => (
-                        <Tr key={ship.Codigo}>
-                          <Td>
-                            {(ship.Codigo === "04014" && "SEDEX") ||
-                              (ship.Codigo === "04510" && "PAC")}
-                          </Td>
-                          <Td>{ship.PrazoEntrega} dias</Td>
-                          <Td isNumeric>R$ {ship.Valor}</Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
+                      <Button
+                        colorScheme={"red"}
+                        rounded="none"
+                        size={"sm"}
+                        leftIcon={<FaTrashAlt />}
+                        onClick={() => removeThumbnail()}
+                        opacity={0.85}
+                      >
+                        Excluir
+                      </Button>
+                      <Button
+                        colorScheme={"blue"}
+                        rounded="none"
+                        size={"sm"}
+                        leftIcon={<AiOutlineSave />}
+                        opacity={0.85}
+                        isLoading={loadingThumbnail}
+                        onClick={() => storeThumbnail()}
+                      >
+                        Salvar
+                      </Button>
+                    </Grid>
+                  </Box>
+                ) : (
+                  <FormLabel
+                    display={"flex"}
+                    rounded={"md"}
+                    overflow="hidden"
+                    position={"relative"}
+                    borderWidth="1px"
+                    borderStyle={"dashed"}
+                    borderColor={useColorModeValue("gray.900", "gray.100")}
+                    _hover={{ borderWidth: "2px" }}
+                    w="260px"
+                    h="260px"
+                    justifyContent={"center"}
+                    alignItems="center"
+                    flexDirection={"column"}
+                    gap={3}
+                    cursor="pointer"
+                  >
+                    <ChakraInput
+                      type={"file"}
+                      display="none"
+                      onChange={(e) => handelThumbnail(e.target.files)}
+                    />
+                    <Icon as={AiOutlinePicture} fontSize="4xl" />
+                    <Text userSelect={"none"}>Insira sua imagem aqui</Text>
+                  </FormLabel>
                 )}
-                <Divider />
-                <HStack spacing={4}>
-                  <Button
-                    leftIcon={<AiOutlineSave />}
-                    size="lg"
-                    colorScheme={"blue"}
-                    w="fit-content"
-                    type="submit"
-                    isLoading={loading}
-                  >
-                    Salvar Produto
-                  </Button>
-                  <Button
-                    rightIcon={<CgArrowRight />}
-                    isFullWidth={false}
-                    w="fit-content"
-                    onClick={() => setIndex(4)}
-                    mt={3}
-                    size="lg"
-                  >
-                    Próximo
-                  </Button>
-                </HStack>
-              </Stack>
-            </TabPanel>
-            <TabPanel>
-              <Grid templateColumns={"260px 1fr"} gap={5}>
-                <Box>
-                  <Flex
-                    bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                    p={1}
-                    justify="center"
-                    align={"center"}
-                    rounded="md"
-                    mb={3}
-                  >
-                    IMAGEM PRINCIPAL
-                  </Flex>
+              </Box>
+              <Box>
+                <Flex
+                  bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+                  p={1}
+                  justify="center"
+                  align={"center"}
+                  rounded="md"
+                  mb={3}
+                >
+                  MAIS IMAGENS DO PRODUTO
+                </Flex>
 
-                  {thumbnail ? (
+                <Grid
+                  templateColumns={"repeat(auto-fit, minmax(260px, 260px))"}
+                  gap={2}
+                  justifyContent="center"
+                >
+                  {images?.map((img) => (
+                    <Box
+                      key={img.id}
+                      w="260px"
+                      h="260px"
+                      rounded="md"
+                      borderWidth={"1px"}
+                      overflow="hidden"
+                      position={"relative"}
+                    >
+                      <Image
+                        w="260px"
+                        h="260px"
+                        src={img.image}
+                        objectFit="cover"
+                      />
+                    </Box>
+                  ))}
+                  {productImage ? (
                     <Box
                       w="260px"
                       h="260px"
@@ -1633,7 +1792,7 @@ const RegisterProduct = () => {
                         w="260px"
                         h="260px"
                         objectFit={"cover"}
-                        src={previewThumbnail}
+                        src={previewProductImage}
                       />
                       <Grid
                         templateColumns={"1fr 1fr"}
@@ -1648,7 +1807,7 @@ const RegisterProduct = () => {
                           rounded="none"
                           size={"sm"}
                           leftIcon={<FaTrashAlt />}
-                          onClick={() => removeThumbnail()}
+                          onClick={() => removeProductImage()}
                           opacity={0.85}
                         >
                           Excluir
@@ -1659,8 +1818,8 @@ const RegisterProduct = () => {
                           size={"sm"}
                           leftIcon={<AiOutlineSave />}
                           opacity={0.85}
-                          isLoading={loadingThumbnail}
-                          onClick={() => storeThumbnail()}
+                          isLoading={loadingImage}
+                          onClick={() => storeImageProduct()}
                         >
                           Salvar
                         </Button>
@@ -1687,219 +1846,128 @@ const RegisterProduct = () => {
                       <ChakraInput
                         type={"file"}
                         display="none"
-                        onChange={(e) => handelThumbnail(e.target.files)}
+                        onChange={(e) => handelProductImage(e.target.files)}
                       />
                       <Icon as={AiOutlinePicture} fontSize="4xl" />
                       <Text userSelect={"none"}>Insira sua imagem aqui</Text>
                     </FormLabel>
                   )}
-                </Box>
-                <Box>
-                  <Flex
-                    bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                    p={1}
-                    justify="center"
-                    align={"center"}
-                    rounded="md"
-                    mb={3}
-                  >
-                    MAIS IMAGENS DO PRODUTO
-                  </Flex>
+                </Grid>
+              </Box>
+            </Grid>
+          </ModalBody>
 
-                  <Grid
-                    templateColumns={"repeat(auto-fit, minmax(260px, 260px))"}
-                    gap={2}
-                    justifyContent="center"
-                  >
-                    {images?.map((img) => (
-                      <Box
-                        key={img.id}
-                        w="260px"
-                        h="260px"
-                        rounded="md"
-                        borderWidth={"1px"}
-                        overflow="hidden"
-                        position={"relative"}
-                      >
-                        <Image
-                          w="260px"
-                          h="260px"
-                          src={img.image}
-                          objectFit="cover"
-                        />
-                      </Box>
-                    ))}
-                    {productImage ? (
-                      <Box
-                        w="260px"
-                        h="260px"
-                        rounded={"md"}
-                        borderWidth="1px"
-                        position={"relative"}
-                        overflow="hidden"
-                      >
-                        <Image
-                          w="260px"
-                          h="260px"
-                          objectFit={"cover"}
-                          src={previewProductImage}
-                        />
-                        <Grid
-                          templateColumns={"1fr 1fr"}
-                          position="absolute"
-                          bottom={0}
-                          left={0}
-                          right={0}
-                          zIndex={100}
-                        >
-                          <Button
-                            colorScheme={"red"}
-                            rounded="none"
-                            size={"sm"}
-                            leftIcon={<FaTrashAlt />}
-                            onClick={() => removeProductImage()}
-                            opacity={0.85}
-                          >
-                            Excluir
-                          </Button>
-                          <Button
-                            colorScheme={"blue"}
-                            rounded="none"
-                            size={"sm"}
-                            leftIcon={<AiOutlineSave />}
-                            opacity={0.85}
-                            isLoading={loadingImage}
-                            onClick={() => storeImageProduct()}
-                          >
-                            Salvar
-                          </Button>
-                        </Grid>
-                      </Box>
-                    ) : (
-                      <FormLabel
-                        display={"flex"}
-                        rounded={"md"}
-                        overflow="hidden"
-                        position={"relative"}
-                        borderWidth="1px"
-                        borderStyle={"dashed"}
-                        borderColor={useColorModeValue("gray.900", "gray.100")}
-                        _hover={{ borderWidth: "2px" }}
-                        w="260px"
-                        h="260px"
-                        justifyContent={"center"}
-                        alignItems="center"
-                        flexDirection={"column"}
-                        gap={3}
-                        cursor="pointer"
-                      >
-                        <ChakraInput
-                          type={"file"}
-                          display="none"
-                          onChange={(e) => handelProductImage(e.target.files)}
-                        />
-                        <Icon as={AiOutlinePicture} fontSize="4xl" />
-                        <Text userSelect={"none"}>Insira sua imagem aqui</Text>
-                      </FormLabel>
-                    )}
-                  </Grid>
-                </Box>
-              </Grid>
-              <Button
-                rightIcon={<CgArrowRight />}
-                isFullWidth={false}
-                w="fit-content"
-                onClick={() => setIndex(5)}
-                mt={3}
-              >
-                Próximo
-              </Button>
-            </TabPanel>
-            <TabPanel>
-              <Grid templateColumns={"2fr 1fr 150px"} gap={3} alignItems="end">
-                <FormControl>
-                  <FormLabel>Nome do Item</FormLabel>
-                  <ChakraInput
-                    placeholder="Nome do Item"
-                    value={nameItem}
-                    onChange={(e) => setNameItem(e.target.value)}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Valor do Item (R$)</FormLabel>
-                  <ChakraInput
-                    placeholder="Valor do Item (R$)"
-                    type="number"
-                    value={valueItem}
-                    onChange={(e) => setValueItem(parseFloat(e.target.value))}
-                  />
-                </FormControl>
-                <Button
-                  leftIcon={<AiOutlineSave />}
-                  colorScheme="blue"
-                  isLoading={loading}
-                  onClick={() => storeAddctionalItems()}
-                >
-                  Salvar
-                </Button>
-              </Grid>
+          <ModalFooter>
+            <Button
+              onClick={() => handleCloseImages()}
+              leftIcon={<AiOutlineCheck />}
+            >
+              Finalizar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-              <Table size="sm" mt={5}>
-                <Thead>
-                  <Tr>
-                    <Th>Nome do Item</Th>
-                    <Th isNumeric>Preço</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {adicionalItems?.map((add) => (
-                    <Tr key={add.id}>
-                      <Td>{add.name}</Td>
-                      <Td>
-                        {parseFloat(add.value.toString()).toLocaleString(
-                          "pt-br",
-                          {
-                            style: "currency",
-                            currency: "BRL",
-                          }
-                        )}
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </TabPanel>
-          </TabPanels>
-        </Form>
-      </Tabs>
-
-      <AlertDialog
-        isOpen={modal}
-        onClose={() => setModal(false)}
-        leastDestructiveRef={cancelRef}
+      <Modal
+        isOpen={modalAdictional}
+        onClose={() => handleCloseFinish()}
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        size="6xl"
       >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Atenção
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              A partir deste ponto você poderá inserir as{" "}
-              <strong>Imagens dos produtos</strong> e os{" "}
-              <strong>Itens Adicionais (se for o caso)</strong>, deseja inserir
-              estes itens?
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button onClick={() => handleCloseModal()}>Não</Button>
-              <Button colorScheme="blue" onClick={() => setModal(false)} ml={3}>
-                Sim
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Itens Adicionais</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Grid templateColumns={"2fr 1fr 150px"} gap={3} alignItems="end">
+              <FormControl>
+                <FormLabel>Nome do Item</FormLabel>
+                <ChakraInput
+                  placeholder="Nome do Item"
+                  value={nameItem}
+                  onChange={(e) => setNameItem(e.target.value)}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Valor do Item (R$)</FormLabel>
+                <ChakraInput
+                  placeholder="Valor do Item (R$)"
+                  type="number"
+                  value={valueItem}
+                  onChange={(e) => setValueItem(parseFloat(e.target.value))}
+                />
+              </FormControl>
+              <Button
+                leftIcon={<AiOutlineSave />}
+                colorScheme="blue"
+                isLoading={loading}
+                onClick={() => storeAddctionalItems()}
+              >
+                Salvar
               </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+            </Grid>
+
+            <Table size="sm" mt={5}>
+              <Thead>
+                <Tr>
+                  <Th>Nome do Item</Th>
+                  <Th isNumeric>Preço</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {adicionalItems?.map((add) => (
+                  <Tr key={add.id}>
+                    <Td>{add.name}</Td>
+                    <Td>
+                      {parseFloat(add.value.toString()).toLocaleString(
+                        "pt-br",
+                        {
+                          style: "currency",
+                          currency: "BRL",
+                        }
+                      )}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              onClick={() => handleCloseFinish()}
+              leftIcon={<AiOutlineCheck />}
+            >
+              Finalizar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={modalHelp} onClose={() => setModalHelp(false)} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Ajuda</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}>
+            {!format ? (
+              <Text>Selecione uma opção no formato do frete</Text>
+            ) : (
+              <Image
+                src={
+                  (format === 1 && imageHelp) ||
+                  (format === 2 && imageRolo) ||
+                  (format === 3 && imageEnv) ||
+                  undefined
+                }
+                w="100%"
+                rounded={"md"}
+              />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Fragment>
   );
 };
