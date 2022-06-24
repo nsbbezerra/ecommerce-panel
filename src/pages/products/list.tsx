@@ -60,7 +60,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, memo } from "react";
 import {
   AiOutlineAppstoreAdd,
   AiOutlineCalculator,
@@ -179,6 +179,9 @@ type ProductsEditProps = {
   liter: number;
   length: number;
   width: WidthProps;
+  inventory: number;
+  sale_value: number;
+  shipping: ShippinOptionsProps;
 };
 
 type WidthProps = {
@@ -217,7 +220,7 @@ type ShippinOptionsProps = {
   diameter: number;
 };
 
-export default function ListProduct() {
+const ListProduct = () => {
   const toast = useToast();
   const formRefTax = useRef<FormHandles>(null);
   const formRefInformation = useRef<FormHandles>(null);
@@ -402,6 +405,12 @@ export default function ListProduct() {
     }
   }, [page]);
 
+  useEffect(() => {
+    setShipping([]);
+    setOriginCep("");
+    setDestinyCep("");
+  }, [modalInformation]);
+
   function handleSearchName(text: string) {
     setTextSearch(text);
     if (text === "") {
@@ -514,11 +523,111 @@ export default function ListProduct() {
     }
   );
 
+  function handleUnit(ind: number) {
+    switch (ind) {
+      case 0:
+        return "square_meter";
+
+      case 1:
+        return "meter";
+
+      case 2:
+        return "unity";
+
+      case 3:
+        return "weight";
+
+      case 4:
+        return "liter";
+
+      case 5:
+        return "without";
+
+      default:
+        return "unity";
+    }
+  }
+
+  const mutationInfo = useMutation(
+    (data: ProductsEditProps) => {
+      let calcValue = {
+        cost,
+        otherCost,
+        freightValue,
+        tax: taxProduct,
+        cardTax,
+        comission,
+        marge,
+        sale,
+      };
+      let shippingValues = {
+        width: widthFreight,
+        height,
+        length,
+        weight,
+        format,
+        diameter,
+      };
+      return api.put(
+        `/products/${productId}`,
+        {
+          title: data.title,
+          description: data.description,
+          sku: data.sku,
+          barcode: data.barcode,
+          internal_code: data.internal_code,
+          type_unit: handleUnit(indexUnit),
+          unit_desc: data.unit_desc,
+          details: text.toString("html"),
+          cost_value: JSON.stringify(calcValue),
+          type_sale: data.type_sale,
+          sale_options: data.sale_options,
+          sale_options_category: data.sale_options_category,
+          weight: data.weight,
+          liter: data.liter,
+          length: data.length,
+          width: JSON.stringify(widthProduct),
+          inventory: data.inventory,
+          shipping: JSON.stringify(shippingValues),
+          sale_value: sale,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+    },
+    {
+      onSuccess: async (response) => {
+        showToast(response.data.message, "success", "Sucesso");
+        queryClient.invalidateQueries("list-products");
+      },
+      onError: (err) => {
+        if (axios.isAxiosError(err) && err.message) {
+          showToast(err.response?.data.error.message, "error", "Erro");
+        } else {
+          const message = (error as Error).message;
+          showToast(message, "error", "Erro");
+        }
+      },
+    }
+  );
+
   const handleUpdateInformation: SubmitHandler<ProductsEditProps> = async (
-    data,
-    { reset }
+    data
   ) => {
-    console.log(data);
+    try {
+      setLoading(true);
+      mutationInfo.mutate(data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        const message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
   };
 
   async function findProductInformation(id: string) {
@@ -609,6 +718,18 @@ export default function ListProduct() {
   };
 
   async function calcShipping() {
+    if (originCep === "") {
+      showToast("Insira um CEP de origem", "warning", "Atenção");
+      return false;
+    }
+    if (destinyCep === "") {
+      showToast("Insira um CEP de destino", "warning", "Atenção");
+      return false;
+    }
+    if (!format || format === 0) {
+      showToast("Selecione um formato de encomenda", "warning", "Atenção");
+      return false;
+    }
     setLoadingShipping(true);
     try {
       const response = await api.post("/shipping", {
@@ -1264,7 +1385,7 @@ export default function ListProduct() {
                         resize={"none"}
                       />
                     </FormControl>
-                    <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
+                    <Grid templateColumns={"repeat(4, 1fr)"} gap={3}>
                       <FormControl isRequired>
                         <FormLabel>SKU</FormLabel>
                         <Input placeholder="SKU" name="sku" />
@@ -1283,44 +1404,44 @@ export default function ListProduct() {
                           name="internal_code"
                         />
                       </FormControl>
+                      <FormControl isRequired>
+                        <FormLabel>Unidade de Medida</FormLabel>
+                        <Select
+                          name="unit_desc"
+                          placeholder="Selecione uma opção"
+                        >
+                          <option value="KG">Quilograma</option>
+                          <option value="GR">Grama</option>
+                          <option value="UN">Unidade</option>
+                          <option value="MT">Metro</option>
+                          <option value="M²">Metro Quadrado</option>
+                          <option value="CM">Centímetro</option>
+                          <option value="MM">Milímetro</option>
+                          <option value="PC">Peça</option>
+                          <option value="CX">Caixa</option>
+                          <option value="DZ">Duzia</option>
+                          <option value="EM">Embalagem</option>
+                          <option value="FD">Fardo</option>
+                          <option value="KT">KIT</option>
+                          <option value="JG">Jogo</option>
+                          <option value="PT">Pacote</option>
+                          <option value="LATA">Lata</option>
+                          <option value="LT">Litro</option>
+                          <option value="ML">Mililitro</option>
+                          <option value="SC">Saco</option>
+                          <option value="ROLO">Rolo</option>
+                          <option value="VD">Vidro</option>
+                          <option value="CE">Centro</option>
+                          <option value="CJ">Conjunto</option>
+                          <option value="GF">Garrafa</option>
+                        </Select>
+                      </FormControl>
                     </Grid>
-                    <FormControl isRequired>
-                      <FormLabel>Unidade de Medida</FormLabel>
-                      <Select
-                        name="unit_desc"
-                        placeholder="Selecione uma opção"
-                      >
-                        <option value="KG">Quilograma</option>
-                        <option value="GR">Grama</option>
-                        <option value="UN">Unidade</option>
-                        <option value="MT">Metro</option>
-                        <option value="M²">Metro Quadrado</option>
-                        <option value="CM">Centímetro</option>
-                        <option value="MM">Milímetro</option>
-                        <option value="PC">Peça</option>
-                        <option value="CX">Caixa</option>
-                        <option value="DZ">Duzia</option>
-                        <option value="EM">Embalagem</option>
-                        <option value="FD">Fardo</option>
-                        <option value="KT">KIT</option>
-                        <option value="JG">Jogo</option>
-                        <option value="PT">Pacote</option>
-                        <option value="LATA">Lata</option>
-                        <option value="LT">Litro</option>
-                        <option value="ML">Mililitro</option>
-                        <option value="SC">Saco</option>
-                        <option value="ROLO">Rolo</option>
-                        <option value="VD">Vidro</option>
-                        <option value="CE">Centro</option>
-                        <option value="CJ">Conjunto</option>
-                        <option value="GF">Garrafa</option>
-                      </Select>
-                    </FormControl>
                     <FormControl isRequired>
                       <FormLabel>Cálculo de Medidas</FormLabel>
                       <Tabs
                         mt={2}
-                        variant="enclosed"
+                        variant="enclosed-colored"
                         size="sm"
                         defaultIndex={indexUnit}
                         onChange={(e) => setIndexUnit(e)}
@@ -1335,7 +1456,7 @@ export default function ListProduct() {
                         </TabList>
 
                         <TabPanels>
-                          <TabPanel>
+                          <TabPanel px={0}>
                             <Grid
                               templateColumns={"1fr 1fr"}
                               gap={3}
@@ -1407,7 +1528,7 @@ export default function ListProduct() {
                               </FormControl>
                             </Grid>
                           </TabPanel>
-                          <TabPanel>
+                          <TabPanel px={0}>
                             <Grid templateColumns={"1fr"} gap={3}>
                               <FormControl>
                                 <FormLabel>Comprimento (Metros)</FormLabel>
@@ -1418,7 +1539,7 @@ export default function ListProduct() {
                               </FormControl>
                             </Grid>
                           </TabPanel>
-                          <TabPanel>
+                          <TabPanel px={0}>
                             <Grid templateColumns={"1fr"} gap={3}>
                               <FormControl>
                                 <FormLabel>Total de Unidades</FormLabel>
@@ -1430,7 +1551,7 @@ export default function ListProduct() {
                               </FormControl>
                             </Grid>
                           </TabPanel>
-                          <TabPanel>
+                          <TabPanel px={0}>
                             <Grid templateColumns={"1fr"} gap={3}>
                               <FormControl>
                                 <FormLabel>Peso (Kg)</FormLabel>
@@ -1438,7 +1559,7 @@ export default function ListProduct() {
                               </FormControl>
                             </Grid>
                           </TabPanel>
-                          <TabPanel>
+                          <TabPanel px={0}>
                             <Grid templateColumns={"1fr"} gap={3}>
                               <FormControl>
                                 <FormLabel>Volume (Lt / Ml)</FormLabel>
@@ -1446,7 +1567,7 @@ export default function ListProduct() {
                               </FormControl>
                             </Grid>
                           </TabPanel>
-                          <TabPanel>
+                          <TabPanel px={0}>
                             <Flex
                               borderWidth={"1px"}
                               rounded="md"
@@ -1848,4 +1969,6 @@ export default function ListProduct() {
       </Modal>
     </Fragment>
   );
-}
+};
+
+export default memo(ListProduct);

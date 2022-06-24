@@ -47,6 +47,7 @@ import {
   Icon,
   Skeleton,
   MenuGroup,
+  Divider,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
@@ -74,9 +75,10 @@ import {
   AiOutlineMenu,
   AiOutlinePartition,
   AiOutlineBarcode,
+  AiOutlineShoppingCart,
 } from "react-icons/ai";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { FaRegSun, FaRegMoon } from "react-icons/fa";
+import { FaRegSun, FaRegMoon, FaCashRegister } from "react-icons/fa";
 import Input from "../components/Input";
 import { Form } from "@unform/web";
 import { FormHandles, SubmitHandler } from "@unform/core";
@@ -88,6 +90,7 @@ import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.svg";
+import { BsBagCheck, BsJournalBookmark } from "react-icons/bs";
 
 interface LoginData {
   user: string;
@@ -356,14 +359,29 @@ export default function Header() {
           </MenuGroup>
         </MenuList>
       </Menu>
-      <Button
-        leftIcon={<AiOutlineShopping />}
-        colorScheme="blue"
-        variant={"ghost"}
-        size="sm"
-      >
-        Vendas
-      </Button>
+      <Menu placement="auto">
+        <MenuButton
+          as={Button}
+          rightIcon={<MdKeyboardArrowDown />}
+          leftIcon={<AiOutlineShopping />}
+          colorScheme="blue"
+          variant={"ghost"}
+          size="sm"
+        >
+          Vendas
+        </MenuButton>
+        <MenuList>
+          <MenuGroup title="PDV">
+            <MenuItem icon={<AiOutlineShoppingCart />}>
+              Balcão de Vendas
+            </MenuItem>
+            <MenuItem icon={<BsJournalBookmark />}>Orçamentos</MenuItem>
+          </MenuGroup>
+          <MenuGroup title="Gestão">
+            <MenuItem icon={<BsBagCheck />}>Vendas Realizadas</MenuItem>
+          </MenuGroup>
+        </MenuList>
+      </Menu>
       <Menu placement="auto">
         <MenuButton
           as={Button}
@@ -376,10 +394,16 @@ export default function Header() {
           Financeiro
         </MenuButton>
         <MenuList>
-          <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
-          <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
-          <MenuItem icon={<AiOutlinePercentage />}>Comissões</MenuItem>
-          <MenuItem icon={<AiOutlineBarcode />}>Pagamentos</MenuItem>
+          <MenuGroup title="Movimentação">
+            <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
+            <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
+            <MenuItem icon={<AiOutlinePercentage />}>Comissões</MenuItem>
+            <MenuItem icon={<AiOutlineBarcode />}>Pagamentos</MenuItem>
+          </MenuGroup>
+          <MenuGroup title="Caixa">
+            <MenuItem icon={<FaCashRegister />}>Caixa Diário</MenuItem>
+            <MenuItem icon={<BsJournalBookmark />}>Gestão de Caixa</MenuItem>
+          </MenuGroup>
         </MenuList>
       </Menu>
       <Button
@@ -600,8 +624,8 @@ export default function Header() {
         <ModalOverlay />
         <ModalContent>
           <ModalBody mt={5} mb={5}>
-            <Grid templateColumns={"1fr 1fr"} gap={5}>
-              <Box borderWidth="1px" rounded="md">
+            <Grid templateColumns={"1fr 1px 1fr"} gap={5} alignItems="center">
+              <Box mr={-4}>
                 <Flex justify={"center"} align="center" mt={2}>
                   <Image src={logo} w="50%" />
                 </Flex>
@@ -639,6 +663,9 @@ export default function Header() {
                       )}
                     </Text>
                     <Text fontSize="xs">
+                      <strong>Período da Ativação:</strong> Mensal
+                    </Text>
+                    <Text fontSize="xs">
                       <strong>Status da Ativação:</strong>{" "}
                       {new Date(company?.expires_code_date || new Date()) <
                       new Date() ? (
@@ -664,17 +691,18 @@ export default function Header() {
 
                     <Button
                       size="sm"
-                      leftIcon={<AiOutlineShop />}
-                      variant="outline"
+                      leftIcon={<AiOutlineTool />}
+                      variant="link"
                       colorScheme={"blue"}
                       onClick={() => setShow(true)}
+                      w="fit-content"
                     >
-                      Configurar Empresa
+                      Configurar
                     </Button>
                   </Stack>
                 )}
               </Box>
-
+              <Divider orientation="vertical" />
               <Box>
                 <Form onSubmit={handleLogin} ref={formRef}>
                   <Flex
@@ -694,6 +722,7 @@ export default function Header() {
                           placeholder="Usuário"
                           name="user"
                           leftElement={true}
+                          autoFocus
                         />
                       </InputGroup>
                     </FormControl>

@@ -24,6 +24,7 @@ const IndexSubCategories = () => {
             variant={"enclosed"}
             onChange={(e) => setIndex(e)}
             index={index}
+            mb={-3}
           >
             <TabList>
               <Tab>
@@ -37,8 +38,8 @@ const IndexSubCategories = () => {
             </TabList>
 
             <TabPanels>
-              <TabPanel>{index === 0 && <List />}</TabPanel>
-              <TabPanel>{index === 1 && <Register />}</TabPanel>
+              <TabPanel px={0}>{index === 0 && <List />}</TabPanel>
+              <TabPanel px={0}>{index === 1 && <Register />}</TabPanel>
             </TabPanels>
           </Tabs>
         </Box>

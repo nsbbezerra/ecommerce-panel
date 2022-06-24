@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, memo } from "react";
 import {
   Box,
   Flex,
@@ -525,6 +525,18 @@ const RegisterProduct = () => {
   };
 
   async function calcShipping() {
+    if (originCep === "") {
+      showToast("Insira um CEP de origem", "warning", "Atenção");
+      return false;
+    }
+    if (destinyCep === "") {
+      showToast("Insira um CEP de destino", "warning", "Atenção");
+      return false;
+    }
+    if (!format || format === 0) {
+      showToast("Selecione um formato de encomenda", "warning", "Atenção");
+      return false;
+    }
     setLoadingShipping(true);
     try {
       const response = await api.post("/shipping", {
@@ -772,7 +784,7 @@ const RegisterProduct = () => {
               resize={"none"}
             />
           </FormControl>
-          <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
+          <Grid templateColumns={"repeat(4, 1fr)"} gap={3}>
             <FormControl isRequired>
               <FormLabel>SKU</FormLabel>
               <Input placeholder="SKU" name="sku" />
@@ -785,41 +797,41 @@ const RegisterProduct = () => {
               <FormLabel>Código Interno</FormLabel>
               <Input placeholder="Código Interno" name="internal_code" />
             </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Unidade de Medida</FormLabel>
+              <Select name="unit_desc" placeholder="Selecione uma opção">
+                <option value="KG">Quilograma</option>
+                <option value="GR">Grama</option>
+                <option value="UN">Unidade</option>
+                <option value="MT">Metro</option>
+                <option value="M²">Metro Quadrado</option>
+                <option value="CM">Centímetro</option>
+                <option value="MM">Milímetro</option>
+                <option value="PC">Peça</option>
+                <option value="CX">Caixa</option>
+                <option value="DZ">Duzia</option>
+                <option value="EM">Embalagem</option>
+                <option value="FD">Fardo</option>
+                <option value="KT">KIT</option>
+                <option value="JG">Jogo</option>
+                <option value="PT">Pacote</option>
+                <option value="LATA">Lata</option>
+                <option value="LT">Litro</option>
+                <option value="ML">Mililitro</option>
+                <option value="SC">Saco</option>
+                <option value="ROLO">Rolo</option>
+                <option value="VD">Vidro</option>
+                <option value="CE">Centro</option>
+                <option value="CJ">Conjunto</option>
+                <option value="GF">Garrafa</option>
+              </Select>
+            </FormControl>
           </Grid>
-          <FormControl isRequired>
-            <FormLabel>Unidade de Medida</FormLabel>
-            <Select name="unit_desc" placeholder="Selecione uma opção">
-              <option value="KG">Quilograma</option>
-              <option value="GR">Grama</option>
-              <option value="UN">Unidade</option>
-              <option value="MT">Metro</option>
-              <option value="M²">Metro Quadrado</option>
-              <option value="CM">Centímetro</option>
-              <option value="MM">Milímetro</option>
-              <option value="PC">Peça</option>
-              <option value="CX">Caixa</option>
-              <option value="DZ">Duzia</option>
-              <option value="EM">Embalagem</option>
-              <option value="FD">Fardo</option>
-              <option value="KT">KIT</option>
-              <option value="JG">Jogo</option>
-              <option value="PT">Pacote</option>
-              <option value="LATA">Lata</option>
-              <option value="LT">Litro</option>
-              <option value="ML">Mililitro</option>
-              <option value="SC">Saco</option>
-              <option value="ROLO">Rolo</option>
-              <option value="VD">Vidro</option>
-              <option value="CE">Centro</option>
-              <option value="CJ">Conjunto</option>
-              <option value="GF">Garrafa</option>
-            </Select>
-          </FormControl>
           <FormControl isRequired>
             <FormLabel>Cálculo de Medidas</FormLabel>
             <Tabs
               mt={2}
-              variant="enclosed"
+              variant="enclosed-colored"
               size="sm"
               defaultIndex={indexUnit}
               onChange={(e) => setIndexUnit(e)}
@@ -834,7 +846,7 @@ const RegisterProduct = () => {
               </TabList>
 
               <TabPanels>
-                <TabPanel>
+                <TabPanel px={0}>
                   <Grid templateColumns={"1fr 1fr"} gap={3} position="relative">
                     <FormControl>
                       <FormLabel>Largura</FormLabel>
@@ -900,7 +912,7 @@ const RegisterProduct = () => {
                     </FormControl>
                   </Grid>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel px={0}>
                   <Grid templateColumns={"1fr"} gap={3}>
                     <FormControl>
                       <FormLabel>Comprimento (Metros)</FormLabel>
@@ -908,7 +920,7 @@ const RegisterProduct = () => {
                     </FormControl>
                   </Grid>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel px={0}>
                   <Grid templateColumns={"1fr"} gap={3}>
                     <FormControl>
                       <FormLabel>Total de Unidades</FormLabel>
@@ -920,7 +932,7 @@ const RegisterProduct = () => {
                     </FormControl>
                   </Grid>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel px={0}>
                   <Grid templateColumns={"1fr"} gap={3}>
                     <FormControl>
                       <FormLabel>Peso (Kg)</FormLabel>
@@ -928,7 +940,7 @@ const RegisterProduct = () => {
                     </FormControl>
                   </Grid>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel px={0}>
                   <Grid templateColumns={"1fr"} gap={3}>
                     <FormControl>
                       <FormLabel>Volume (Lt / Ml)</FormLabel>
@@ -936,7 +948,7 @@ const RegisterProduct = () => {
                     </FormControl>
                   </Grid>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel px={0}>
                   <Flex
                     borderWidth={"1px"}
                     rounded="md"
@@ -1972,4 +1984,4 @@ const RegisterProduct = () => {
   );
 };
 
-export default RegisterProduct;
+export default memo(RegisterProduct);
