@@ -35,7 +35,7 @@ export default function Layout() {
         <Header />
         <Box w="100%" h="100%" overflow="auto" pt={1} pb={1}>
           <Scrollbars autoHide>
-            <Container maxW={"8xl"}>
+            <Container maxW={"8xl"} h="100%">
               <Routing />
             </Container>
           </Scrollbars>

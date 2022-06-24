@@ -21,7 +21,14 @@ import anyDesk from "../assets/any.svg";
 
 export default function Index() {
   return (
-    <Flex justify={"center"} align="center" py={10} direction="column" gap={1}>
+    <Flex
+      justify={"center"}
+      align="center"
+      py={10}
+      direction="column"
+      gap={1}
+      h={"100%"}
+    >
       <Image src={logo} w="20%" />
       <Heading fontWeight={"semibold"} mt={5}>
         Gestão de Ecommerce

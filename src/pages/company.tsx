@@ -57,6 +57,7 @@ type CompanyProps = {
   cnpj: string;
   city: string;
   thumbnail?: string;
+  thumbnail_id?: string;
 };
 
 type LoadingProps = {
@@ -77,6 +78,7 @@ export default function Company() {
   const [userToken, setUserToken] = useState<UserProps>();
   const [showThumb, setShowThumb] = useState<boolean>(true);
   const [thumbnail, setThumbnail] = useState<any>(null);
+  const [loadingDel, setLoadingDel] = useState<boolean>(false);
 
   const preview = useMemo(() => {
     return thumbnail ? URL.createObjectURL(thumbnail) : undefined;
@@ -218,6 +220,32 @@ export default function Company() {
     }
   );
 
+  const handleRemoveThumbnail = async (id: string, name: string) => {
+    try {
+      setLoadingDel(true);
+      const response = await api.put(
+        `/deleteThumbnailCompany/${id}`,
+        {
+          name,
+        },
+        {
+          headers: { "x-access-authorization": userToken?.token || "" },
+        }
+      );
+      showToast(response.data.message, "success", "Sucesso");
+      setShowThumb(false);
+      setLoadingDel(false);
+    } catch (error) {
+      setLoadingDel(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
+
   return (
     <Fragment>
       <Box py={3}>
@@ -306,7 +334,13 @@ export default function Company() {
                             <Button onClick={onClose}>Não</Button>
                             <Button
                               colorScheme="blue"
-                              onClick={() => setShowThumb(false)}
+                              onClick={() =>
+                                handleRemoveThumbnail(
+                                  company?.id || "",
+                                  company?.thumbnail_id || ""
+                                )
+                              }
+                              isLoading={loadingDel}
                             >
                               Sim
                             </Button>

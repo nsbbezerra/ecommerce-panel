@@ -21,17 +21,17 @@ const IndexCategories = () => {
       <Box py={3}>
         <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
           <Tabs
-            variant={"enclosed"}
+            variant={"enclosed-colored"}
             onChange={(e) => setIndex(e)}
             index={index}
             mb={-3}
           >
             <TabList>
-              <Tab>
+              <Tab roundedTop={"md"}>
                 <Icon as={AiOutlineOrderedList} mr={2} />
                 Listagem
               </Tab>
-              <Tab>
+              <Tab roundedTop={"md"}>
                 <Icon as={AiOutlineSave} mr={2} />
                 Cadastro
               </Tab>
