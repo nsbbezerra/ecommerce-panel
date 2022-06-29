@@ -287,172 +287,167 @@ const ListEmployee = () => {
 
   return (
     <Fragment>
-      <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
-          {isLoading ? (
-            <Stack spacing={3}>
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-            </Stack>
+      {isLoading ? (
+        <Stack spacing={3}>
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+        </Stack>
+      ) : (
+        <Fragment>
+          {employees.length === 0 ? (
+            <Flex justify={"center"} align="center" direction={"column"}>
+              <Icon as={GiCardboardBox} fontSize="8xl" />
+              <Text>Nenhuma informação para mostrar</Text>
+            </Flex>
           ) : (
-            <Fragment>
-              {employees.length === 0 ? (
-                <Flex justify={"center"} align="center" direction={"column"}>
-                  <Icon as={GiCardboardBox} fontSize="8xl" />
-                  <Text>Nenhuma informação para mostrar</Text>
-                </Flex>
-              ) : (
-                <Table size={"sm"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Nome</Th>
-                      <Th>Telefone</Th>
-                      <Th>Usuário</Th>
-                      <Th>Ativo?</Th>
-                      <Th>Permissão</Th>
-                      <Th>Opções</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {employees.map((emp) => (
-                      <Tr key={emp.id}>
-                        <Td>{emp.name}</Td>
-                        <Td>{emp.phone}</Td>
-                        <Td>{emp.user}</Td>
-                        <Td>
-                          <Switch
-                            defaultChecked={emp.active}
-                            onChange={(e) =>
-                              mutationActive.mutate({
-                                id: emp.id,
-                                active: e.target.checked,
-                              })
-                            }
-                          />
-                        </Td>
-                        <Td>
-                          <HStack>
-                            <Tag
-                              colorScheme={
-                                (emp.permission === "all" && "green") ||
-                                (emp.permission === "cashier" && "blue") ||
-                                (emp.permission === "seller" && "gray") ||
-                                "gray"
-                              }
-                            >
-                              {(emp.permission === "all" && "Geral") ||
-                                (emp.permission === "cashier" &&
-                                  "Financeiro") ||
-                                (emp.permission === "seller" && "Vendas") ||
-                                "Geral"}
-                            </Tag>
-                            <Popover>
-                              <PopoverTrigger>
-                                <IconButton
-                                  size={"xs"}
-                                  icon={<AiOutlineEdit />}
-                                  aria-label="Editar permissão"
-                                  colorScheme={"blue"}
-                                  variant="outline"
-                                />
-                              </PopoverTrigger>
-                              <PopoverContent>
-                                <PopoverArrow />
-                                <PopoverCloseButton />
-                                <PopoverHeader fontWeight={"bold"}>
-                                  Permissão
-                                </PopoverHeader>
-                                <PopoverBody>
-                                  Selecione uma opção:
-                                  <RadioGroup
-                                    name="permission"
-                                    value={permission}
-                                    onChange={(e) => setPermission(e)}
-                                    mt={3}
-                                  >
-                                    <Stack>
-                                      <Radio value="all">Geral</Radio>
-                                      <Radio value="cashier">Financeiro</Radio>
-                                      <Radio value="seller">Vendas</Radio>
-                                    </Stack>
-                                  </RadioGroup>
-                                </PopoverBody>
-                                <PopoverFooter
-                                  display="flex"
-                                  justifyContent="flex-end"
-                                >
-                                  <Button
-                                    colorScheme={"blue"}
-                                    size="sm"
-                                    leftIcon={<AiOutlineSave />}
-                                    onClick={() =>
-                                      mutationPermission.mutate({
-                                        id: emp.id,
-                                        permission: permission || "",
-                                      })
-                                    }
-                                    isLoading={mutationPermission.isLoading}
-                                  >
-                                    Salvar
-                                  </Button>
-                                </PopoverFooter>
-                              </PopoverContent>
-                            </Popover>
-                          </HStack>
-                        </Td>
-                        <Td>
-                          <Menu>
-                            <MenuButton
-                              as={Button}
-                              rightIcon={<AiOutlineTool />}
-                              size="xs"
-                              isFullWidth
-                            >
-                              Opções
-                            </MenuButton>
-                            <MenuList>
-                              <MenuItem
-                                icon={<AiOutlineEdit />}
-                                onClick={() => handeToUpdate(emp.id)}
+            <Table size={"sm"}>
+              <Thead>
+                <Tr>
+                  <Th>Nome</Th>
+                  <Th>Telefone</Th>
+                  <Th>Usuário</Th>
+                  <Th>Ativo?</Th>
+                  <Th>Permissão</Th>
+                  <Th>Opções</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {employees.map((emp) => (
+                  <Tr key={emp.id}>
+                    <Td>{emp.name}</Td>
+                    <Td>{emp.phone}</Td>
+                    <Td>{emp.user}</Td>
+                    <Td>
+                      <Switch
+                        defaultChecked={emp.active}
+                        onChange={(e) =>
+                          mutationActive.mutate({
+                            id: emp.id,
+                            active: e.target.checked,
+                          })
+                        }
+                      />
+                    </Td>
+                    <Td>
+                      <HStack>
+                        <Tag
+                          colorScheme={
+                            (emp.permission === "all" && "green") ||
+                            (emp.permission === "cashier" && "blue") ||
+                            (emp.permission === "seller" && "gray") ||
+                            "gray"
+                          }
+                        >
+                          {(emp.permission === "all" && "Geral") ||
+                            (emp.permission === "cashier" && "Financeiro") ||
+                            (emp.permission === "seller" && "Vendas") ||
+                            "Geral"}
+                        </Tag>
+                        <Popover>
+                          <PopoverTrigger>
+                            <IconButton
+                              size={"xs"}
+                              icon={<AiOutlineEdit />}
+                              aria-label="Editar permissão"
+                              colorScheme={"blue"}
+                              variant="outline"
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent>
+                            <PopoverArrow />
+                            <PopoverCloseButton />
+                            <PopoverHeader fontWeight={"bold"}>
+                              Permissão
+                            </PopoverHeader>
+                            <PopoverBody>
+                              Selecione uma opção:
+                              <RadioGroup
+                                name="permission"
+                                value={permission}
+                                onChange={(e) => setPermission(e)}
+                                mt={3}
                               >
-                                Alterar Informações
-                              </MenuItem>
-                            </MenuList>
-                          </Menu>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-              <Flex justify={"flex-end"} align="center" gap={3} mt={3}>
-                <Button
-                  size={"sm"}
-                  onClick={() => setPage(page - 1)}
-                  isDisabled={page + 1 === 1}
-                >
-                  Anterior
-                </Button>
-                <Text>
-                  {page + 1} / {pages}
-                </Text>
-                <Button
-                  size={"sm"}
-                  onClick={() => setPage(page + 1)}
-                  isDisabled={page + 1 === pages}
-                >
-                  Próxima
-                </Button>
-              </Flex>
-            </Fragment>
+                                <Stack>
+                                  <Radio value="all">Geral</Radio>
+                                  <Radio value="cashier">Financeiro</Radio>
+                                  <Radio value="seller">Vendas</Radio>
+                                </Stack>
+                              </RadioGroup>
+                            </PopoverBody>
+                            <PopoverFooter
+                              display="flex"
+                              justifyContent="flex-end"
+                            >
+                              <Button
+                                colorScheme={"blue"}
+                                size="sm"
+                                leftIcon={<AiOutlineSave />}
+                                onClick={() =>
+                                  mutationPermission.mutate({
+                                    id: emp.id,
+                                    permission: permission || "",
+                                  })
+                                }
+                                isLoading={mutationPermission.isLoading}
+                              >
+                                Salvar
+                              </Button>
+                            </PopoverFooter>
+                          </PopoverContent>
+                        </Popover>
+                      </HStack>
+                    </Td>
+                    <Td>
+                      <Menu>
+                        <MenuButton
+                          as={Button}
+                          rightIcon={<AiOutlineTool />}
+                          size="xs"
+                          isFullWidth
+                        >
+                          Opções
+                        </MenuButton>
+                        <MenuList>
+                          <MenuItem
+                            icon={<AiOutlineEdit />}
+                            onClick={() => handeToUpdate(emp.id)}
+                          >
+                            Alterar Informações
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
           )}
-        </Box>
-      </Box>
+          <Flex justify={"flex-end"} align="center" gap={3} mt={3}>
+            <Button
+              size={"sm"}
+              onClick={() => setPage(page - 1)}
+              isDisabled={page + 1 === 1}
+            >
+              Anterior
+            </Button>
+            <Text>
+              {page + 1} / {pages}
+            </Text>
+            <Button
+              size={"sm"}
+              onClick={() => setPage(page + 1)}
+              isDisabled={page + 1 === pages}
+            >
+              Próxima
+            </Button>
+          </Flex>
+        </Fragment>
+      )}
 
       <Modal isOpen={modalInfo} onClose={() => setModalInfo(false)} size="3xl">
         <ModalOverlay />

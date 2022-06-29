@@ -108,79 +108,65 @@ const EmployeeCreate = () => {
 
   return (
     <Fragment>
-      <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
-          <Form onSubmit={handleCreate} ref={formRef}>
-            <Stack spacing={3}>
-              <Grid
-                templateColumns={[
-                  "1fr",
-                  "1fr",
-                  "3fr 1fr",
-                  "3fr 1fr",
-                  "3fr 1fr",
-                ]}
-                gap={3}
-              >
-                <FormControl isRequired>
-                  <FormLabel>Nome</FormLabel>
-                  <Input name="name" placeholder="Nome" autoFocus />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Telefone</FormLabel>
-                  <InputMask
-                    mask="(99) 99999-9999"
-                    name="phone"
-                    placeholder="Telefone"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid
-                templateColumns={[
-                  "repeat(1, 1fr)",
-                  "repeat(1, 1fr)",
-                  "repeat(3, 1fr)",
-                  "repeat(3, 1fr)",
-                  "repeat(3, 1fr)",
-                ]}
-                gap={3}
-              >
-                <FormControl isRequired>
-                  <FormLabel>Usuário</FormLabel>
-                  <Input name="user" placeholder="Usuário" />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Senha</FormLabel>
-                  <Input
-                    name="password"
-                    placeholder="Senha"
-                    type={"password"}
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Permissão</FormLabel>
-                  <Select name="permission" placeholder="Selecione uma opção">
-                    <option value="all">Geral</option>
-                    <option value="cashier">Financeiro</option>
-                    <option value="seller">Vendas</option>
-                  </Select>
-                </FormControl>
-              </Grid>
+      <Form onSubmit={handleCreate} ref={formRef}>
+        <Stack spacing={3}>
+          <Grid
+            templateColumns={["1fr", "1fr", "3fr 1fr", "3fr 1fr", "3fr 1fr"]}
+            gap={3}
+          >
+            <FormControl isRequired>
+              <FormLabel>Nome</FormLabel>
+              <Input name="name" placeholder="Nome" autoFocus />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Telefone</FormLabel>
+              <InputMask
+                mask="(99) 99999-9999"
+                name="phone"
+                placeholder="Telefone"
+              />
+            </FormControl>
+          </Grid>
+          <Grid
+            templateColumns={[
+              "repeat(1, 1fr)",
+              "repeat(1, 1fr)",
+              "repeat(3, 1fr)",
+              "repeat(3, 1fr)",
+              "repeat(3, 1fr)",
+            ]}
+            gap={3}
+          >
+            <FormControl isRequired>
+              <FormLabel>Usuário</FormLabel>
+              <Input name="user" placeholder="Usuário" />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Senha</FormLabel>
+              <Input name="password" placeholder="Senha" type={"password"} />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Permissão</FormLabel>
+              <Select name="permission" placeholder="Selecione uma opção">
+                <option value="all">Geral</option>
+                <option value="cashier">Financeiro</option>
+                <option value="seller">Vendas</option>
+              </Select>
+            </FormControl>
+          </Grid>
 
-              <Button
-                leftIcon={<AiOutlineSave />}
-                size="lg"
-                w="fit-content"
-                colorScheme={"blue"}
-                type="submit"
-                isLoading={loading}
-              >
-                Cadastrar
-              </Button>
-            </Stack>
-          </Form>
-        </Box>
-      </Box>
+          <Button
+            leftIcon={<AiOutlineSave />}
+            size="lg"
+            w="fit-content"
+            colorScheme={"blue"}
+            type="submit"
+            isLoading={loading}
+          >
+            Cadastrar
+          </Button>
+        </Stack>
+      </Form>
     </Fragment>
   );
 };

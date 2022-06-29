@@ -277,32 +277,15 @@ export default function Header() {
       >
         Empresa
       </Button>
-      <Menu placement="auto">
-        <MenuButton
-          as={Button}
-          rightIcon={<MdKeyboardArrowDown />}
-          leftIcon={<AiOutlineUsergroupAdd />}
-          colorScheme="blue"
-          variant={"ghost"}
-          size="sm"
-        >
-          Colaboradores
-        </MenuButton>
-        <MenuList>
-          <MenuItem
-            icon={<AiOutlineSave />}
-            onClick={() => navigate("/criar_colaborador")}
-          >
-            Cadastro
-          </MenuItem>
-          <MenuItem
-            icon={<AiOutlineTool />}
-            onClick={() => navigate("/listar_colaboradores")}
-          >
-            Gerenciar
-          </MenuItem>
-        </MenuList>
-      </Menu>
+      <Button
+        leftIcon={<AiOutlineUsergroupAdd />}
+        colorScheme="blue"
+        variant={"ghost"}
+        size="sm"
+        onClick={() => navigate("/colaboradores")}
+      >
+        Colaboradores
+      </Button>
       <Button
         leftIcon={<AiOutlineUser />}
         colorScheme="blue"
