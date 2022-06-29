@@ -1,10 +1,9 @@
 import {
   Box,
+  Button,
   Flex,
   Grid,
   Icon,
-  Text,
-  useColorModeValue,
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -13,16 +12,17 @@ import {
   PopoverFooter,
   PopoverArrow,
   PopoverCloseButton,
-  Button,
-  ButtonGroup,
+  Text,
+  useColorModeValue,
   FormControl,
   FormLabel,
-  Divider,
+  ButtonGroup,
   useToast,
   Stack,
   Skeleton,
   RadioGroup,
   Radio,
+  Divider,
   Table,
   Thead,
   Tbody,
@@ -30,44 +30,46 @@ import {
   Th,
   Td,
 } from "@chakra-ui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { AiOutlineSave } from "react-icons/ai";
-import { GiCardboardBox } from "react-icons/gi";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
 import * as Yup from "yup";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { GiCardboardBox } from "react-icons/gi";
 import Input from "../../components/Input";
-import { useQuery } from "react-query";
-import { api } from "../../configs";
+import { AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
+import { api } from "../../configs";
+import { useQuery } from "react-query";
 import { FaTrashAlt } from "react-icons/fa";
+
+type CategoryProps = {
+  id: string;
+  title: string;
+};
 
 type Props = {
   id: string;
   token: string;
 };
 
-type PropsCategory = {
-  id: string;
-  name: string;
-};
-
-type PropsItems = {
+type ItemsProps = {
   id: string;
   name: string;
   value: number;
 };
 
-export default function PartitionSale() {
+export default function AdictionalItems() {
   const toast = useToast();
   const formCategoryRef = useRef<FormHandles>(null);
   const formItemsRef = useRef<FormHandles>(null);
   const [auth, setAuth] = useState<Props>();
-  const [categories, setCategories] = useState<PropsCategory[]>();
-  const [items, setItems] = useState<PropsItems[]>();
+
   const [loadingCategory, setLoadingCategory] = useState<boolean>(false);
   const [loadingItems, setLoadingItems] = useState<boolean>(false);
   const [idCategory, setIdCategory] = useState<string>("");
+
+  const [categories, setCategories] = useState<CategoryProps[]>();
+  const [items, setItems] = useState<ItemsProps[]>();
 
   function showToast(
     message: string,
@@ -84,93 +86,6 @@ export default function PartitionSale() {
     });
   }
 
-  const handleSubmitCategory: SubmitHandler<PropsCategory> = async (
-    data,
-    { reset }
-  ) => {
-    try {
-      const scheme = Yup.object().shape({
-        name: Yup.string().required("Insira um nome para a categoria"),
-      });
-
-      await scheme.validate(data, {
-        abortEarly: false,
-      });
-      setLoadingCategory(true);
-
-      const response = await api.post(
-        `/storeCategoryPartitionSale/${auth?.id}`,
-        data,
-        {
-          headers: { "x-access-authorization": auth?.token || "" },
-        }
-      );
-
-      showToast(response.data.message, "success", "Sucesso");
-
-      setLoadingCategory(false);
-      reset();
-    } catch (error) {
-      setLoadingCategory(false);
-      if (error instanceof Yup.ValidationError) {
-        error.inner.forEach((err) => {
-          showToast(err.message, "error", "Erro");
-        });
-      }
-      if (axios.isAxiosError(error) && error.message) {
-        showToast(error.response?.data.message, "error", "Erro");
-      }
-    }
-  };
-
-  const handleSubmitItems: SubmitHandler<PropsItems> = async (
-    data,
-    { reset }
-  ) => {
-    if (idCategory === "") {
-      showToast("Selecione uma categoria para continuar", "warning", "Atenção");
-      return false;
-    }
-
-    try {
-      const scheme = Yup.object().shape({
-        name: Yup.string().required("Insira um nome para o item"),
-        value: Yup.string().required("Insira um valor para o item"),
-      });
-
-      await scheme.validate(data, {
-        abortEarly: false,
-      });
-
-      setLoadingItems(true);
-
-      const response = await api.post(
-        `/storeItemsPartitionSale/${idCategory}`,
-        data,
-        {
-          headers: { "x-access-authorization": auth?.token || "" },
-        }
-      );
-
-      showToast(response.data.message, "success", "Sucesso");
-
-      setItems(response.data.partition_items);
-
-      setLoadingItems(false);
-      reset();
-    } catch (error) {
-      setLoadingItems(false);
-      if (error instanceof Yup.ValidationError) {
-        error.inner.forEach((err) => {
-          showToast(err.message, "error", "Erro");
-        });
-      }
-      if (axios.isAxiosError(error) && error.message) {
-        showToast(error.response?.data.message, "error", "Erro");
-      }
-    }
-  };
-
   async function getInformation() {
     const company = localStorage.getItem("company");
     const user = sessionStorage.getItem("user");
@@ -181,7 +96,7 @@ export default function PartitionSale() {
     }
     try {
       const { data } = await api.get(
-        `/showCategoryPartitionSale/${companyParse?.id}`
+        `/categoryAdictionalItems/${companyParse?.id}`
       );
       return data;
     } catch (error) {
@@ -195,7 +110,7 @@ export default function PartitionSale() {
   }
 
   const { data, isLoading, error } = useQuery(
-    "list_categories_partition",
+    "list_adictional_category",
     getInformation,
     {
       refetchInterval: 4000,
@@ -203,11 +118,25 @@ export default function PartitionSale() {
   );
 
   useEffect(() => {
-    if (error) {
-      const message = (error as Error).message;
-      showToast(message, "error", "Erro");
+    async function findCategories() {
+      try {
+        const response = await api.get(`/adictionalItems/${idCategory}`);
+        if (response.data) {
+          setItems(response.data);
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.message) {
+          showToast(error.response?.data.message, "error", "Erro");
+        } else {
+          let message = (error as Error).message;
+          showToast(message, "error", "Erro");
+        }
+      }
     }
-  }, [error]);
+    if (idCategory !== "") {
+      findCategories();
+    }
+  }, [idCategory]);
 
   useEffect(() => {
     if (data) {
@@ -216,30 +145,101 @@ export default function PartitionSale() {
   }, [data]);
 
   useEffect(() => {
-    if (idCategory !== "") {
-      async function findItems() {
-        try {
-          const response = await api.get(
-            `/showItemsPartitionSale/${idCategory}`
-          );
-          setItems(response.data);
-        } catch (error) {
-          if (axios.isAxiosError(error) && error.message) {
-            showToast(error.response?.data.message, "error", "Erro");
-          } else {
-            let message = (error as Error).message;
-            showToast(message, "error", "Erro");
-          }
-        }
-      }
-      findItems();
+    if (error) {
+      const message = (error as Error).message;
+      showToast(message, "error", "Erro");
     }
-  }, [idCategory]);
+  }, [error]);
 
-  async function deleteItem(id: string) {
+  const handleSubmitCategory: SubmitHandler<CategoryProps> = async (
+    data,
+    { reset }
+  ) => {
+    try {
+      const scheme = Yup.object().shape({
+        title: Yup.string().required("Insira um nome para a categoria"),
+      });
+
+      await scheme.validate(data, {
+        abortEarly: false,
+      });
+
+      setLoadingCategory(true);
+      const response = await api.post(
+        `/adicionalItemsCategory/${auth?.id}`,
+        data,
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+      showToast(response.data.message, "success", "Sucesso");
+      reset();
+      setLoadingCategory(false);
+    } catch (error) {
+      setLoadingCategory(false);
+      if (error instanceof Yup.ValidationError) {
+        error.inner.forEach((err) => {
+          showToast(err.message, "error", "Erro");
+        });
+      }
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      }
+    }
+  };
+
+  const handleSubmitItems: SubmitHandler<ItemsProps> = async (
+    data,
+    { reset }
+  ) => {
+    if (idCategory === "") {
+      showToast("Selecione uma categoria", "warning", "Atenção");
+      return false;
+    }
+    try {
+      const scheme = Yup.object().shape({
+        name: Yup.string().required("Insira um nome para o item"),
+        value: Yup.number().required("Insira um valor para o item"),
+      });
+
+      await scheme.validate(data, {
+        abortEarly: false,
+      });
+
+      setLoadingItems(true);
+
+      const response = await api.post(
+        `/adictionalItems/${idCategory}`,
+        {
+          name: data.name,
+          value: data.value,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+
+      showToast(response.data.message, "success", "Sucesso");
+      setItems(response.data.adictional_items);
+      reset();
+      setLoadingItems(false);
+    } catch (error) {
+      setLoadingItems(false);
+      if (error instanceof Yup.ValidationError) {
+        error.inner.forEach((err) => {
+          showToast(err.message, "error", "Erro");
+        });
+      }
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      }
+    }
+  };
+
+  const handleDelItem = async (id: string) => {
     try {
       setLoadingCategory(true);
-      const response = await api.delete(`/deleteItemPartition/${id}`, {
+      const response = await api.delete(`/deleteAdictionalItems/${id}`, {
         headers: { "x-access-authorization": auth?.token || "" },
       });
       showToast(response.data.message, "success", "Sucesso");
@@ -255,7 +255,7 @@ export default function PartitionSale() {
         showToast(message, "error", "Erro");
       }
     }
-  }
+  };
 
   return (
     <Fragment>
@@ -273,7 +273,6 @@ export default function PartitionSale() {
               >
                 CATEGORIAS
               </Flex>
-
               <Box borderWidth="1px" rounded="md" py={2} px={3}>
                 {isLoading ? (
                   <Stack>
@@ -304,7 +303,7 @@ export default function PartitionSale() {
                         <Stack>
                           {categories.map((cat) => (
                             <Radio key={cat.id} value={cat.id}>
-                              {cat.name}
+                              {cat.title}
                             </Radio>
                           ))}
                         </Stack>
@@ -312,7 +311,6 @@ export default function PartitionSale() {
                     )}
                   </Fragment>
                 )}
-
                 <Popover placement="right">
                   <PopoverTrigger>
                     <Button isFullWidth size="sm" mt={3}>
@@ -329,7 +327,7 @@ export default function PartitionSale() {
                       <PopoverBody py={5}>
                         <FormControl isRequired>
                           <FormLabel>Nome da Categoria</FormLabel>
-                          <Input name="name" placeholder="Nome da Categoria" />
+                          <Input name="title" placeholder="Nome da Categoria" />
                         </FormControl>
                       </PopoverBody>
                       <PopoverFooter display="flex" justifyContent="flex-end">
@@ -349,7 +347,6 @@ export default function PartitionSale() {
                 </Popover>
               </Box>
             </Box>
-
             <Box h="fit-content">
               <Flex
                 bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
@@ -359,9 +356,9 @@ export default function PartitionSale() {
                 rounded="md"
                 mb={3}
               >
-                ITENS DA VENDA FRACIONADA
+                ITENS ADICIONAIS
               </Flex>
-              <Box borderWidth="1px" rounded="md" py={2} px={4}>
+              <Box borderWidth="1px" rounded="md" py={2} px={3}>
                 <Form ref={formItemsRef} onSubmit={handleSubmitItems}>
                   <Grid
                     templateColumns={"1fr 1fr 150px"}
@@ -373,11 +370,11 @@ export default function PartitionSale() {
                       <Input name="name" placeholder="Nome do Item" />
                     </FormControl>
                     <FormControl isRequired>
-                      <FormLabel>Preço do Item (R$)</FormLabel>
+                      <FormLabel>Valor do Item (R$)</FormLabel>
                       <Input
                         name="value"
+                        placeholder="Valor do Item (R$)"
                         type={"number"}
-                        placeholder="Preço do Item (R$)"
                       />
                     </FormControl>
                     <Button
@@ -389,9 +386,8 @@ export default function PartitionSale() {
                       Salvar
                     </Button>
                   </Grid>
-                  <Divider mt={3} mb={3} />
                 </Form>
-
+                <Divider mt={3} mb={3} />
                 {items?.length === 0 || !items ? (
                   <Flex
                     justify={"center"}
@@ -426,7 +422,7 @@ export default function PartitionSale() {
                               }
                             )}
                           </Td>
-                          <Td textAlign={"center"}>
+                          <Td>
                             <Popover placement="left">
                               <PopoverTrigger>
                                 <Button
@@ -456,7 +452,7 @@ export default function PartitionSale() {
                                       colorScheme="blue"
                                       leftIcon={<AiOutlineSave />}
                                       isLoading={loadingCategory}
-                                      onClick={() => deleteItem(itm.id)}
+                                      onClick={() => handleDelItem(itm.id)}
                                     >
                                       Sim
                                     </Button>

@@ -185,8 +185,7 @@ type PropsCategoryPartition = {
 
 type AdicionalItemsProps = {
   id: string;
-  name: string;
-  value: number;
+  title: string;
 };
 
 const RegisterProduct = () => {
@@ -201,6 +200,7 @@ const RegisterProduct = () => {
   const [images, setImages] = useState<ImageProps[]>();
   const [adicionalItems, setAdictionalItems] =
     useState<AdicionalItemsProps[]>();
+  const [adicionalItemsId, setAdicionalItemsId] = useState<string>("");
 
   const [indexUnit, setIndexUnit] = useState<number>(2);
   const [width, setWidth] = useState<WidthProps[]>([]);
@@ -292,6 +292,22 @@ const RegisterProduct = () => {
     }
   }
 
+  async function findAdicionalItems(id: string, token: string) {
+    try {
+      const response = await api.get(`/categoryAdictionalItems/${id}`, {
+        headers: { "x-access-authorization": token || "" },
+      });
+      setAdictionalItems(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
   useEffect(() => {
     const company = localStorage.getItem("company");
     const userToken = sessionStorage.getItem("user");
@@ -301,6 +317,7 @@ const RegisterProduct = () => {
     if (companyParse && userParse) {
       findCategories(companyParse.id, userParse.token);
       findPartitionItems(companyParse.id, userParse.token);
+      findAdicionalItems(companyParse.id, userParse.token);
       setAuth({ id: companyParse.id, token: userParse.token });
     } else {
       showToast(
@@ -402,6 +419,7 @@ const RegisterProduct = () => {
     setText(RichTextEditor.createEmptyValue());
     setShipping([]);
     setAdictionalItems([]);
+    setAdicionalItemsId("");
     setImages([]);
   }
 
@@ -629,17 +647,20 @@ const RegisterProduct = () => {
       showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
       return false;
     }
-    if (nameItem === "") {
-      showToast("Insira o nome do item adicional", "warning", "Atenção");
+    if (adicionalItemsId === "") {
+      showToast(
+        "Selecione uma opção de itens adicionais",
+        "warning",
+        "Atenção"
+      );
       return false;
     }
     setLoading(true);
     try {
-      const response = await api.post(
-        `/adictionalItems/${productId}`,
+      const response = await api.put(
+        `/setAdicionalItems/${productId}`,
         {
-          name: nameItem,
-          value: valueItem,
+          adictional: adicionalItemsId,
         },
         {
           headers: { "x-access-authorization": auth?.token || "" },
@@ -647,10 +668,8 @@ const RegisterProduct = () => {
       );
 
       showToast(response.data.message, "success", "Sucesso");
-      setAdictionalItems(response.data.items);
-      setNameItem("");
-      setValueItem(0);
       setLoading(false);
+      handleCloseFinish();
     } catch (error) {
       setLoading(false);
       if (axios.isAxiosError(error) && error.message) {
@@ -1885,30 +1904,27 @@ const RegisterProduct = () => {
         onClose={() => handleCloseFinish()}
         closeOnEsc={false}
         closeOnOverlayClick={false}
-        size="6xl"
+        size="md"
       >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Itens Adicionais</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            <Grid templateColumns={"2fr 1fr 150px"} gap={3} alignItems="end">
+          <ModalBody pb={5}>
+            <Grid templateColumns={"1fr 100px"} gap={3} alignItems="end">
               <FormControl>
-                <FormLabel>Nome do Item</FormLabel>
-                <ChakraInput
-                  placeholder="Nome do Item"
-                  value={nameItem}
-                  onChange={(e) => setNameItem(e.target.value)}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Valor do Item (R$)</FormLabel>
-                <ChakraInput
-                  placeholder="Valor do Item (R$)"
-                  type="number"
-                  value={valueItem}
-                  onChange={(e) => setValueItem(parseFloat(e.target.value))}
-                />
+                <FormLabel>Itens Adicionais</FormLabel>
+                <ChakraSelect
+                  value={adicionalItemsId}
+                  onChange={(e) => setAdicionalItemsId(e.target.value)}
+                  placeholder="Selecione uma opção"
+                >
+                  {adicionalItems?.map((add) => (
+                    <option key={add.id} value={add.id}>
+                      {add.title}
+                    </option>
+                  ))}
+                </ChakraSelect>
               </FormControl>
               <Button
                 leftIcon={<AiOutlineSave />}
@@ -1919,41 +1935,7 @@ const RegisterProduct = () => {
                 Salvar
               </Button>
             </Grid>
-
-            <Table size="sm" mt={5}>
-              <Thead>
-                <Tr>
-                  <Th>Nome do Item</Th>
-                  <Th isNumeric>Preço</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {adicionalItems?.map((add) => (
-                  <Tr key={add.id}>
-                    <Td>{add.name}</Td>
-                    <Td>
-                      {parseFloat(add.value.toString()).toLocaleString(
-                        "pt-br",
-                        {
-                          style: "currency",
-                          currency: "BRL",
-                        }
-                      )}
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
           </ModalBody>
-
-          <ModalFooter>
-            <Button
-              onClick={() => handleCloseFinish()}
-              leftIcon={<AiOutlineCheck />}
-            >
-              Finalizar
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
 

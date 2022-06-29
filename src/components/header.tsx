@@ -76,6 +76,7 @@ import {
   AiOutlinePartition,
   AiOutlineBarcode,
   AiOutlineShoppingCart,
+  AiOutlineAppstoreAdd,
 } from "react-icons/ai";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { FaRegSun, FaRegMoon, FaCashRegister } from "react-icons/fa";
@@ -326,12 +327,17 @@ export default function Header() {
             >
               Produtos
             </MenuItem>
-            <MenuDivider />
             <MenuItem
               icon={<AiOutlinePartition />}
               onClick={() => navigate("/venda_fracionada")}
             >
               Venda Fracionada
+            </MenuItem>
+            <MenuItem
+              icon={<AiOutlineAppstoreAdd />}
+              onClick={() => navigate("/itens_adicionais")}
+            >
+              Itens Adicionais
             </MenuItem>
             <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
             <MenuItem icon={<AiOutlineProfile />}>Cupons de Desconto</MenuItem>

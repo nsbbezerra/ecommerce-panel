@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Index from "../pages";
+import AdictionalItems from "../pages/adictional_items";
 import IndexCategories from "../pages/categories";
 import Clients from "../pages/clients";
 import Company from "../pages/company";
@@ -19,6 +20,7 @@ export default function Routing() {
       <Route path="/sub_categorias" element={<IndexSubCategories />} />
       <Route path="/produtos" element={<IndexProducts />} />
       <Route path="/venda_fracionada" element={<PartitionSale />} />
+      <Route path="/itens_adicionais" element={<AdictionalItems />} />
     </Routes>
   );
 }
