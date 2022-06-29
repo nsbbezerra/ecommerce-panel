@@ -308,7 +308,12 @@ export default function Company() {
                       />
                     </Box>
 
-                    <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
+                    <Popover
+                      isOpen={isOpen}
+                      onOpen={onOpen}
+                      onClose={onClose}
+                      placement="right"
+                    >
                       <PopoverTrigger>
                         <IconButton
                           aria-label="Alterar logo da empresa"

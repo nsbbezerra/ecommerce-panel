@@ -1823,7 +1823,11 @@ const ListProduct = () => {
                         />
                       </FormControl>
                     </Grid>
-                    <Grid templateColumns={"repeat(3,1fr)"} gap={3}>
+                    <Grid
+                      templateColumns={"1fr 1fr 1fr 100px"}
+                      gap={3}
+                      alignItems="end"
+                    >
                       <FormControl>
                         <FormLabel>Altura (cm)</FormLabel>
                         <ChakraInput
@@ -1860,19 +1864,14 @@ const ListProduct = () => {
                           type="number"
                         />
                       </FormControl>
+                      <Button
+                        rightIcon={<MdHelpOutline />}
+                        colorScheme={"yellow"}
+                        onClick={() => setModalHelp(true)}
+                      >
+                        Ajuda
+                      </Button>
                     </Grid>
-
-                    <Button
-                      rightIcon={<MdHelpOutline />}
-                      size="sm"
-                      w="fit-content"
-                      colorScheme={"yellow"}
-                      onClick={() => setModalHelp(true)}
-                    >
-                      Ajuda
-                    </Button>
-
-                    <Divider />
 
                     <FormControl>
                       <FormLabel>Simular Frete</FormLabel>
@@ -1925,6 +1924,7 @@ const ListProduct = () => {
                         </Tbody>
                       </Table>
                     )}
+                    <Divider />
                     <Flex mt={5} justify="end">
                       <Button
                         leftIcon={<AiOutlineSave />}
