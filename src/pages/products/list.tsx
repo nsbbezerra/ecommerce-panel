@@ -36,11 +36,6 @@ import {
   FormControl,
   FormLabel,
   Tooltip,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
@@ -58,6 +53,8 @@ import {
   Tbody,
   Td,
   Image,
+  Wrap,
+  PopoverFooter,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useRef, useState, memo } from "react";
@@ -69,6 +66,7 @@ import {
   AiOutlinePicture,
   AiOutlinePlus,
   AiOutlineSave,
+  AiOutlineSearch,
   AiOutlineTool,
 } from "react-icons/ai";
 import { GiCardboardBox } from "react-icons/gi";
@@ -78,7 +76,6 @@ import { useQuery, useMutation, QueryClient } from "react-query";
 import { api, configs } from "../../configs";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
-import * as Yup from "yup";
 import { dataTrib } from "../../configs/data";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
@@ -86,10 +83,12 @@ import RichTextEditor from "react-rte";
 import MaskedInput from "react-input-mask";
 import TextArea from "../../components/textArea";
 import { FaRuler, FaTrashAlt } from "react-icons/fa";
+import * as Yup from "yup";
 
 import imageHelp from "../../assets/correios.png";
 import imageRolo from "../../assets/rolo.png";
 import imageEnv from "../../assets/envelope.png";
+import { BiRuler } from "react-icons/bi";
 
 const queryClient = new QueryClient();
 
@@ -112,13 +111,15 @@ type ProductProps = {
     | "unity"
     | "weight"
     | "liter"
-    | "without";
+    | "without"
+    | "sizes";
   unit_desc: string;
   inventory: number;
   weight: number;
   liter: number;
   length: number;
   type_sale: "unique" | "partition";
+  width: string;
 };
 
 type TaxProps = {
@@ -168,17 +169,15 @@ type ProductsEditProps = {
     | "unity"
     | "weight"
     | "liter"
-    | "without";
+    | "without"
+    | "sizes";
   unit_desc: string;
   details: string;
   cost_value: CostValueProps;
   type_sale: "unique" | "partition";
   sale_options: string;
   sale_options_category: string;
-  weight: number;
-  liter: number;
-  length: number;
-  width: WidthProps;
+  width: string;
   inventory: number;
   sale_value: number;
   shipping: ShippinOptionsProps;
@@ -220,15 +219,25 @@ type ShippinOptionsProps = {
   diameter: number;
 };
 
+type SizeProps = {
+  id: string;
+  description: string;
+  inventory: number;
+};
+
 const ListProduct = () => {
   const toast = useToast();
   const formRefTax = useRef<FormHandles>(null);
   const formRefInformation = useRef<FormHandles>(null);
+  const formRefSizes = useRef<FormHandles>(null);
+  const formRefUpSizes = useRef<FormHandles>(null);
 
   const [auth, setAuth] = useState<Props>();
 
   const [search, setSearch] = useState<string>("all");
   const [textSearch, setTextSearch] = useState<string>("");
+  const [sizes, setSizes] = useState<SizeProps[]>();
+  const [modalSizes, setModalSizes] = useState<boolean>(false);
 
   const [products, setProducts] = useState<ProductProps[]>();
   const [page, setPage] = useState<number>(0);
@@ -248,8 +257,8 @@ const ListProduct = () => {
   const [comission, setComission] = useState<number>(0);
   const [freightValue, setFreightValue] = useState<number>(0);
   const [text, setText] = useState<any>(RichTextEditor.createEmptyValue());
-  const [indexUnit, setIndexUnit] = useState<number>(2);
   const [widthNumber, setWidthNumber] = useState<string>("");
+  const [styleStock, setStyleStock] = useState<string>("");
 
   const [originCep, setOriginCep] = useState<string>("");
   const [destinyCep, setDestinyCep] = useState<string>("");
@@ -523,31 +532,6 @@ const ListProduct = () => {
     }
   );
 
-  function handleUnit(ind: number) {
-    switch (ind) {
-      case 0:
-        return "square_meter";
-
-      case 1:
-        return "meter";
-
-      case 2:
-        return "unity";
-
-      case 3:
-        return "weight";
-
-      case 4:
-        return "liter";
-
-      case 5:
-        return "without";
-
-      default:
-        return "unity";
-    }
-  }
-
   const mutationInfo = useMutation(
     (data: ProductsEditProps) => {
       let calcValue = {
@@ -576,16 +560,13 @@ const ListProduct = () => {
           sku: data.sku,
           barcode: data.barcode,
           internal_code: data.internal_code,
-          type_unit: handleUnit(indexUnit),
+          type_unit: data.type_unit,
           unit_desc: data.unit_desc,
           details: text.toString("html"),
           cost_value: JSON.stringify(calcValue),
           type_sale: data.type_sale,
           sale_options: data.sale_options,
           sale_options_category: data.sale_options_category,
-          weight: data.weight,
-          liter: data.liter,
-          length: data.length,
           width: JSON.stringify(widthProduct),
           inventory: data.inventory,
           shipping: JSON.stringify(shippingValues),
@@ -616,9 +597,7 @@ const ListProduct = () => {
     data
   ) => {
     try {
-      setLoading(true);
       mutationInfo.mutate(data);
-      setLoading(false);
     } catch (error) {
       setLoading(false);
       if (axios.isAxiosError(error) && error.message) {
@@ -640,22 +619,10 @@ const ListProduct = () => {
         response.data.cost_value
       );
       let typeUnit = response.data.type_unit;
+      setStyleStock(typeUnit);
       let shippingOptions: ShippinOptionsProps = JSON.parse(
         response.data.shipping
       );
-      if (typeUnit === "square_meter") {
-        setIndexUnit(0);
-      } else if (typeUnit === "meter") {
-        setIndexUnit(1);
-      } else if (typeUnit === "unity") {
-        setIndexUnit(2);
-      } else if (typeUnit === "weight") {
-        setIndexUnit(3);
-      } else if (typeUnit === "liter") {
-        setIndexUnit(4);
-      } else if (typeUnit === "without") {
-        setIndexUnit(5);
-      }
       setWeight(shippingOptions.weight);
       setLength(shippingOptions.length);
       setFormat(shippingOptions.format);
@@ -755,6 +722,138 @@ const ListProduct = () => {
     }
   }
 
+  const handleShowWidths = (widths: string) => {
+    const larguras: WidthProps[] = JSON.parse(widths);
+    return larguras;
+  };
+
+  const saveSizes: SubmitHandler<SizeProps> = async (data, { reset }) => {
+    try {
+      const scheme = Yup.object().shape({
+        description: Yup.string().required("Insira uma descrição"),
+        inventory: Yup.string().required("Insira um valor para o estoque"),
+      });
+      await scheme.validate(data, {
+        abortEarly: false,
+      });
+      setLoadingShipping(true);
+      const response = await api.post(
+        "/sizes",
+        {
+          product_id: productId,
+          description: data.description,
+          inventory: data.inventory,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+      showToast(response.data.message, "success", "Sucesso");
+      setSizes(response.data.sizes);
+      reset();
+      setLoadingShipping(false);
+    } catch (error) {
+      setLoadingShipping(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+        console.log(error.response?.data.error.message);
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
+
+  const updateSizes: SubmitHandler<SizeProps> = async (data, { reset }) => {
+    try {
+      const scheme = Yup.object().shape({
+        description: Yup.string().required("Insira uma descrição"),
+        inventory: Yup.string().required("Insira um valor para o estoque"),
+      });
+      await scheme.validate(data, {
+        abortEarly: false,
+      });
+      setLoadingModal(true);
+      const response = await api.put(
+        `/sizes/${data.id}`,
+        {
+          description: data.description,
+          inventory: data.inventory,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+      const updated = sizes?.map((siz) => {
+        if (siz.id === data.id) {
+          return {
+            ...siz,
+            description: data.description,
+            inventory: data.inventory,
+          };
+        }
+        return siz;
+      });
+      setSizes(updated);
+      setLoadingModal(false);
+      showToast(response.data.message, "success", "Sucesso");
+    } catch (error) {
+      setLoadingModal(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+        console.log(error.response?.data.error.message);
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
+
+  async function handleSizes(id: string) {
+    try {
+      setProductId(id);
+      setLoadingModal(true);
+      const response = await api.get(`/findSizes/${id}`);
+      setSizes(response.data);
+      setModalSizes(true);
+      setLoadingModal(false);
+    } catch (error) {
+      setLoadingModal(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+        console.log(error.response?.data.error.message);
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  async function deleteSizes(id: string) {
+    try {
+      setLoadingModal(true);
+      const response = await api.delete(`/sizes/${id}`, {
+        headers: { "x-access-authorization": auth?.token || "" },
+      });
+      showToast(response.data.message, "success", "Sucesso");
+
+      const updated = sizes?.filter((obj) => obj.id !== id);
+
+      setSizes(updated);
+
+      setLoadingModal(false);
+    } catch (error) {
+      setLoadingModal(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+        console.log(error.response?.data.error.message);
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
   return (
     <Fragment>
       <Grid templateColumns={"200px 1fr"} gap={3}>
@@ -829,7 +928,9 @@ const ListProduct = () => {
                     <Th>Nome</Th>
                     <Th>SKU</Th>
                     <Th>Uni.</Th>
-                    <Th isNumeric>Estoque</Th>
+                    <Th w={"200px"} textAlign={"center"}>
+                      Estoque
+                    </Th>
                     <Th isNumeric>Preço</Th>
                     <Th textAlign={"center"} w="12%">
                       Opções
@@ -863,17 +964,84 @@ const ListProduct = () => {
                       <Td>{pro.title}</Td>
                       <Td>{pro.sku}</Td>
                       <Td>{pro.unit_desc}</Td>
-                      <Td isNumeric>
-                        {(pro.type_unit === "square_meter" && "Indefinido") ||
-                          (pro.type_unit === "unity" &&
-                            `${pro.inventory} ${pro.unit_desc}`) ||
-                          (pro.type_unit === "liter" &&
-                            `${pro.liter} ${pro.unit_desc}`) ||
-                          (pro.type_unit === "meter" &&
-                            `${pro.length} ${pro.unit_desc}`) ||
-                          (pro.type_unit === "weight" &&
-                            `${pro.weight} ${pro.unit_desc}`) ||
-                          (pro.type_unit === "without" && "Venda sem Estoque")}
+                      <Td w="200px" textAlign={"center"}>
+                        {(pro.type_unit === "square_meter" && (
+                          <Popover>
+                            <PopoverTrigger>
+                              <Button
+                                leftIcon={<BiRuler />}
+                                size="xs"
+                                isFullWidth
+                              >
+                                Larguras
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent shadow={"lg"}>
+                              <PopoverArrow />
+                              <PopoverCloseButton />
+                              <PopoverHeader textAlign={"justify"}>
+                                Larguras
+                              </PopoverHeader>
+                              <PopoverBody>
+                                <Wrap spacing={3}>
+                                  {handleShowWidths(pro.width).map((wid) => (
+                                    <Tag key={wid.id}>{wid.width} MT</Tag>
+                                  ))}
+                                </Wrap>
+                              </PopoverBody>
+                            </PopoverContent>
+                          </Popover>
+                        )) ||
+                          (pro.type_unit === "unity" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme={pro.inventory <= 0 ? "red" : "green"}
+                            >{`${pro.inventory} ${pro.unit_desc}`}</Tag>
+                          )) ||
+                          (pro.type_unit === "liter" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme={pro.inventory <= 0 ? "red" : "green"}
+                            >{`${pro.inventory} ${pro.unit_desc}`}</Tag>
+                          )) ||
+                          (pro.type_unit === "meter" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme={pro.inventory <= 0 ? "red" : "green"}
+                            >{`${pro.inventory} ${pro.unit_desc}`}</Tag>
+                          )) ||
+                          (pro.type_unit === "weight" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme={pro.inventory <= 0 ? "red" : "green"}
+                            >{`${pro.inventory} ${pro.unit_desc}`}</Tag>
+                          )) ||
+                          (pro.type_unit === "without" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme={"orange"}
+                            >
+                              VENDA SEM ESTOQUE
+                            </Tag>
+                          )) ||
+                          (pro.type_unit === "sizes" && (
+                            <Button
+                              leftIcon={<AiOutlineSearch />}
+                              size="xs"
+                              isLoading={
+                                loadingModal === true && productId === pro.id
+                              }
+                              onClick={() => handleSizes(pro.id)}
+                              isFullWidth
+                            >
+                              Visualizar Estoque
+                            </Button>
+                          ))}
                       </Td>
                       <Td isNumeric>
                         {parseFloat(pro.sale_value.toString()).toLocaleString(
@@ -1437,153 +1605,135 @@ const ListProduct = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <FormControl isRequired>
-                      <FormLabel>Cálculo de Medidas</FormLabel>
-                      <Tabs
-                        mt={2}
-                        variant="enclosed-colored"
-                        size="sm"
-                        defaultIndex={indexUnit}
-                        onChange={(e) => setIndexUnit(e)}
-                      >
-                        <TabList>
-                          <Tab>Metro Quadrado</Tab>
-                          <Tab>Comprimento</Tab>
-                          <Tab>Unidade</Tab>
-                          <Tab>Peso</Tab>
-                          <Tab>Litro</Tab>
-                          <Tab>Sem Estoque</Tab>
-                        </TabList>
+                    <Grid templateColumns={"1fr 2fr"} gap={3}>
+                      <FormControl isRequired>
+                        <FormLabel>Estilo do Estoque</FormLabel>
+                        <Select
+                          name="type_unit"
+                          placeholder="Selecione uma opção"
+                          onChange={(e) => setStyleStock(e.target.value)}
+                        >
+                          <option value="square_meter">
+                            Venda por Metro Quadrado
+                          </option>
+                          <option value={"meter"}>Venda por Metro</option>
+                          <option value="unity">Venda por Unidade</option>
+                          <option value="weight">Venda no Peso</option>
+                          <option value="liter">Venda por Litro</option>
+                          <option value="without">Venda sem Estoque</option>
+                          <option value="sizes">Estoque Personalizado</option>
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>
+                          {(styleStock === "" && "Informações do Estoque") ||
+                            (styleStock === "square_meter" &&
+                              "Insira as Larguras") ||
+                            (styleStock === "meter" &&
+                              "Insira o Comprimento") ||
+                            (styleStock === "unity" &&
+                              "Insira a quantidade do Estoque") ||
+                            (styleStock === "unity" &&
+                              "Insira a quantidade do Estoque") ||
+                            (styleStock === "weight" && "Insira o Peso") ||
+                            (styleStock === "liter" &&
+                              "Insira o Volume em Litros") ||
+                            (styleStock === "without" &&
+                              "Sem Estoque Definido") ||
+                            (styleStock === "sizes" &&
+                              "Personalizar o Estoque")}
+                        </FormLabel>
 
-                        <TabPanels>
-                          <TabPanel px={0}>
-                            <Grid
-                              templateColumns={"1fr 1fr"}
-                              gap={3}
-                              position="relative"
-                            >
-                              <FormControl>
-                                <FormLabel>Largura</FormLabel>
-                                <HStack>
-                                  <NumberInput
-                                    w="100%"
-                                    value={widthNumber}
-                                    onChange={(e) => setWidthNumber(e)}
-                                  >
-                                    <NumberInputField />
-                                    <NumberInputStepper>
-                                      <NumberIncrementStepper />
-                                      <NumberDecrementStepper />
-                                    </NumberInputStepper>
-                                  </NumberInput>
-                                  <IconButton
-                                    aria-label="Inserir largura"
-                                    icon={<AiOutlinePlus />}
-                                    onClick={() => handleWidth()}
-                                  />
-                                </HStack>
-                                <Box
-                                  borderWidth={"1px"}
-                                  rounded="md"
-                                  py={1}
-                                  mt={3}
-                                  px={3}
+                        {styleStock === "square_meter" && (
+                          <Grid
+                            templateColumns={"1fr 1fr"}
+                            gap={3}
+                            position="relative"
+                          >
+                            <FormControl>
+                              <HStack>
+                                <NumberInput
+                                  w="100%"
+                                  value={widthNumber}
+                                  onChange={(e) => setWidthNumber(e)}
                                 >
-                                  {widthProduct?.length === 0 ? (
-                                    <Text>Insira uma largura</Text>
-                                  ) : (
-                                    <Stack spacing={1}>
-                                      {widthProduct?.map((wd) => (
-                                        <HStack key={wd.id}>
-                                          <Icon as={FaRuler} />
-                                          <Text>{wd.width}m</Text>
-                                          <IconButton
-                                            aria-label="Remover Altura"
-                                            icon={<FaTrashAlt />}
-                                            variant="link"
-                                            colorScheme={"red"}
-                                            size="sm"
-                                            onClick={() => removeWidth(wd.id)}
-                                          />
-                                        </HStack>
-                                      ))}
-                                    </Stack>
-                                  )}
-                                </Box>
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Altura</FormLabel>
-                                <Flex
-                                  borderWidth={"1px"}
-                                  rounded="md"
-                                  p={4}
-                                  justify={"center"}
-                                  align="center"
-                                  textAlign={"center"}
-                                >
-                                  <Text>
-                                    A Altura ficará a critério do cliente
-                                  </Text>
-                                </Flex>
-                              </FormControl>
-                            </Grid>
-                          </TabPanel>
-                          <TabPanel px={0}>
-                            <Grid templateColumns={"1fr"} gap={3}>
-                              <FormControl>
-                                <FormLabel>Comprimento (Metros)</FormLabel>
-                                <Input
-                                  name="length"
-                                  placeholder="Comprimento"
+                                  <NumberInputField placeholder="Largura em Metros" />
+                                  <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                  </NumberInputStepper>
+                                </NumberInput>
+                                <IconButton
+                                  aria-label="Inserir largura"
+                                  icon={<AiOutlinePlus />}
+                                  onClick={() => handleWidth()}
                                 />
-                              </FormControl>
-                            </Grid>
-                          </TabPanel>
-                          <TabPanel px={0}>
-                            <Grid templateColumns={"1fr"} gap={3}>
-                              <FormControl>
-                                <FormLabel>Total de Unidades</FormLabel>
-                                <Input
-                                  name="inventory"
-                                  placeholder="Total de Unidades"
-                                  type="number"
-                                />
-                              </FormControl>
-                            </Grid>
-                          </TabPanel>
-                          <TabPanel px={0}>
-                            <Grid templateColumns={"1fr"} gap={3}>
-                              <FormControl>
-                                <FormLabel>Peso (Kg)</FormLabel>
-                                <Input name="weight" placeholder="Peso" />
-                              </FormControl>
-                            </Grid>
-                          </TabPanel>
-                          <TabPanel px={0}>
-                            <Grid templateColumns={"1fr"} gap={3}>
-                              <FormControl>
-                                <FormLabel>Volume (Lt / Ml)</FormLabel>
-                                <Input name="liter" placeholder="Volume" />
-                              </FormControl>
-                            </Grid>
-                          </TabPanel>
-                          <TabPanel px={0}>
-                            <Flex
-                              borderWidth={"1px"}
-                              rounded="md"
-                              p={4}
-                              justify="center"
-                              align="center"
-                              textAlign={"center"}
-                            >
-                              Produto não possui estoque definido, pode efetuar
-                              venda sem estoque.
-                            </Flex>
-                          </TabPanel>
-                        </TabPanels>
-                      </Tabs>
-                    </FormControl>
-                    <Divider />
+                              </HStack>
+                            </FormControl>
+                            <Box borderWidth={"1px"} rounded="md" py={1} px={3}>
+                              {widthProduct?.length === 0 ? (
+                                <Text>Insira uma largura</Text>
+                              ) : (
+                                <Stack spacing={1}>
+                                  {widthProduct?.map((wd) => (
+                                    <HStack key={wd.id}>
+                                      <Icon as={FaRuler} />
+                                      <Text>{wd.width}m</Text>
+                                      <IconButton
+                                        aria-label="Remover Altura"
+                                        icon={<FaTrashAlt />}
+                                        variant="link"
+                                        colorScheme={"red"}
+                                        size="sm"
+                                        onClick={() => removeWidth(wd.id)}
+                                      />
+                                    </HStack>
+                                  ))}
+                                </Stack>
+                              )}
+                            </Box>
+                          </Grid>
+                        )}
+                        {styleStock === "meter" ||
+                        styleStock === "weight" ||
+                        styleStock === "liter" ||
+                        styleStock === "unity" ? (
+                          <Input
+                            name="inventory"
+                            placeholder="Quantidade"
+                            type="number"
+                          />
+                        ) : (
+                          ""
+                        )}
+                        {styleStock === "without" && (
+                          <Flex
+                            borderWidth={"1px"}
+                            rounded="md"
+                            justify="center"
+                            align="center"
+                            textAlign={"center"}
+                            h={10}
+                          >
+                            Produto não possui estoque definido, pode efetuar
+                            venda sem estoque.
+                          </Flex>
+                        )}
+                        {styleStock === "sizes" && (
+                          <Flex
+                            borderWidth={"1px"}
+                            rounded="md"
+                            h={10}
+                            justify="center"
+                            align="center"
+                            textAlign={"center"}
+                          >
+                            Os Informações serão inseridas posteriormente nesta
+                            mesma tela.
+                          </Flex>
+                        )}
+                      </FormControl>
+                    </Grid>
                     <FormControl>
                       <FormLabel>Detalhes do Produto</FormLabel>
                       <RichTextEditor
@@ -1931,7 +2081,7 @@ const ListProduct = () => {
                         colorScheme={"blue"}
                         w="fit-content"
                         type="submit"
-                        isLoading={loading}
+                        isLoading={mutationInfo.isLoading}
                       >
                         Salvar
                       </Button>
@@ -1964,6 +2114,180 @@ const ListProduct = () => {
                 rounded={"md"}
               />
             )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={modalSizes}
+        onClose={() => setModalSizes(false)}
+        size="3xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Estoque Personalizado</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}>
+            <Form ref={formRefSizes} onSubmit={saveSizes}>
+              <Grid templateColumns={"2fr 2fr 1fr"} gap={3} alignItems="end">
+                <FormControl isRequired>
+                  <FormLabel>Descrição</FormLabel>
+                  <Input name="description" placeholder="Descrição" autoFocus />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Quantidade em Estoque</FormLabel>
+                  <Input
+                    name="inventory"
+                    placeholder="Quantidade em Estoque"
+                    type="number"
+                  />
+                </FormControl>
+                <Button
+                  leftIcon={<AiOutlineSave />}
+                  colorScheme="blue"
+                  type="submit"
+                  isLoading={loadingShipping}
+                >
+                  Salvar
+                </Button>
+              </Grid>
+            </Form>
+
+            <Box
+              rounded="md"
+              borderWidth={"1px"}
+              overflow="hidden"
+              mt={3}
+              pt={2}
+            >
+              <Table size="sm">
+                <Thead>
+                  <Tr>
+                    <Th>Descrição</Th>
+                    <Th isNumeric>Estoque</Th>
+                    <Th w="30%" textAlign={"center"}>
+                      Opções
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {sizes?.map((siz) => (
+                    <Tr key={siz.id}>
+                      <Td>{siz.description}</Td>
+                      <Td isNumeric>{siz.inventory} UN</Td>
+                      <Td w="30%">
+                        <HStack spacing={1}>
+                          <Popover>
+                            <PopoverTrigger>
+                              <Button
+                                leftIcon={<AiOutlineEdit />}
+                                size="xs"
+                                w="50%"
+                              >
+                                Editar
+                              </Button>
+                            </PopoverTrigger>
+
+                            <Form
+                              ref={formRefUpSizes}
+                              onSubmit={updateSizes}
+                              initialData={{
+                                id: siz.id,
+                                description: siz.description,
+                                inventory: siz.inventory,
+                              }}
+                            >
+                              <PopoverContent shadow={"lg"}>
+                                <PopoverArrow />
+                                <PopoverHeader>
+                                  Editar Informações
+                                </PopoverHeader>
+                                <PopoverCloseButton />
+                                <PopoverBody>
+                                  <Stack spacing={3}>
+                                    <FormControl isRequired>
+                                      <FormLabel>Descrição</FormLabel>
+                                      <Input
+                                        name="description"
+                                        placeholder="Descrição"
+                                        size="sm"
+                                      />
+                                    </FormControl>
+                                    <FormControl isRequired>
+                                      <FormLabel>
+                                        Quantidade em Estoque
+                                      </FormLabel>
+                                      <Input
+                                        type="number"
+                                        name="inventory"
+                                        placeholder="Quantidade em Estoque"
+                                        size="sm"
+                                      />
+                                    </FormControl>
+                                  </Stack>
+                                  <Input
+                                    name="id"
+                                    display={"none"}
+                                    isReadOnly
+                                  />
+                                </PopoverBody>
+                                <PopoverFooter
+                                  display={"flex"}
+                                  justifyContent="end"
+                                >
+                                  <Button
+                                    colorScheme="blue"
+                                    size="sm"
+                                    type="submit"
+                                    isLoading={loadingModal}
+                                  >
+                                    Salvar
+                                  </Button>
+                                </PopoverFooter>
+                              </PopoverContent>
+                            </Form>
+                          </Popover>
+
+                          <Popover>
+                            <PopoverTrigger>
+                              <Button
+                                leftIcon={<FaTrashAlt />}
+                                size="xs"
+                                w="50%"
+                                colorScheme={"red"}
+                              >
+                                Excluir
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent shadow={"lg"}>
+                              <PopoverArrow />
+                              <PopoverHeader>Excluir Informações</PopoverHeader>
+                              <PopoverCloseButton />
+                              <PopoverBody>
+                                Tem certeza que deseja excluir este item?
+                              </PopoverBody>
+                              <PopoverFooter
+                                display={"flex"}
+                                justifyContent="end"
+                              >
+                                <Button
+                                  colorScheme="blue"
+                                  size="sm"
+                                  isLoading={loadingModal}
+                                  onClick={() => deleteSizes(siz.id)}
+                                >
+                                  Excluir
+                                </Button>
+                              </PopoverFooter>
+                            </PopoverContent>
+                          </Popover>
+                        </HStack>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Box>
           </ModalBody>
         </ModalContent>
       </Modal>
