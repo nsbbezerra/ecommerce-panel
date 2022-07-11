@@ -84,6 +84,7 @@ import MaskedInput from "react-input-mask";
 import TextArea from "../../components/textArea";
 import { FaRuler, FaTrashAlt } from "react-icons/fa";
 import * as Yup from "yup";
+import HandleImages from "../../components/images";
 
 import imageHelp from "../../assets/correios.png";
 import imageRolo from "../../assets/rolo.png";
@@ -225,6 +226,22 @@ type SizeProps = {
   inventory: number;
 };
 
+type ThumbnailProps = {
+  thumbnail: string;
+  thumbnail_id: string;
+};
+
+type ImageProps = {
+  id: string;
+  image: string;
+  image_id: string;
+};
+
+type ProductImageProps = {
+  thumbnail: ThumbnailProps;
+  images: ImageProps[];
+};
+
 const ListProduct = () => {
   const toast = useToast();
   const formRefTax = useRef<FormHandles>(null);
@@ -271,6 +288,8 @@ const ListProduct = () => {
   const [shipping, setShipping] = useState<ShippingProps[]>();
   const [loadingShipping, setLoadingShipping] = useState<boolean>(false);
   const [modalHelp, setModalHelp] = useState<boolean>(false);
+  const [modalImages, setModalImages] = useState<boolean>(false);
+  const [productsImages, setProductsImages] = useState<ProductImageProps>();
 
   const [tax, setTax] = useState<TaxProps>();
   const [productId, setProductId] = useState<string>("");
@@ -756,7 +775,6 @@ const ListProduct = () => {
       setLoadingShipping(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
-        console.log(error.response?.data.error.message);
       } else {
         let message = (error as Error).message;
         showToast(message, "error", "Erro");
@@ -801,7 +819,6 @@ const ListProduct = () => {
       setLoadingModal(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
-        console.log(error.response?.data.error.message);
       } else {
         let message = (error as Error).message;
         showToast(message, "error", "Erro");
@@ -821,7 +838,6 @@ const ListProduct = () => {
       setLoadingModal(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
-        console.log(error.response?.data.error.message);
       } else {
         let message = (error as Error).message;
         showToast(message, "error", "Erro");
@@ -846,13 +862,32 @@ const ListProduct = () => {
       setLoadingModal(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
-        console.log(error.response?.data.error.message);
       } else {
         let message = (error as Error).message;
         showToast(message, "error", "Erro");
       }
     }
   }
+
+  const findImages = async (id: string) => {
+    setProductId(id);
+
+    try {
+      setLoadingModal(true);
+      setModalImages(true);
+      const response = await api.get(`/findProductsImage/${id}`);
+      setProductsImages(response.data);
+      setLoadingModal(false);
+    } catch (error) {
+      setLoadingModal(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
 
   return (
     <Fragment>
@@ -867,7 +902,7 @@ const ListProduct = () => {
               Filtrar por
             </Button>
           </PopoverTrigger>
-          <PopoverContent shadow={"lg"}>
+          <PopoverContent shadow={"lg"} _focus={{ outline: "none" }}>
             <PopoverArrow />
             <PopoverCloseButton />
             <PopoverHeader>Filtros</PopoverHeader>
@@ -928,7 +963,7 @@ const ListProduct = () => {
                     <Th>Nome</Th>
                     <Th>SKU</Th>
                     <Th>Uni.</Th>
-                    <Th w={"200px"} textAlign={"center"}>
+                    <Th w={"180px"} textAlign={"center"}>
                       Estoque
                     </Th>
                     <Th isNumeric>Preço</Th>
@@ -964,7 +999,7 @@ const ListProduct = () => {
                       <Td>{pro.title}</Td>
                       <Td>{pro.sku}</Td>
                       <Td>{pro.unit_desc}</Td>
-                      <Td w="200px" textAlign={"center"}>
+                      <Td w="180px" textAlign={"center"}>
                         {(pro.type_unit === "square_meter" && (
                           <Popover>
                             <PopoverTrigger>
@@ -972,11 +1007,16 @@ const ListProduct = () => {
                                 leftIcon={<BiRuler />}
                                 size="xs"
                                 isFullWidth
+                                colorScheme={"blue"}
+                                variant="outline"
                               >
                                 Larguras
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent shadow={"lg"}>
+                            <PopoverContent
+                              shadow={"lg"}
+                              _focus={{ outline: "none" }}
+                            >
                               <PopoverArrow />
                               <PopoverCloseButton />
                               <PopoverHeader textAlign={"justify"}>
@@ -1038,6 +1078,8 @@ const ListProduct = () => {
                               }
                               onClick={() => handleSizes(pro.id)}
                               isFullWidth
+                              colorScheme={"blue"}
+                              variant="outline"
                             >
                               Visualizar Estoque
                             </Button>
@@ -1075,7 +1117,10 @@ const ListProduct = () => {
                             >
                               Alterar Tributação
                             </MenuItem>
-                            <MenuItem icon={<AiOutlinePicture />}>
+                            <MenuItem
+                              icon={<AiOutlinePicture />}
+                              onClick={() => findImages(pro.id)}
+                            >
                               Alterar Imagens
                             </MenuItem>
                             <MenuDivider />
@@ -1732,6 +1777,19 @@ const ListProduct = () => {
                             mesma tela.
                           </Flex>
                         )}
+                        {styleStock === "" && (
+                          <Flex
+                            borderWidth={"1px"}
+                            rounded="md"
+                            h={10}
+                            justify="center"
+                            align="center"
+                            textAlign={"center"}
+                          >
+                            Selecione uma opção ao lado para adicionar o
+                            estoque.
+                          </Flex>
+                        )}
                       </FormControl>
                     </Grid>
                     <FormControl>
@@ -2197,7 +2255,10 @@ const ListProduct = () => {
                                 inventory: siz.inventory,
                               }}
                             >
-                              <PopoverContent shadow={"lg"}>
+                              <PopoverContent
+                                shadow={"lg"}
+                                _focus={{ outline: "none" }}
+                              >
                                 <PopoverArrow />
                                 <PopoverHeader>
                                   Editar Informações
@@ -2259,7 +2320,10 @@ const ListProduct = () => {
                                 Excluir
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent shadow={"lg"}>
+                            <PopoverContent
+                              shadow={"lg"}
+                              _focus={{ outline: "none" }}
+                            >
                               <PopoverArrow />
                               <PopoverHeader>Excluir Informações</PopoverHeader>
                               <PopoverCloseButton />
@@ -2288,6 +2352,30 @@ const ListProduct = () => {
                 </Tbody>
               </Table>
             </Box>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={modalImages}
+        onClose={() => setModalImages(false)}
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        size="6xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Alterar Imagens</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}>
+            {modalImages && (
+              <HandleImages
+                productId={productId}
+                imagesProduct={productsImages?.images || []}
+                thumbnailId={productsImages?.thumbnail.thumbnail_id || ""}
+                thumbnailUrl={productsImages?.thumbnail.thumbnail || undefined}
+              />
+            )}
           </ModalBody>
         </ModalContent>
       </Modal>

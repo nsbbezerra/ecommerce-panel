@@ -317,17 +317,18 @@ export default function AdictionalItems() {
                       Adicionar Categoria
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent shadow={"lg"}>
+                  <PopoverContent shadow={"lg"} _focus={{ outline: "none" }}>
                     <Form ref={formCategoryRef} onSubmit={handleSubmitCategory}>
-                      <PopoverHeader fontWeight="semibold">
-                        Categoria
-                      </PopoverHeader>
                       <PopoverArrow />
-                      <PopoverCloseButton />
-                      <PopoverBody py={5}>
+                      <PopoverCloseButton zIndex={100} />
+                      <PopoverBody>
                         <FormControl isRequired>
                           <FormLabel>Nome da Categoria</FormLabel>
-                          <Input name="title" placeholder="Nome da Categoria" />
+                          <Input
+                            name="title"
+                            placeholder="Nome da Categoria"
+                            size="sm"
+                          />
                         </FormControl>
                       </PopoverBody>
                       <PopoverFooter display="flex" justifyContent="flex-end">

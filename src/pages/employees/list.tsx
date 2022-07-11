@@ -358,7 +358,7 @@ const ListEmployee = () => {
                               variant="outline"
                             />
                           </PopoverTrigger>
-                          <PopoverContent>
+                          <PopoverContent _focus={{ outline: "none" }}>
                             <PopoverArrow />
                             <PopoverCloseButton />
                             <PopoverHeader fontWeight={"bold"}>
@@ -372,11 +372,11 @@ const ListEmployee = () => {
                                 onChange={(e) => setPermission(e)}
                                 mt={3}
                               >
-                                <Stack>
+                                <HStack spacing={3}>
                                   <Radio value="all">Geral</Radio>
                                   <Radio value="cashier">Financeiro</Radio>
                                   <Radio value="seller">Vendas</Radio>
-                                </Stack>
+                                </HStack>
                               </RadioGroup>
                             </PopoverBody>
                             <PopoverFooter

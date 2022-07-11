@@ -46,6 +46,10 @@ import {
   PopoverFooter,
   PopoverArrow,
   PopoverCloseButton,
+  Wrap,
+  TagLabel,
+  TagCloseButton,
+  Tag,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
@@ -259,7 +263,11 @@ const RegisterProduct = () => {
   const [modalTaxes, setModalTaxes] = useState<boolean>(false);
   const [modalImages, setModalImages] = useState<boolean>(false);
   const [modalAdictional, setModalAdictional] = useState<boolean>(false);
+  const [have_adictional, setHave_adictional] = useState<boolean>(false);
   const [modalHelp, setModalHelp] = useState<boolean>(false);
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagName, setTagName] = useState<string>("");
 
   async function findCategories(id: string, token: string) {
     try {
@@ -414,6 +422,7 @@ const RegisterProduct = () => {
     setAdicionalItemsId("");
     setImages([]);
     setStyleStock("");
+    setHave_adictional(false);
   }
 
   const handleSubmit: SubmitHandler<ProductProps> = async (data, { reset }) => {
@@ -475,7 +484,7 @@ const RegisterProduct = () => {
           width: JSON.stringify(width),
           unity: "none",
           details: text.toString("html"),
-          tags: "none",
+          tags: JSON.stringify(tags),
           shipping: JSON.stringify(shippingValues),
           type_sale: data.type_sale,
           sale_options: data.sale_options,
@@ -655,6 +664,7 @@ const RegisterProduct = () => {
         `/setAdicionalItems/${productId}`,
         {
           adictional: adicionalItemsId,
+          have_adictional,
         },
         {
           headers: { "x-access-authorization": auth?.token || "" },
@@ -834,6 +844,22 @@ const RegisterProduct = () => {
     }
   };
 
+  const handleTag = () => {
+    const find = tags?.find((obj) => obj === tagName);
+    if (find) {
+      showToast("Tag já inserida", "warning", "Atenção");
+      return false;
+    }
+
+    setTags((prev) => [...prev, `${tagName}`]);
+    setTagName("");
+  };
+
+  const removeTag = (tag: string) => {
+    const result = tags?.filter((obj) => obj !== tag);
+    setTags(result);
+  };
+
   return (
     <Fragment>
       <Form ref={formRef} onSubmit={handleSubmit}>
@@ -959,7 +985,7 @@ const RegisterProduct = () => {
               </FormLabel>
 
               {styleStock === "square_meter" && (
-                <Grid templateColumns={"1fr 1fr"} gap={3} position="relative">
+                <Grid templateColumns={"1fr"} gap={3} position="relative">
                   <FormControl>
                     <HStack>
                       <NumberInput
@@ -973,33 +999,31 @@ const RegisterProduct = () => {
                           <NumberDecrementStepper />
                         </NumberInputStepper>
                       </NumberInput>
-                      <IconButton
+                      <Button
                         aria-label="Inserir largura"
-                        icon={<AiOutlinePlus />}
+                        leftIcon={<AiOutlinePlus />}
                         onClick={() => handleWidth()}
-                      />
+                        px={10}
+                      >
+                        Incluir Tamanho
+                      </Button>
                     </HStack>
                   </FormControl>
-                  <Box borderWidth={"1px"} rounded="md" py={1} px={3}>
+                  <Box>
                     {width?.length === 0 ? (
-                      <Text>Insira uma largura</Text>
+                      <Text></Text>
                     ) : (
-                      <Stack spacing={1}>
+                      <Wrap>
                         {width?.map((wd) => (
-                          <HStack key={wd.id}>
-                            <Icon as={FaRuler} />
-                            <Text>{wd.width}m</Text>
-                            <IconButton
-                              aria-label="Remover Altura"
-                              icon={<FaTrashAlt />}
-                              variant="link"
-                              colorScheme={"red"}
-                              size="sm"
+                          <Tag key={wd.id} size="lg" colorScheme={"blue"}>
+                            <TagLabel>{wd.width} mt</TagLabel>
+
+                            <TagCloseButton
                               onClick={() => removeWidth(wd.id)}
                             />
-                          </HStack>
+                          </Tag>
                         ))}
-                      </Stack>
+                      </Wrap>
                     )}
                   </Box>
                 </Grid>
@@ -1042,6 +1066,18 @@ const RegisterProduct = () => {
                   tela.
                 </Flex>
               )}
+              {styleStock === "" && (
+                <Flex
+                  borderWidth={"1px"}
+                  rounded="md"
+                  h={10}
+                  justify="center"
+                  align="center"
+                  textAlign={"center"}
+                >
+                  Selecione uma opção ao lado para adicionar o estoque.
+                </Flex>
+              )}
             </FormControl>
           </Grid>
           <FormControl>
@@ -1068,6 +1104,33 @@ const RegisterProduct = () => {
               }}
             />
           </FormControl>
+
+          <FormControl>
+            <FormLabel>Tags do Produto</FormLabel>
+            <HStack spacing={3}>
+              <ChakraInput
+                placeholder="Tag"
+                value={tagName}
+                onChange={(e) => setTagName(e.target.value)}
+              />
+              <Button
+                leftIcon={<AiOutlinePlus />}
+                px={10}
+                onClick={() => handleTag()}
+              >
+                Incluir Tag
+              </Button>
+            </HStack>
+          </FormControl>
+          <Wrap>
+            {tags?.map((tg) => (
+              <Tag key={tg} size="lg" colorScheme={"blue"}>
+                <TagLabel>{tg}</TagLabel>
+
+                <TagCloseButton onClick={() => removeTag(tg)} />
+              </Tag>
+            ))}
+          </Wrap>
 
           <Flex
             bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
@@ -1973,11 +2036,20 @@ const RegisterProduct = () => {
           <ModalBody pb={5}>
             <Grid templateColumns={"1fr 100px"} gap={3} alignItems="end">
               <FormControl>
-                <FormLabel>Itens Adicionais</FormLabel>
+                <FormLabel>
+                  Itens Adicionais{" "}
+                  <Switch
+                    mt={1}
+                    mb={1}
+                    defaultChecked={have_adictional}
+                    onChange={(e) => setHave_adictional(e.target.checked)}
+                  />
+                </FormLabel>
                 <ChakraSelect
                   value={adicionalItemsId}
                   onChange={(e) => setAdicionalItemsId(e.target.value)}
                   placeholder="Selecione uma opção"
+                  isDisabled={!have_adictional}
                 >
                   {adicionalItems?.map((add) => (
                     <option key={add.id} value={add.id}>
