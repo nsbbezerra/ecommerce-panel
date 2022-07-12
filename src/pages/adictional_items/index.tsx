@@ -29,6 +29,8 @@ import {
   Tr,
   Th,
   Td,
+  HStack,
+  IconButton,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
@@ -36,10 +38,10 @@ import * as Yup from "yup";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { GiCardboardBox } from "react-icons/gi";
 import Input from "../../components/Input";
-import { AiOutlineSave } from "react-icons/ai";
+import { AiOutlineCheck, AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
 import { api } from "../../configs";
-import { useQuery } from "react-query";
+import { useQuery, useMutation, QueryClient } from "react-query";
 import { FaTrashAlt } from "react-icons/fa";
 
 type CategoryProps = {
@@ -58,10 +60,14 @@ type ItemsProps = {
   value: number;
 };
 
+const queryClient = new QueryClient();
+
 export default function AdictionalItems() {
   const toast = useToast();
   const formCategoryRef = useRef<FormHandles>(null);
   const formItemsRef = useRef<FormHandles>(null);
+  const formCategoryEditRef = useRef<FormHandles>(null);
+  const formItemsEditRef = useRef<FormHandles>(null);
   const [auth, setAuth] = useState<Props>();
 
   const [loadingCategory, setLoadingCategory] = useState<boolean>(false);
@@ -257,6 +263,76 @@ export default function AdictionalItems() {
     }
   };
 
+  const mutation = useMutation(
+    (data: CategoryProps) => {
+      return api.put(
+        `/editAdicionalItemsCategory/${data.id}`,
+        {
+          title: data.title,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+    },
+    {
+      onSuccess: async (response) => {
+        showToast(response.data.message, "success", "Sucesso");
+        queryClient.invalidateQueries("list_adictional_category");
+      },
+      onError: (err) => {
+        if (axios.isAxiosError(err) && err.message) {
+          showToast(err.response?.data.message, "error", "Erro");
+        } else {
+          const message = (error as Error).message;
+          showToast(message, "error", "Erro");
+        }
+      },
+    }
+  );
+
+  const editCategory: SubmitHandler<CategoryProps> = async (data) => {
+    mutation.mutate({
+      id: data.id,
+      title: data.title,
+    });
+  };
+
+  const editItems: SubmitHandler<ItemsProps> = async (data) => {
+    setLoadingCategory(true);
+
+    try {
+      const response = await api.put(
+        `/editAdicionalItems/${data.id}`,
+        {
+          name: data.name,
+          value: data.value,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+      const updated = items?.map((itm) => {
+        if (itm.id === data.id) {
+          return { ...itm, name: data.name, value: data.value };
+        }
+        return itm;
+      });
+
+      setItems(updated);
+      setLoadingCategory(false);
+      showToast(response.data.message, "success", "Sucesso");
+    } catch (error) {
+      setLoadingCategory(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        const message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
+
   return (
     <Fragment>
       <Box py={3}>
@@ -303,7 +379,69 @@ export default function AdictionalItems() {
                         <Stack>
                           {categories.map((cat) => (
                             <Radio key={cat.id} value={cat.id}>
-                              {cat.title}
+                              <HStack>
+                                <Text>{cat.title}</Text>
+                                <Popover placement="auto">
+                                  <PopoverTrigger>
+                                    <IconButton
+                                      icon={<AiOutlineEdit />}
+                                      aria-label="Editar Categoria"
+                                      size="xs"
+                                      colorScheme={"blue"}
+                                    />
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    shadow={"lg"}
+                                    _focus={{ outline: "none" }}
+                                  >
+                                    <Form
+                                      ref={formCategoryEditRef}
+                                      onSubmit={editCategory}
+                                      initialData={{
+                                        id: cat.id,
+                                        title: cat.title,
+                                      }}
+                                    >
+                                      <PopoverArrow />
+                                      <PopoverCloseButton zIndex={100} />
+                                      <PopoverBody>
+                                        <FormControl isRequired>
+                                          <FormLabel>
+                                            Nome da Categoria (Clique aqui)
+                                          </FormLabel>
+                                          <Input
+                                            name="title"
+                                            placeholder="Nome da Categoria"
+                                            size="sm"
+                                            autoFocus
+                                          />
+                                        </FormControl>
+                                        <Input
+                                          name="id"
+                                          placeholder="Nome da Categoria"
+                                          size="sm"
+                                          display={"none"}
+                                        />
+                                      </PopoverBody>
+                                      <PopoverFooter
+                                        display="flex"
+                                        justifyContent="flex-end"
+                                      >
+                                        <ButtonGroup size="sm">
+                                          <Button
+                                            colorScheme="blue"
+                                            leftIcon={<AiOutlineSave />}
+                                            type="submit"
+                                            isLoading={mutation.isLoading}
+                                          >
+                                            Salvar
+                                          </Button>
+                                        </ButtonGroup>
+                                      </PopoverFooter>
+                                    </Form>
+                                  </PopoverContent>
+                                </Popover>
+                              </HStack>
                             </Radio>
                           ))}
                         </Stack>
@@ -405,7 +543,7 @@ export default function AdictionalItems() {
                       <Tr>
                         <Th>Descrição</Th>
                         <Th isNumeric>Valor</Th>
-                        <Th textAlign={"center"} w="15%">
+                        <Th textAlign={"center"} w="25%">
                           Opções
                         </Th>
                       </Tr>
@@ -424,44 +562,116 @@ export default function AdictionalItems() {
                             )}
                           </Td>
                           <Td>
-                            <Popover placement="left">
-                              <PopoverTrigger>
-                                <Button
-                                  colorScheme={"red"}
-                                  leftIcon={<FaTrashAlt />}
-                                  size="xs"
-                                  isFullWidth
-                                >
-                                  Excluir
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                shadow={"lg"}
-                                _focus={{ outline: "none" }}
+                            <Grid templateColumns={"1fr 1fr"} gap={3}>
+                              <Form
+                                ref={formItemsEditRef}
+                                onSubmit={editItems}
+                                initialData={{
+                                  id: itm.id,
+                                  value: itm.value,
+                                  name: itm.name,
+                                }}
                               >
-                                <PopoverHeader>Confirmação</PopoverHeader>
-                                <PopoverArrow />
-                                <PopoverCloseButton />
-                                <PopoverBody>
-                                  Tem certeza que deseja remover este item?
-                                </PopoverBody>
-                                <PopoverFooter
-                                  display="flex"
-                                  justifyContent="flex-end"
-                                >
-                                  <ButtonGroup size="sm">
+                                <Popover placement="left">
+                                  <PopoverTrigger>
                                     <Button
-                                      colorScheme="blue"
-                                      leftIcon={<AiOutlineSave />}
-                                      isLoading={loadingCategory}
-                                      onClick={() => handleDelItem(itm.id)}
+                                      leftIcon={<AiOutlineEdit />}
+                                      size="xs"
+                                      isFullWidth
                                     >
-                                      Sim
+                                      Editar
                                     </Button>
-                                  </ButtonGroup>
-                                </PopoverFooter>
-                              </PopoverContent>
-                            </Popover>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    shadow={"lg"}
+                                    _focus={{ outline: "none" }}
+                                  >
+                                    <PopoverHeader>
+                                      Editar Informações
+                                    </PopoverHeader>
+                                    <PopoverArrow />
+                                    <PopoverCloseButton />
+                                    <PopoverBody>
+                                      <FormControl isRequired>
+                                        <FormLabel>Nome do Item</FormLabel>
+                                        <Input
+                                          name="name"
+                                          placeholder="Nome do Item"
+                                          size="sm"
+                                        />
+                                      </FormControl>
+                                      <FormControl mt={3} isRequired>
+                                        <FormLabel>Valor (R$)</FormLabel>
+                                        <Input
+                                          name="value"
+                                          placeholder="Valor"
+                                          size="sm"
+                                        />
+                                      </FormControl>
+                                      <Input
+                                        name="id"
+                                        placeholder="Valor"
+                                        size="sm"
+                                        display={"none"}
+                                      />
+                                    </PopoverBody>
+                                    <PopoverFooter
+                                      display="flex"
+                                      justifyContent="flex-end"
+                                    >
+                                      <ButtonGroup size="sm">
+                                        <Button
+                                          colorScheme="blue"
+                                          leftIcon={<AiOutlineSave />}
+                                          isLoading={loadingCategory}
+                                          type="submit"
+                                        >
+                                          Salvar
+                                        </Button>
+                                      </ButtonGroup>
+                                    </PopoverFooter>
+                                  </PopoverContent>
+                                </Popover>
+                              </Form>
+                              <Popover placement="left">
+                                <PopoverTrigger>
+                                  <Button
+                                    colorScheme={"red"}
+                                    leftIcon={<FaTrashAlt />}
+                                    size="xs"
+                                    isFullWidth
+                                  >
+                                    Excluir
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  shadow={"lg"}
+                                  _focus={{ outline: "none" }}
+                                >
+                                  <PopoverHeader>Confirmação</PopoverHeader>
+                                  <PopoverArrow />
+                                  <PopoverCloseButton />
+                                  <PopoverBody>
+                                    Tem certeza que deseja remover este item?
+                                  </PopoverBody>
+                                  <PopoverFooter
+                                    display="flex"
+                                    justifyContent="flex-end"
+                                  >
+                                    <ButtonGroup size="sm">
+                                      <Button
+                                        colorScheme="blue"
+                                        leftIcon={<AiOutlineCheck />}
+                                        isLoading={loadingCategory}
+                                        onClick={() => handleDelItem(itm.id)}
+                                      >
+                                        Sim
+                                      </Button>
+                                    </ButtonGroup>
+                                  </PopoverFooter>
+                                </PopoverContent>
+                              </Popover>
+                            </Grid>
                           </Td>
                         </Tr>
                       ))}

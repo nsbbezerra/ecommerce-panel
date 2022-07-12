@@ -345,7 +345,12 @@ export default function Header() {
             >
               Promoções
             </MenuItem>
-            <MenuItem icon={<AiOutlineProfile />}>Cupons de Desconto</MenuItem>
+            <MenuItem
+              icon={<AiOutlineProfile />}
+              onClick={() => navigate("/cupons")}
+            >
+              Cupons de Desconto
+            </MenuItem>
           </MenuGroup>
           <MenuDivider />
           <MenuGroup title="Faturamento">

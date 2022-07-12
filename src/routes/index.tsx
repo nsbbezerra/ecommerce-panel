@@ -4,6 +4,7 @@ import AdictionalItems from "../pages/adictional_items";
 import IndexCategories from "../pages/categories";
 import Clients from "../pages/clients";
 import Company from "../pages/company";
+import Coupons from "../pages/coupons";
 import IndexEmployee from "../pages/employees";
 import PartitionSale from "../pages/partition_sale";
 import IndexProducts from "../pages/products";
@@ -23,6 +24,7 @@ export default function Routing() {
       <Route path="/venda_fracionada" element={<PartitionSale />} />
       <Route path="/itens_adicionais" element={<AdictionalItems />} />
       <Route path="/promocoes" element={<IndexPromotions />} />
+      <Route path="/cupons" element={<Coupons />} />
     </Routes>
   );
 }
