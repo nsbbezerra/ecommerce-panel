@@ -7,6 +7,7 @@ import Company from "../pages/company";
 import IndexEmployee from "../pages/employees";
 import PartitionSale from "../pages/partition_sale";
 import IndexProducts from "../pages/products";
+import IndexPromotions from "../pages/promotions";
 import IndexSubCategories from "../pages/sub_categories";
 
 export default function Routing() {
@@ -21,6 +22,7 @@ export default function Routing() {
       <Route path="/produtos" element={<IndexProducts />} />
       <Route path="/venda_fracionada" element={<PartitionSale />} />
       <Route path="/itens_adicionais" element={<AdictionalItems />} />
+      <Route path="/promocoes" element={<IndexPromotions />} />
     </Routes>
   );
 }

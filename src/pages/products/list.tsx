@@ -85,6 +85,8 @@ import TextArea from "../../components/textArea";
 import { FaRuler, FaTrashAlt } from "react-icons/fa";
 import * as Yup from "yup";
 import HandleImages from "../../components/images";
+import HandleAdicionalItems from "../../components/adictional_items";
+import HandlePromotions from "../../components/promotions";
 
 import imageHelp from "../../assets/correios.png";
 import imageRolo from "../../assets/rolo.png";
@@ -121,6 +123,8 @@ type ProductProps = {
   length: number;
   type_sale: "unique" | "partition";
   width: string;
+  promotions: string;
+  profit_percent: number;
 };
 
 type TaxProps = {
@@ -242,6 +246,11 @@ type ProductImageProps = {
   images: ImageProps[];
 };
 
+type AdicionalItemsProps = {
+  have_adictional: boolean;
+  adictional_items_id: string;
+};
+
 const ListProduct = () => {
   const toast = useToast();
   const formRefTax = useRef<FormHandles>(null);
@@ -289,7 +298,15 @@ const ListProduct = () => {
   const [loadingShipping, setLoadingShipping] = useState<boolean>(false);
   const [modalHelp, setModalHelp] = useState<boolean>(false);
   const [modalImages, setModalImages] = useState<boolean>(false);
+  const [modalAdictional, setModalAdictional] = useState<boolean>(false);
   const [productsImages, setProductsImages] = useState<ProductImageProps>();
+  const [productAdicionalItems, setProductAdicionalItems] =
+    useState<AdicionalItemsProps>();
+  const [productSalePrice, setProductSalePrice] = useState<number>(0);
+  const [promotionId, setPromotionId] = useState<string>("");
+  const [isPromotional, setIsPromotional] = useState<boolean>(false);
+
+  const [modalPromotions, setModalPromotions] = useState<boolean>(false);
 
   const [tax, setTax] = useState<TaxProps>();
   const [productId, setProductId] = useState<string>("");
@@ -889,6 +906,41 @@ const ListProduct = () => {
     }
   };
 
+  const findAdicionalItem = async (id: string) => {
+    setProductId(id);
+    try {
+      const response = await api.get(`/findAdicionalItems/${id}`);
+      setProductAdicionalItems(response.data);
+      setModalAdictional(true);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  };
+
+  function handlePromotionProduct(
+    id: string,
+    value: number,
+    promo_id: string,
+    isPromo: boolean
+  ) {
+    setProductId(id);
+    setProductSalePrice(value);
+    setPromotionId(promo_id);
+    setIsPromotional(isPromo);
+    setModalPromotions(true);
+  }
+
+  function calcPercent(price: number, discount: number) {
+    let calc = (price * discount) / 100;
+    let final = price - calc;
+    return parseFloat(final.toFixed(2));
+  }
+
   return (
     <Fragment>
       <Grid templateColumns={"200px 1fr"} gap={3}>
@@ -1086,12 +1138,35 @@ const ListProduct = () => {
                           ))}
                       </Td>
                       <Td isNumeric>
-                        {parseFloat(pro.sale_value.toString()).toLocaleString(
-                          "pt-br",
-                          {
-                            style: "currency",
-                            currency: "BRL",
-                          }
+                        {pro.in_promotion === true ? (
+                          <HStack justify={"end"}>
+                            <Text textDecor={"line-through"} color={"gray.500"}>
+                              {parseFloat(
+                                pro.sale_value.toString()
+                              ).toLocaleString("pt-br", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </Text>
+                            <Text>
+                              {calcPercent(
+                                pro.sale_value,
+                                pro.profit_percent
+                              ).toLocaleString("pt-br", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </Text>
+                          </HStack>
+                        ) : (
+                          <>
+                            {parseFloat(
+                              pro.sale_value.toString()
+                            ).toLocaleString("pt-br", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </>
                         )}
                       </Td>
                       <Td textAlign={"center"} w="12%">
@@ -1124,10 +1199,23 @@ const ListProduct = () => {
                               Alterar Imagens
                             </MenuItem>
                             <MenuDivider />
-                            <MenuItem icon={<AiOutlineAppstoreAdd />}>
+                            <MenuItem
+                              icon={<AiOutlineAppstoreAdd />}
+                              onClick={() => findAdicionalItem(pro.id)}
+                            >
                               Items Adicionais
                             </MenuItem>
-                            <MenuItem icon={<AiOutlineCalculator />}>
+                            <MenuItem
+                              icon={<AiOutlineCalculator />}
+                              onClick={() =>
+                                handlePromotionProduct(
+                                  pro.id,
+                                  pro.sale_value,
+                                  pro.promotions,
+                                  pro.in_promotion
+                                )
+                              }
+                            >
                               Promoções
                             </MenuItem>
                           </MenuList>
@@ -2359,8 +2447,6 @@ const ListProduct = () => {
       <Modal
         isOpen={modalImages}
         onClose={() => setModalImages(false)}
-        closeOnEsc={false}
-        closeOnOverlayClick={false}
         size="6xl"
       >
         <ModalOverlay />
@@ -2374,6 +2460,49 @@ const ListProduct = () => {
                 imagesProduct={productsImages?.images || []}
                 thumbnailId={productsImages?.thumbnail.thumbnail_id || ""}
                 thumbnailUrl={productsImages?.thumbnail.thumbnail || undefined}
+              />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={modalAdictional}
+        onClose={() => setModalAdictional(false)}
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Itens Adicionais</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}>
+            {modalAdictional && (
+              <HandleAdicionalItems
+                productId={productId}
+                adictional={productAdicionalItems?.have_adictional || false}
+                category={productAdicionalItems?.adictional_items_id || ""}
+              />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={modalPromotions}
+        onClose={() => setModalPromotions(false)}
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Promoções</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}>
+            {modalPromotions && (
+              <HandlePromotions
+                productId={productId}
+                price={productSalePrice}
+                promo_id={promotionId}
+                isPromotional={isPromotional}
               />
             )}
           </ModalBody>

@@ -64,9 +64,8 @@ import {
   AiOutlinePicture,
   AiOutlinePlus,
   AiOutlineSave,
-  AiOutlineTool,
 } from "react-icons/ai";
-import { FaRuler, FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import RichTextEditor from "react-rte";
 import { dataTrib } from "../../configs/data";
 import MaskedInput from "react-input-mask";

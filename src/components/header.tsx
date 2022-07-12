@@ -339,7 +339,12 @@ export default function Header() {
             >
               Itens Adicionais
             </MenuItem>
-            <MenuItem icon={<AiOutlinePercentage />}>Promoções</MenuItem>
+            <MenuItem
+              icon={<AiOutlinePercentage />}
+              onClick={() => navigate("/promocoes")}
+            >
+              Promoções
+            </MenuItem>
             <MenuItem icon={<AiOutlineProfile />}>Cupons de Desconto</MenuItem>
           </MenuGroup>
           <MenuDivider />

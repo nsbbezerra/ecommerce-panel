@@ -439,13 +439,16 @@ export default function PartitionSale() {
                                   Excluir
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent shadow={"lg"}>
-                                <PopoverHeader fontWeight="semibold">
+                              <PopoverContent
+                                shadow={"lg"}
+                                _focus={{ outline: "none" }}
+                              >
+                                <PopoverHeader textAlign={"justify"}>
                                   Confirmação
                                 </PopoverHeader>
                                 <PopoverArrow />
                                 <PopoverCloseButton />
-                                <PopoverBody>
+                                <PopoverBody textAlign={"justify"}>
                                   Tem certeza que deseja remover este item?
                                 </PopoverBody>
                                 <PopoverFooter

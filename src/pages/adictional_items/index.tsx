@@ -435,10 +435,11 @@ export default function AdictionalItems() {
                                   Excluir
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent shadow={"lg"}>
-                                <PopoverHeader fontWeight="semibold">
-                                  Confirmação
-                                </PopoverHeader>
+                              <PopoverContent
+                                shadow={"lg"}
+                                _focus={{ outline: "none" }}
+                              >
+                                <PopoverHeader>Confirmação</PopoverHeader>
                                 <PopoverArrow />
                                 <PopoverCloseButton />
                                 <PopoverBody>
