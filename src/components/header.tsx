@@ -77,6 +77,7 @@ import {
   AiOutlineBarcode,
   AiOutlineShoppingCart,
   AiOutlineAppstoreAdd,
+  AiOutlineDollar,
 } from "react-icons/ai";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { FaRegSun, FaRegMoon, FaCashRegister } from "react-icons/fa";
@@ -371,7 +372,10 @@ export default function Header() {
         </MenuButton>
         <MenuList>
           <MenuGroup title="PDV">
-            <MenuItem icon={<AiOutlineShoppingCart />}>
+            <MenuItem
+              icon={<AiOutlineShoppingCart />}
+              onClick={() => navigate("/pdv")}
+            >
               Balcão de Vendas
             </MenuItem>
             <MenuItem icon={<BsJournalBookmark />}>Orçamentos</MenuItem>
@@ -397,11 +401,19 @@ export default function Header() {
             <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
             <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
             <MenuItem icon={<AiOutlinePercentage />}>Comissões</MenuItem>
-            <MenuItem icon={<AiOutlineBarcode />}>Pagamentos</MenuItem>
+            <MenuItem
+              icon={<AiOutlineDollar />}
+              onClick={() => navigate("/formas_pagamento")}
+            >
+              Formas de Pagamento
+            </MenuItem>
           </MenuGroup>
           <MenuGroup title="Caixa">
             <MenuItem icon={<FaCashRegister />}>Caixa Diário</MenuItem>
             <MenuItem icon={<BsJournalBookmark />}>Gestão de Caixa</MenuItem>
+          </MenuGroup>
+          <MenuGroup title="Recebimento">
+            <MenuItem icon={<AiOutlineBarcode />}>Pagamentos</MenuItem>
           </MenuGroup>
         </MenuList>
       </Menu>

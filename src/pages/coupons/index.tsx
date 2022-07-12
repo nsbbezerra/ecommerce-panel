@@ -20,7 +20,6 @@ import {
   PopoverFooter,
   PopoverArrow,
   PopoverCloseButton,
-  useColorMode,
   useToast,
   Skeleton,
   Icon,
@@ -336,7 +335,7 @@ export default function Coupons() {
                           <Text fontSize={"2xl"} fontWeight="semibold">
                             {coup.coupon}
                           </Text>
-                          <Tag w="fit-content">
+                          <Tag>
                             {coup.period === "due_date" &&
                               `Expira em: ${format(
                                 new Date(coup.expires_date),

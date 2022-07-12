@@ -7,6 +7,8 @@ import Company from "../pages/company";
 import Coupons from "../pages/coupons";
 import IndexEmployee from "../pages/employees";
 import PartitionSale from "../pages/partition_sale";
+import PayForms from "../pages/pay_form";
+import PDV from "../pages/pdv/pdv";
 import IndexProducts from "../pages/products";
 import IndexPromotions from "../pages/promotions";
 import IndexSubCategories from "../pages/sub_categories";
@@ -25,6 +27,8 @@ export default function Routing() {
       <Route path="/itens_adicionais" element={<AdictionalItems />} />
       <Route path="/promocoes" element={<IndexPromotions />} />
       <Route path="/cupons" element={<Coupons />} />
+      <Route path="/formas_pagamento" element={<PayForms />} />
+      <Route path="/pdv" element={<PDV />} />
     </Routes>
   );
 }
