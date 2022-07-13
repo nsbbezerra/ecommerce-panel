@@ -3,7 +3,9 @@ import {
   Container,
   Flex,
   Grid,
+  Heading,
   HStack,
+  Icon,
   IconButton,
   Link,
   Text,
@@ -21,16 +23,33 @@ import {
   AiOutlineWhatsApp,
 } from "react-icons/ai";
 import { FaTelegramPlane } from "react-icons/fa";
+import { BiMobileVibration } from "react-icons/bi";
 
 export default function Layout() {
   return (
     <Fragment>
+      <Flex
+        h="100vh"
+        w="100vw"
+        justify={"center"}
+        align="center"
+        display={["flex", "flex", "flex", "none", "none"]}
+        direction="column"
+        gap={5}
+      >
+        <Icon as={BiMobileVibration} fontSize="8xl" />
+        <Heading fontSize={"2xl"} textAlign="center">
+          Este App não está configurado para versões Mobile
+        </Heading>
+        <Text>Aguarde as próximas versões</Text>
+      </Flex>
       <Grid
         w={"100vw"}
         h="100vh"
         maxW={"100vw"}
         maxH="100vh"
         templateRows={"60px 1fr 35px"}
+        display={["none", "none", "none", "grid", "grid"]}
       >
         <Header />
         <Box w="100%" h="100%" overflow="auto" pt={1} pb={1}>

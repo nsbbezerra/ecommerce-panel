@@ -308,7 +308,7 @@ export default function Header() {
         >
           Produtos
         </MenuButton>
-        <MenuList>
+        <MenuList zIndex={2}>
           <MenuGroup title="Cadastro">
             <MenuItem
               icon={<AiOutlineTag />}
@@ -370,7 +370,7 @@ export default function Header() {
         >
           Vendas
         </MenuButton>
-        <MenuList>
+        <MenuList zIndex={2}>
           <MenuGroup title="PDV">
             <MenuItem
               icon={<AiOutlineShoppingCart />}
@@ -396,7 +396,7 @@ export default function Header() {
         >
           Financeiro
         </MenuButton>
-        <MenuList>
+        <MenuList zIndex={2}>
           <MenuGroup title="Movimentação">
             <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
             <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
