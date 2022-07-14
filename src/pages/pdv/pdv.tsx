@@ -27,10 +27,6 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
   Input,
   InputGroup,
   InputLeftElement,
@@ -45,11 +41,8 @@ import {
   AiOutlineBarcode,
   AiOutlineCheck,
   AiOutlineFilter,
-  AiOutlineMail,
   AiOutlineMore,
   AiOutlinePercentage,
-  AiOutlinePhone,
-  AiOutlinePlus,
   AiOutlineSave,
   AiOutlineSearch,
   AiOutlineShopping,
@@ -67,7 +60,7 @@ export default function PDV() {
     <Tr>
       <Td>
         <Avatar
-          src="https://img.itdg.com.br/images/recipes/000/095/378/225012/225012_original.jpg"
+          src="https://img.freepik.com/psd-premium/fone-de-ouvido-cor-vermelha-marca-produto-midia-social-post-banner_154386-99.jpg?w=2000"
           size="xs"
           zIndex={-1}
         />
@@ -129,7 +122,7 @@ export default function PDV() {
       h="fit-content"
     >
       <Image
-        src="https://seuelias.com/v2018/wp-content/uploads/2021/12/seu-elias-leave-in-produto-300x300.png"
+        src="https://img.freepik.com/psd-premium/fone-de-ouvido-cor-vermelha-marca-produto-midia-social-post-banner_154386-99.jpg?w=2000"
         w="100%"
       />
       <Box borderTopWidth={"1px"} p={2}>
@@ -212,7 +205,7 @@ export default function PDV() {
         <Box h="full" maxH="full" overflow={"hidden"} pt={"65px"}>
           <Grid templateColumns={"1fr 1fr"} gap={3} h="full" maxH={"full"}>
             <Grid
-              templateRows={"1fr 120px"}
+              templateRows={"1fr 130px"}
               borderWidth="1px"
               overflow={"hidden"}
               rounded="md"
@@ -254,7 +247,7 @@ export default function PDV() {
                 </Table>
               </Box>
               <Flex
-                bg={useColorModeValue("white", "gray.800")}
+                bg={useColorModeValue("blackAlpha.50", "whiteAlpha.50")}
                 justify="space-between"
                 align={"center"}
                 direction="column"
@@ -267,14 +260,26 @@ export default function PDV() {
                 <Flex
                   justify={"space-between"}
                   w="full"
+                  borderTopWidth={"1px"}
+                  borderTopStyle="dashed"
+                  borderTopColor={useColorModeValue("gray.400", "gray.500")}
                   borderBottomWidth={"1px"}
+                  borderBottomStyle="dashed"
+                  borderBottomColor={useColorModeValue("gray.400", "gray.500")}
                   px={5}
-                  py={"7px"}
+                  h={"44px"}
+                  align="center"
                 >
                   <Text>SUB TOTAL</Text>
                   <Text>R$ 40,00</Text>
                 </Flex>
-                <Flex justify={"space-between"} w="full" px={5} py={1}>
+                <Flex
+                  justify={"space-between"}
+                  w="full"
+                  px={5}
+                  h={"40px"}
+                  align="center"
+                >
                   <Text>DESCONTO</Text>
                   <Text>10%</Text>
                 </Flex>
@@ -285,8 +290,12 @@ export default function PDV() {
                   fontWeight="semibold"
                   bg={useColorModeValue("blue.500", "blue.300")}
                   color={useColorModeValue("white", "gray.800")}
+                  borderTopStyle="dashed"
+                  borderTopWidth={"1px"}
+                  borderTopColor={useColorModeValue("white", "gray.800")}
                   px={5}
-                  py={2}
+                  h={"45px"}
+                  align="center"
                 >
                   <Text>TOTAL A PAGAR</Text>
                   <Text>R$ 36,00</Text>
@@ -325,6 +334,10 @@ export default function PDV() {
                     ? "0px -2px 6px rgba(0,0,0,.1)"
                     : "0px -2px 6px rgba(0,0,0,.3)"
                 }
+                bg={useColorModeValue("blackAlpha.50", "whiteAlpha.50")}
+                borderTopWidth="1px"
+                borderTopStyle={"dashed"}
+                borderTopColor={useColorModeValue("gray.400", "gray.500")}
               >
                 <Menu>
                   <MenuButton
@@ -332,6 +345,8 @@ export default function PDV() {
                     aria-label="Oções"
                     icon={<AiOutlineTool />}
                     size="lg"
+                    variant="outline"
+                    colorScheme="blue"
                   />
                   <MenuList>
                     <MenuItem icon={<AiOutlineSave />}>
@@ -357,7 +372,7 @@ export default function PDV() {
                 <Button
                   size="lg"
                   leftIcon={<AiOutlineShoppingCart />}
-                  colorScheme="blue"
+                  colorScheme="green"
                 >
                   Finalizar
                 </Button>
