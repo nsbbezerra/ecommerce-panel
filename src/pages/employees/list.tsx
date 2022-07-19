@@ -359,7 +359,10 @@ const ListEmployee = () => {
                               variant="outline"
                             />
                           </PopoverTrigger>
-                          <PopoverContent _focus={{ outline: "none" }}>
+                          <PopoverContent
+                            _focus={{ outline: "none" }}
+                            shadow="lg"
+                          >
                             <PopoverArrow />
                             <PopoverCloseButton />
                             <PopoverHeader fontWeight={"bold"}>

@@ -53,6 +53,7 @@ import {
 import { BiRename } from "react-icons/bi";
 import { BsPrinter } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
+import Scrollbars from "react-custom-scrollbars";
 
 export default function PDV() {
   const { colorMode } = useColorMode();
@@ -211,40 +212,42 @@ export default function PDV() {
               rounded="md"
             >
               <Box maxH={"full"} h="full" overflow={"auto"}>
-                <Table size="sm">
-                  <Thead
-                    position="sticky"
-                    top={0}
-                    bg={useColorModeValue("white", "gray.800")}
-                    shadow={"md"}
-                    zIndex={1}
-                  >
-                    <Tr>
-                      <Th py={3} w="5%">
-                        Thumb
-                      </Th>
-                      <Th w="3%">Qtd</Th>
-                      <Th>Descrição</Th>
-                      <Th>Unit</Th>
-                      <Th>Total</Th>
-                      <Th w="3%" textAlign={"center"}>
-                        Opções
-                      </Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                    <TableRow />
-                  </Tbody>
-                </Table>
+                <Scrollbars autoHide>
+                  <Table size="sm">
+                    <Thead
+                      position="sticky"
+                      top={0}
+                      bg={useColorModeValue("white", "gray.800")}
+                      shadow={"md"}
+                      zIndex={1}
+                    >
+                      <Tr>
+                        <Th py={3} w="5%">
+                          Thumb
+                        </Th>
+                        <Th w="3%">Qtd</Th>
+                        <Th>Descrição</Th>
+                        <Th>Unit</Th>
+                        <Th>Total</Th>
+                        <Th w="3%" textAlign={"center"}>
+                          Opções
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                      <TableRow />
+                    </Tbody>
+                  </Table>
+                </Scrollbars>
               </Box>
               <Flex
                 bg={useColorModeValue("blackAlpha.50", "whiteAlpha.50")}
@@ -309,20 +312,22 @@ export default function PDV() {
               rounded="md"
             >
               <Box maxH={"full"} h="full" overflow={"auto"} p={2}>
-                <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                  <ProductShow />
-                </Grid>
+                <Scrollbars autoHide>
+                  <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                    <ProductShow />
+                  </Grid>
+                </Scrollbars>
               </Box>
               <Grid
                 templateColumns="1fr 2fr 2fr"

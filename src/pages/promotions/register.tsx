@@ -143,14 +143,14 @@ export default function RegisterPromotions() {
             >
               <Box
                 w="1140px"
-                h="215px"
+                h="250px"
                 overflow={"hidden"}
                 borderWidth="1px"
                 rounded={"md"}
               >
                 <Image
                   w="1140px"
-                  h="215px"
+                  h="250px"
                   objectFit={"cover"}
                   src={previewThumbnail}
                 />
@@ -176,7 +176,7 @@ export default function RegisterPromotions() {
               borderColor={useColorModeValue("gray.900", "gray.100")}
               _hover={{ borderWidth: "2px" }}
               w="1140px"
-              h="215px"
+              h="250px"
               justifyContent={"center"}
               alignItems="center"
               flexDirection={"column"}
@@ -190,7 +190,7 @@ export default function RegisterPromotions() {
               />
               <Icon as={AiOutlinePicture} fontSize="4xl" />
               <Text userSelect={"none"}>
-                Insira sua imagem aqui, o tamanho deve ser 1140px por 215px
+                Insira sua imagem aqui, o tamanho deve ser 1140px por 250px
               </Text>
             </FormLabel>
           )}

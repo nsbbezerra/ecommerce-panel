@@ -382,7 +382,7 @@ export default function Header() {
             <MenuItem icon={<BsJournalBookmark />}>Orçamentos</MenuItem>
           </MenuGroup>
           <MenuGroup title="Gestão">
-            <MenuItem icon={<BsBagCheck />}>Vendas Realizadas</MenuItem>
+            <MenuItem icon={<BsBagCheck />}>Gerenciar Vendas</MenuItem>
           </MenuGroup>
         </MenuList>
       </Menu>

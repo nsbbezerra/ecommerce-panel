@@ -11,12 +11,13 @@ import {
   Select,
   Stack,
   Switch,
+  ToastPositionWithLogical,
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useState } from "react";
 import { AiOutlineSave } from "react-icons/ai";
-import { api } from "../configs";
+import { api, configs } from "../configs";
 
 type Props = {
   productId: string;
@@ -64,7 +65,7 @@ export default function AdminPromotions({
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });
