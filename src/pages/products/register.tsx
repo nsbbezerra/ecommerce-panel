@@ -50,6 +50,7 @@ import {
   TagLabel,
   TagCloseButton,
   Tag,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
@@ -70,7 +71,7 @@ import RichTextEditor from "react-rte";
 import { dataTrib } from "../../configs/data";
 import MaskedInput from "react-input-mask";
 import axios from "axios";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import { MdHelpOutline } from "react-icons/md";
 
 import imageHelp from "../../assets/correios.png";
@@ -391,7 +392,7 @@ const RegisterProduct = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });
@@ -422,6 +423,8 @@ const RegisterProduct = () => {
     setImages([]);
     setStyleStock("");
     setHave_adictional(false);
+    setTags([]);
+    setIsTributed(true);
   }
 
   const handleSubmit: SubmitHandler<ProductProps> = async (data, { reset }) => {

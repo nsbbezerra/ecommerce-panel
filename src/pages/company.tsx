@@ -23,6 +23,7 @@ import {
   Icon,
   Text,
   Input as ChakraInput,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
@@ -36,7 +37,7 @@ import InputMask from "../components/InputMask";
 import Select from "../components/Select";
 import { AiOutlinePicture, AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
-import { api } from "../configs";
+import { api, configs } from "../configs";
 
 const queryClient = new QueryClient();
 
@@ -98,7 +99,7 @@ export default function Company() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

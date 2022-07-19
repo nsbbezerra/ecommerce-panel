@@ -31,6 +31,7 @@ import {
   Td,
   HStack,
   IconButton,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { AiOutlineCheck, AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
@@ -40,7 +41,7 @@ import { Form } from "@unform/web";
 import * as Yup from "yup";
 import Input from "../../components/Input";
 import { useQuery, useMutation, QueryClient } from "react-query";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import axios from "axios";
 import { FaTrashAlt } from "react-icons/fa";
 
@@ -84,7 +85,7 @@ export default function PartitionSale() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

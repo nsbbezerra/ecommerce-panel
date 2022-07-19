@@ -20,6 +20,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useState } from "react";
@@ -65,7 +66,7 @@ const Clients = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

@@ -12,6 +12,7 @@ import {
   Stack,
   Text,
   Textarea,
+  ToastPositionWithLogical,
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
@@ -19,7 +20,7 @@ import axios from "axios";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { AiOutlinePicture, AiOutlineSave } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 
 type Props = {
   id: string;
@@ -69,7 +70,7 @@ export default function RegisterPromotions() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

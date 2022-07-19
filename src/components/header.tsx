@@ -48,6 +48,7 @@ import {
   Skeleton,
   MenuGroup,
   Divider,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
@@ -85,7 +86,7 @@ import Input from "../components/Input";
 import { Form } from "@unform/web";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import axios from "axios";
-import { api } from "../configs/index";
+import { api, configs } from "../configs/index";
 import pt_br from "date-fns/locale/pt-BR";
 import { format, differenceInDays } from "date-fns";
 import * as Yup from "yup";
@@ -167,7 +168,7 @@ export default function Header() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

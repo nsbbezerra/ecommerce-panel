@@ -11,6 +11,7 @@ import {
   RadioGroup,
   Stack,
   Text,
+  ToastPositionWithLogical,
   useToast,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -71,7 +72,7 @@ const RegisterSubCategories = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

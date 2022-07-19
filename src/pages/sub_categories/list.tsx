@@ -31,6 +31,7 @@ import {
   Radio,
   HStack,
   Input as ChakraInput,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import * as Icons from "react-icons/all";
@@ -120,7 +121,7 @@ const ListSubCategories = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

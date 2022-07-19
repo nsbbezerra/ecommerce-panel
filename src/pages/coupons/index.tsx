@@ -23,6 +23,7 @@ import {
   useToast,
   Skeleton,
   Icon,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { forwardRef, Fragment, useEffect, useRef, useState } from "react";
 import { AiOutlineCheck, AiOutlineSave } from "react-icons/ai";
@@ -30,7 +31,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import DatePicker, { registerLocale } from "react-datepicker";
 import pt_br from "date-fns/locale/pt-BR";
 import axios from "axios";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import { format } from "date-fns";
 import { GiCardboardBox } from "react-icons/gi";
 
@@ -82,7 +83,7 @@ export default function Coupons() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

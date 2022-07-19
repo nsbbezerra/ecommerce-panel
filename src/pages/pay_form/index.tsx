@@ -26,6 +26,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, QueryClient } from "react-query";
@@ -36,7 +37,7 @@ import Input from "../../components/Input";
 import Select from "../../components/Select";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import { GiCardboardBox } from "react-icons/gi";
 
 const queryClient = new QueryClient();
@@ -82,7 +83,7 @@ export default function PayForms() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

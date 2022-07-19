@@ -31,6 +31,7 @@ import {
   Td,
   HStack,
   IconButton,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
@@ -40,7 +41,7 @@ import { GiCardboardBox } from "react-icons/gi";
 import Input from "../../components/Input";
 import { AiOutlineCheck, AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import { useQuery, useMutation, QueryClient } from "react-query";
 import { FaTrashAlt } from "react-icons/fa";
 
@@ -86,7 +87,7 @@ export default function AdictionalItems() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

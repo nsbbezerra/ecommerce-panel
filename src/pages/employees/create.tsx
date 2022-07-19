@@ -5,10 +5,11 @@ import {
   FormLabel,
   Grid,
   Stack,
+  ToastPositionWithLogical,
   useToast,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import { Form } from "@unform/web";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import * as Yup from "yup";
@@ -51,7 +52,7 @@ const EmployeeCreate = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

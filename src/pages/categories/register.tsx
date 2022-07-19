@@ -19,6 +19,7 @@ import {
   Text,
   Input as ChakraInput,
   useToast,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import { AiOutlineSave } from "react-icons/ai";
 import TextArea from "../../components/textArea";
@@ -64,7 +65,7 @@ const RegisterCategories = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

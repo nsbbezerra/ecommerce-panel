@@ -31,6 +31,7 @@ import {
   RadioGroup,
   Radio,
   HStack,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -114,7 +115,7 @@ const ListCategories = () => {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });

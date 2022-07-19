@@ -21,6 +21,7 @@ import {
   Stack,
   Flex,
   Icon,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -29,7 +30,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { useQuery, useMutation, QueryClient } from "react-query";
 import Input from "../../components/Input";
 import TextArea from "../../components/textArea";
-import { api } from "../../configs";
+import { api, configs } from "../../configs";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
 import { GiCardboardBox } from "react-icons/gi";
@@ -75,7 +76,7 @@ export default function ListPromotions() {
       title: title,
       description: message,
       status: status,
-      position: "top-right",
+      position: configs.toastPosition as ToastPositionWithLogical,
       duration: 8000,
       isClosable: true,
     });
