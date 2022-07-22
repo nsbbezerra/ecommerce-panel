@@ -399,7 +399,12 @@ export default function Header() {
         </MenuButton>
         <MenuList zIndex={2}>
           <MenuGroup title="Movimentação">
-            <MenuItem icon={<AiOutlineRise />}>Receitas</MenuItem>
+            <MenuItem
+              icon={<AiOutlineRise />}
+              onClick={() => navigate("/receitas")}
+            >
+              Receitas
+            </MenuItem>
             <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
             <MenuItem icon={<AiOutlinePercentage />}>Comissões</MenuItem>
             <MenuItem

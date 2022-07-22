@@ -11,6 +11,7 @@ import PayForms from "../pages/pay_form";
 import PDV from "../pages/pdv/pdv";
 import IndexProducts from "../pages/products";
 import IndexPromotions from "../pages/promotions";
+import IndexRevenues from "../pages/revenues";
 import IndexSubCategories from "../pages/sub_categories";
 
 export default function Routing() {
@@ -29,6 +30,7 @@ export default function Routing() {
       <Route path="/cupons" element={<Coupons />} />
       <Route path="/formas_pagamento" element={<PayForms />} />
       <Route path="/pdv" element={<PDV />} />
+      <Route path="/receitas" element={<IndexRevenues />} />
     </Routes>
   );
 }

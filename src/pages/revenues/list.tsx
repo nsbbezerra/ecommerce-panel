@@ -1,0 +1,434 @@
+import {
+  Button,
+  Divider,
+  Flex,
+  FormControl,
+  FormLabel,
+  Grid,
+  Icon,
+  Select as ChakraSelect,
+  Skeleton,
+  Stack,
+  Table,
+  Tag,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  ToastPositionWithLogical,
+  Tr,
+  useToast,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverArrow,
+  PopoverCloseButton,
+  Box,
+  theme,
+  useColorMode,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { Fragment, useEffect, useState } from "react";
+import { api, configs } from "../../configs";
+import { useQuery, useMutation, QueryClient } from "react-query";
+import axios from "axios";
+import { GiCardboardBox } from "react-icons/gi";
+import { format } from "date-fns";
+import { AiOutlineEdit, AiOutlineZoomIn } from "react-icons/ai";
+
+type Props = {
+  id: string;
+  token: string;
+};
+
+type RevenueProps = {
+  id: string;
+  title: string;
+  description: string;
+  due_date: Date;
+  payment_method:
+    | "money"
+    | "credit_card"
+    | "debit_card"
+    | "ticket"
+    | "duplicata"
+    | "pix";
+  payment_status: "wait" | "paid_out" | "refused" | "cancel";
+  value: string;
+};
+
+const queryClient = new QueryClient();
+
+export default function ListRevenues() {
+  const { colorMode } = useColorMode();
+  const dados = [
+    {
+      name: "Formas de Pagamento",
+      dinheiro: 4000,
+      crédito: 2400,
+      débito: 2400,
+      boleto: 2400,
+      duplicata: 2400,
+      pix: 2400,
+      amt: 2400,
+    },
+  ];
+
+  const toast = useToast();
+  const [month, setMonth] = useState<string>(
+    new Date().toLocaleString("pt-Br", { month: "long" })
+  );
+  const [year, setYear] = useState<string>(new Date().getFullYear().toString());
+  const [type, setType] = useState<string>("actual");
+
+  const [auth, setAuth] = useState<Props>();
+
+  const [revenues, setRevenues] = useState<RevenueProps[]>();
+
+  function showToast(
+    message: string,
+    status: "error" | "info" | "warning" | "success" | undefined,
+    title: string
+  ) {
+    toast({
+      title: title,
+      description: message,
+      status: status,
+      position: configs.toastPosition as ToastPositionWithLogical,
+      duration: 8000,
+      isClosable: true,
+    });
+  }
+
+  useEffect(() => {
+    const company = localStorage.getItem("company");
+    const userToken = sessionStorage.getItem("user");
+    let companyParse = JSON.parse(company || "");
+    let userParse = JSON.parse(userToken || "");
+    const dateToNow = new Date();
+    setMonth(dateToNow.toLocaleString("pt-Br", { month: "long" }));
+    setYear(dateToNow.getFullYear().toString());
+
+    if (companyParse && userParse) {
+      setAuth({ id: companyParse.id, token: userParse.token });
+    } else {
+      showToast(
+        "Informações da empresa e do usuário ausentes",
+        "warning",
+        "Atenção"
+      );
+    }
+  }, []);
+
+  function handleYear() {
+    const dateNow = new Date();
+    let yearMinusThree = dateNow.getFullYear() - 3;
+    let yearMinusTwo = dateNow.getFullYear() - 2;
+    let yearMinusOne = dateNow.getFullYear() - 1;
+    let yearDate = dateNow.getFullYear();
+    let yearPlusOne = dateNow.getFullYear() + 1;
+    let yearPlusTwo = dateNow.getFullYear() + 2;
+    let yearPlusThree = dateNow.getFullYear() + 3;
+    let years = [
+      yearMinusThree.toString(),
+      yearMinusTwo.toString(),
+      yearMinusOne.toString(),
+      yearDate.toString(),
+      yearPlusOne.toString(),
+      yearPlusTwo.toString(),
+      yearPlusThree.toString(),
+    ];
+
+    return years;
+  }
+
+  function handlePaymentMethod(method: string) {
+    switch (method) {
+      case "money":
+        return "Dinheiro";
+
+      case "credit_card":
+        return "Cartão de Crédito";
+
+      case "debit_card":
+        return "Cartão de Débito";
+
+      case "ticket":
+        return "Boleto";
+
+      case "duplicata":
+        return "Duplicata";
+
+      case "PIX":
+        return "PIX";
+      default:
+        return "Dinheiro";
+    }
+  }
+
+  function handleStatusPay(status: string) {
+    switch (status) {
+      case "wait":
+        return "Aguardando";
+
+      case "paid_out":
+        return "Pago";
+
+      case "refused":
+        return "Recusado";
+
+      case "cancel":
+        return "Cancelado";
+
+      default:
+        return "Aguardando";
+    }
+  }
+
+  async function getInformation() {
+    const company = localStorage.getItem("company");
+    const user = sessionStorage.getItem("user");
+    const companyParse = JSON.parse(company || "");
+    const userParse = JSON.parse(user || "");
+    if (companyParse && userParse) {
+      setAuth({ id: companyParse.id, token: userParse.token });
+    }
+
+    try {
+      const { data } = await api.get(
+        `/revenues/${companyParse?.id}/${type}/${month}/${year}`
+      );
+      return data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  const { data, isLoading, error } = useQuery("list-revenues", getInformation, {
+    refetchInterval: 4000,
+  });
+
+  useEffect(() => {
+    if (error) {
+      const message = (error as Error).message;
+      showToast(message, "error", "Erro");
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (data) {
+      setRevenues(data);
+    }
+  }, [data]);
+
+  return (
+    <Fragment>
+      <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
+        <FormControl>
+          <FormLabel>Opção de busca</FormLabel>
+          <ChakraSelect
+            placeholder="Selecione uma opção"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option value="actual">Mês Atual</option>
+            <option value="period">Por Período</option>
+          </ChakraSelect>
+        </FormControl>
+        <FormControl>
+          <FormLabel>Mês</FormLabel>
+          <ChakraSelect
+            placeholder="Selecione uma opção"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            isDisabled={type === "actual" ? true : false}
+          >
+            <option value={"janeiro"}>Janeiro</option>
+            <option value={"fevereiro"}>Fevereiro</option>
+            <option value={"março"}>Março</option>
+            <option value={"abril"}>Abril</option>
+            <option value={"maio"}>Maio</option>
+            <option value={"junho"}>Junho</option>
+            <option value={"julho"}>Julho</option>
+            <option value={"agosto"}>Agosto</option>
+            <option value={"setembro"}>Setembro</option>
+            <option value={"outubro"}>Outubro</option>
+            <option value={"novembro"}>Novembro</option>
+            <option value={"dezembro"}>Dezembro</option>
+          </ChakraSelect>
+        </FormControl>
+        <FormControl>
+          <FormLabel>Ano</FormLabel>
+          <ChakraSelect
+            placeholder="Selecione uma opção"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            isDisabled={type === "actual" ? true : false}
+          >
+            {handleYear().map((yr) => (
+              <option value={yr} key={yr}>
+                {yr}
+              </option>
+            ))}
+          </ChakraSelect>
+        </FormControl>
+      </Grid>
+
+      <Divider mt={3} mb={3} />
+
+      {isLoading ? (
+        <Stack spacing={4}>
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+          <Skeleton h={7} />
+        </Stack>
+      ) : (
+        <Fragment>
+          {!revenues || revenues.length === 0 ? (
+            <Flex justify={"center"} align="center" direction={"column"}>
+              <Icon as={GiCardboardBox} fontSize="8xl" />
+              <Text>Nenhuma informação para mostrar</Text>
+            </Flex>
+          ) : (
+            <Fragment>
+              <Table size={"sm"}>
+                <Thead>
+                  <Tr>
+                    <Th>Título</Th>
+                    <Th w="12%">Descrição</Th>
+                    <Th w="12%" textAlign={"center"}>
+                      Pagamento
+                    </Th>
+                    <Th w="10%" textAlign={"center"}>
+                      Status
+                    </Th>
+                    <Th w="10%">Vencimento</Th>
+                    <Th w="10%" isNumeric>
+                      Valor
+                    </Th>
+                    <Th w="10%" textAlign={"center"}>
+                      Opções
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {revenues.map((rv) => (
+                    <Tr
+                      key={rv.id}
+                      bg={
+                        new Date(rv.due_date) < new Date()
+                          ? useColorModeValue("red.50", "red.900")
+                          : ""
+                      }
+                    >
+                      <Td>{rv.title}</Td>
+                      <Td>
+                        <Popover>
+                          <PopoverTrigger>
+                            <Button
+                              isFullWidth
+                              leftIcon={<AiOutlineZoomIn />}
+                              size="xs"
+                              colorScheme={"blue"}
+                              variant="outline"
+                            >
+                              Visualizar
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            shadow="lg"
+                            _focus={{ outline: "none" }}
+                          >
+                            <PopoverArrow />
+                            <PopoverCloseButton />
+                            <PopoverHeader>Descrição</PopoverHeader>
+                            <PopoverBody>{rv.description}</PopoverBody>
+                          </PopoverContent>
+                        </Popover>
+                      </Td>
+                      <Td>
+                        <Tag
+                          w="full"
+                          justifyContent={"center"}
+                          colorScheme="green"
+                        >
+                          {handlePaymentMethod(rv.payment_method)}
+                        </Tag>
+                      </Td>
+                      <Td>
+                        {rv.payment_status === "cancel" && (
+                          <Tag
+                            w="full"
+                            justifyContent={"center"}
+                            colorScheme="red"
+                          >
+                            {handleStatusPay(rv.payment_status)}
+                          </Tag>
+                        )}
+                        {rv.payment_status === "paid_out" && (
+                          <Tag
+                            w="full"
+                            justifyContent={"center"}
+                            colorScheme="green"
+                          >
+                            {handleStatusPay(rv.payment_status)}
+                          </Tag>
+                        )}
+                        {rv.payment_status === "refused" && (
+                          <Tag
+                            w="full"
+                            justifyContent={"center"}
+                            colorScheme="gray"
+                          >
+                            {handleStatusPay(rv.payment_status)}
+                          </Tag>
+                        )}
+                        {rv.payment_status === "wait" && (
+                          <Tag
+                            w="full"
+                            justifyContent={"center"}
+                            colorScheme="yellow"
+                          >
+                            {handleStatusPay(rv.payment_status)}
+                          </Tag>
+                        )}
+                      </Td>
+                      <Td>{format(new Date(rv.due_date), "dd/MM/yyyy")}</Td>
+                      <Td isNumeric>
+                        {parseFloat(rv.value).toLocaleString("pt-br", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </Td>
+                      <Td>
+                        {
+                          <Button
+                            leftIcon={<AiOutlineEdit />}
+                            size="xs"
+                            isFullWidth
+                          >
+                            Alterar
+                          </Button>
+                        }
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Fragment>
+          )}
+        </Fragment>
+      )}
+    </Fragment>
+  );
+}
