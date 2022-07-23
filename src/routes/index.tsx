@@ -6,6 +6,7 @@ import Clients from "../pages/clients";
 import Company from "../pages/company";
 import Coupons from "../pages/coupons";
 import IndexEmployee from "../pages/employees";
+import IndexExpenses from "../pages/expenses";
 import PartitionSale from "../pages/partition_sale";
 import PayForms from "../pages/pay_form";
 import PDV from "../pages/pdv/pdv";
@@ -31,6 +32,7 @@ export default function Routing() {
       <Route path="/formas_pagamento" element={<PayForms />} />
       <Route path="/pdv" element={<PDV />} />
       <Route path="/receitas" element={<IndexRevenues />} />
+      <Route path="/despesas" element={<IndexExpenses />} />
     </Routes>
   );
 }

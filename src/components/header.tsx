@@ -405,7 +405,12 @@ export default function Header() {
             >
               Receitas
             </MenuItem>
-            <MenuItem icon={<AiOutlineFall />}>Despesas</MenuItem>
+            <MenuItem
+              icon={<AiOutlineFall />}
+              onClick={() => navigate("/despesas")}
+            >
+              Despesas
+            </MenuItem>
             <MenuItem icon={<AiOutlinePercentage />}>Comissões</MenuItem>
             <MenuItem
               icon={<AiOutlineDollar />}

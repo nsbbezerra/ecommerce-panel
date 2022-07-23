@@ -55,7 +55,7 @@ type Props = {
   token: string;
 };
 
-type RevenueProps = {
+type ExpensesProps = {
   id: string;
   title: string;
   description: string;
@@ -73,7 +73,7 @@ type RevenueProps = {
 
 const queryClient = new QueryClient();
 
-export default function ListRevenues() {
+export default function ListExpenses() {
   const formRef = useRef<FormHandles>(null);
   const toast = useToast();
   const [month, setMonth] = useState<string>(
@@ -84,8 +84,8 @@ export default function ListRevenues() {
 
   const [auth, setAuth] = useState<Props>();
 
-  const [revenues, setRevenues] = useState<RevenueProps[]>();
-  const [revenue, setRevenue] = useState<RevenueProps>();
+  const [expenses, setExpenses] = useState<ExpensesProps[]>();
+  const [expense, setExpense] = useState<ExpensesProps>();
 
   const [modalEdit, setModalEdit] = useState<boolean>(false);
 
@@ -200,7 +200,7 @@ export default function ListRevenues() {
 
     try {
       const { data } = await api.get(
-        `/revenues/${companyParse?.id}/${type}/${month}/${year}`
+        `/expenses/${companyParse?.id}/${type}/${month}/${year}`
       );
       return data;
     } catch (error) {
@@ -213,7 +213,7 @@ export default function ListRevenues() {
     }
   }
 
-  const { data, isLoading, error } = useQuery("list-revenues", getInformation, {
+  const { data, isLoading, error } = useQuery("list-expenses", getInformation, {
     refetchInterval: 4000,
   });
 
@@ -226,14 +226,14 @@ export default function ListRevenues() {
 
   useEffect(() => {
     if (data) {
-      setRevenues(data);
+      setExpenses(data);
     }
   }, [data]);
 
   const mutationUpdate = useMutation(
-    (data: RevenueProps) => {
+    (data: ExpensesProps) => {
       return api.put(
-        `/revenues/${data.id}`,
+        `/expenses/${data.id}`,
         {
           title: data.title,
           description: data.description,
@@ -250,7 +250,7 @@ export default function ListRevenues() {
     {
       onSuccess: async (response) => {
         showToast(response.data.message, "success", "Sucesso");
-        queryClient.invalidateQueries("list-revenues");
+        queryClient.invalidateQueries("list-expenses");
         setModalEdit(false);
       },
       onError: (err) => {
@@ -264,13 +264,13 @@ export default function ListRevenues() {
     }
   );
 
-  function handleRevenue(id: string) {
-    const result = revenues?.find((obj) => obj.id === id);
-    setRevenue(result);
+  function handleexpense(id: string) {
+    const result = expenses?.find((obj) => obj.id === id);
+    setExpense(result);
     setModalEdit(true);
   }
 
-  const handleUpdate: SubmitHandler<RevenueProps> = async (data) => {
+  const handleUpdate: SubmitHandler<ExpensesProps> = async (data) => {
     mutationUpdate.mutate({
       id: data.id,
       title: data.title,
@@ -347,7 +347,7 @@ export default function ListRevenues() {
         </Stack>
       ) : (
         <Fragment>
-          {!revenues || revenues.length === 0 ? (
+          {!expenses || expenses.length === 0 ? (
             <Flex justify={"center"} align="center" direction={"column"}>
               <Icon as={GiCardboardBox} fontSize="8xl" />
               <Text>Nenhuma informação para mostrar</Text>
@@ -375,7 +375,7 @@ export default function ListRevenues() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {revenues.map((rv) => (
+                  {expenses.map((rv) => (
                     <Tr
                       key={rv.id}
                       bg={
@@ -470,7 +470,7 @@ export default function ListRevenues() {
                             leftIcon={<AiOutlineEdit />}
                             size="xs"
                             isFullWidth
-                            onClick={() => handleRevenue(rv.id)}
+                            onClick={() => handleexpense(rv.id)}
                           >
                             Alterar
                           </Button>
@@ -491,13 +491,13 @@ export default function ListRevenues() {
           ref={formRef}
           onSubmit={handleUpdate}
           initialData={{
-            title: revenue?.title,
-            description: revenue?.description,
-            due_date: new Date(revenue?.due_date || new Date()),
-            value: revenue?.value,
-            payment_method: revenue?.payment_method,
-            payment_status: revenue?.payment_status,
-            id: revenue?.id,
+            title: expense?.title,
+            description: expense?.description,
+            due_date: new Date(expense?.due_date || new Date()),
+            value: expense?.value,
+            payment_method: expense?.payment_method,
+            payment_status: expense?.payment_status,
+            id: expense?.id,
           }}
         >
           <ModalContent>
@@ -507,8 +507,8 @@ export default function ListRevenues() {
               <Stack spacing={3}>
                 <Grid templateColumns={"3fr 1fr"} gap={3}>
                   <FormControl isRequired>
-                    <FormLabel>Título da Receita</FormLabel>
-                    <Input placeholder="Título da Receita" name="title" />
+                    <FormLabel>Título da Despesa</FormLabel>
+                    <Input placeholder="Título da Despesa" name="title" />
                   </FormControl>
                   <FormControl isRequired>
                     <FormLabel>Data do Pagamento</FormLabel>
@@ -516,17 +516,17 @@ export default function ListRevenues() {
                   </FormControl>
                 </Grid>
                 <FormControl>
-                  <FormLabel>Descrição da Receita</FormLabel>
+                  <FormLabel>Descrição da Despesa</FormLabel>
                   <TextArea
-                    placeholder="Descrição da Receita"
+                    placeholder="Descrição da Despesa"
                     name="description"
                   />
                 </FormControl>
                 <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                   <FormControl isRequired>
-                    <FormLabel>Valor da Receita (R$)</FormLabel>
+                    <FormLabel>Valor da Despesa (R$)</FormLabel>
                     <Input
-                      placeholder="Valor da Receita (R$)"
+                      placeholder="Valor da Despesa (R$)"
                       name="value"
                       type="number"
                     />
