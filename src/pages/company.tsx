@@ -304,7 +304,7 @@ export default function Company() {
                         src={company?.thumbnail}
                         w="250px"
                         h="250px"
-                        objectFit={"contain"}
+                        objectFit={"cover"}
                         rounded="md"
                       />
                     </Box>

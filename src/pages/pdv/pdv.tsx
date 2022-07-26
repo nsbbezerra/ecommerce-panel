@@ -46,13 +46,16 @@ import {
   ModalCloseButton,
   Icon,
   Stack,
+  FormControl,
+  FormLabel,
+  Skeleton,
 } from "@chakra-ui/react";
-import { Fragment, useEffect, useState } from "react";
+import { forwardRef, Fragment, useEffect, useRef, useState, memo } from "react";
 import {
   AiOutlineBarcode,
   AiOutlineCheck,
+  AiOutlineEdit,
   AiOutlineEnter,
-  AiOutlineFilter,
   AiOutlineMore,
   AiOutlinePercentage,
   AiOutlineSave,
@@ -69,6 +72,10 @@ import Scrollbars from "react-custom-scrollbars";
 import { api, configs } from "../../configs";
 import axios from "axios";
 import { useHotkeys } from "react-hotkeys-hook";
+import DatePicker, { registerLocale } from "react-datepicker";
+import pt_br from "date-fns/locale/pt-BR";
+import { useQuery } from "react-query";
+import { GiCardboardBox } from "react-icons/gi";
 
 type ClientsProps = {
   id: string;
@@ -117,8 +124,11 @@ type Props = {
   token: string;
 };
 
-export default function PDV() {
+registerLocale("pt_br", pt_br);
+
+const PDV = () => {
   const toast = useToast();
+  const inputRef = useRef(null);
   const { colorMode } = useColorMode();
 
   const [clients, setClients] = useState<ClientsProps[]>();
@@ -127,6 +137,7 @@ export default function PDV() {
   const [products, setProducts] = useState<ProductsProps[]>();
   const [modalClients, setModalClients] = useState<boolean>(false);
   const [searchClient, setSearchClient] = useState<string>("");
+  const [saleDate, setSaleDate] = useState<Date>(new Date());
 
   const [auth, setAuth] = useState<Props>();
 
@@ -181,6 +192,45 @@ export default function PDV() {
       );
     }
   }, []);
+
+  async function getInformation() {
+    try {
+      let companyId;
+      if (!auth) {
+        const company = localStorage.getItem("company");
+        let companyParse = JSON.parse(company || "");
+        companyId = companyParse.id;
+      } else {
+        companyId = auth.id;
+      }
+      const { data } = await api.get(`/pdv_products/${companyId}`);
+      return data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
+  }
+
+  const { data, isLoading, error } = useQuery("list-products", getInformation, {
+    refetchInterval: 4000,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setProducts(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      const message = (error as Error).message;
+      showToast(message, "error", "Erro");
+    }
+  }, [error]);
 
   useHotkeys("F2", (e) => {
     setModalClients(true);
@@ -258,42 +308,6 @@ export default function PDV() {
     </Tr>
   );
 
-  const ProductShow = () => (
-    <Box
-      rounded="md"
-      overflow={"hidden"}
-      borderWidth="1px"
-      position={"relative"}
-      h="fit-content"
-    >
-      <Image
-        src="https://img.freepik.com/psd-premium/fone-de-ouvido-cor-vermelha-marca-produto-midia-social-post-banner_154386-99.jpg?w=2000"
-        w="100%"
-      />
-      <Box borderTopWidth={"1px"} p={2}>
-        <Tooltip label="Barbeador Profissional para Barbas" hasArrow>
-          <Text fontWeight={"semibold"} fontSize="sm" noOfLines={1}>
-            Barbeador Profissional para Barbas
-          </Text>
-        </Tooltip>
-        <Text fontSize={"xs"} fontWeight="thin" noOfLines={1}>
-          Barbeiro
-        </Text>
-        <Grid templateColumns={"2fr 1fr"} mt={1} gap={2}>
-          <Tag justifyContent={"center"} w="100%">
-            R$ 40,00
-          </Tag>
-          <IconButton
-            aria-label="Adicionar Produto"
-            icon={<AiOutlineShopping />}
-            size="xs"
-            colorScheme={"blue"}
-          />
-        </Grid>
-      </Box>
-    </Box>
-  );
-
   function handleClient(id: string) {
     const result = clients?.find((obj) => obj.id === id);
     setClient(result);
@@ -313,6 +327,10 @@ export default function PDV() {
       setClients(result);
     }
   }
+
+  const CustomInput = forwardRef((props: any, ref) => {
+    return <Input {...props} ref={ref} size="sm" />;
+  });
 
   return (
     <Fragment>
@@ -456,7 +474,19 @@ export default function PDV() {
                 <PopoverArrow />
                 <PopoverCloseButton />
                 <PopoverHeader>Configurações de Venda</PopoverHeader>
-                <PopoverBody></PopoverBody>
+                <PopoverBody>
+                  <FormControl>
+                    <FormLabel>Data da Venda</FormLabel>
+                    <DatePicker
+                      selected={saleDate}
+                      onChange={(e) => setSaleDate(e || new Date())}
+                      customInput={<CustomInput inputRef={inputRef} />}
+                      locale="pt_br"
+                      dateFormat="dd/MM/yyyy"
+                      showPopperArrow={true}
+                    />
+                  </FormControl>
+                </PopoverBody>
               </PopoverContent>
             </Popover>
           </HStack>
@@ -563,9 +593,88 @@ export default function PDV() {
             >
               <Box maxH={"full"} h="full" overflow={"auto"} p={2}>
                 <Scrollbars autoHide>
-                  <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
-                    <ProductShow />
-                  </Grid>
+                  {isLoading ? (
+                    <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
+                      <Skeleton h="200px" rounded={"md"} />
+                      <Skeleton h="200px" rounded={"md"} />
+                      <Skeleton h="200px" rounded={"md"} />
+                      <Skeleton h="200px" rounded={"md"} />
+                    </Grid>
+                  ) : (
+                    <Fragment>
+                      {!products || products.length === 0 ? (
+                        <Flex
+                          justify={"center"}
+                          align="center"
+                          direction={"column"}
+                        >
+                          <Icon as={GiCardboardBox} fontSize="8xl" />
+                          <Text>Nenhuma informação para mostrar</Text>
+                        </Flex>
+                      ) : (
+                        <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
+                          {products?.map((prod) => (
+                            <Box
+                              rounded="md"
+                              overflow={"hidden"}
+                              borderWidth="1px"
+                              position={"relative"}
+                              h="fit-content"
+                              key={prod.id}
+                            >
+                              <Image src={prod.thumbnail || ""} w="100%" />
+                              <Box borderTopWidth={"1px"} p={2}>
+                                <Tooltip
+                                  label="Barbeador Profissional para Barbas"
+                                  hasArrow
+                                >
+                                  <Text
+                                    fontWeight={"semibold"}
+                                    fontSize="sm"
+                                    noOfLines={2}
+                                  >
+                                    {prod.title || ""}
+                                  </Text>
+                                </Tooltip>
+                                <Text
+                                  fontSize={"xs"}
+                                  fontWeight="thin"
+                                  noOfLines={1}
+                                >
+                                  {prod.category?.title || ""}
+                                </Text>
+                                <Text
+                                  fontSize={"xs"}
+                                  fontWeight="thin"
+                                  noOfLines={1}
+                                >
+                                  {prod.sub_category?.title || ""}
+                                </Text>
+                                <Grid
+                                  templateColumns={"2fr 1fr"}
+                                  mt={1}
+                                  gap={2}
+                                >
+                                  <Tag justifyContent={"center"} w="100%">
+                                    {parseFloat(prod.sale_value).toLocaleString(
+                                      "pt-br",
+                                      { style: "currency", currency: "BRL" }
+                                    )}
+                                  </Tag>
+                                  <IconButton
+                                    aria-label="Adicionar Produto"
+                                    icon={<AiOutlineShopping />}
+                                    size="xs"
+                                    colorScheme={"blue"}
+                                  />
+                                </Grid>
+                              </Box>
+                            </Box>
+                          ))}
+                        </Grid>
+                      )}
+                    </Fragment>
+                  )}
                 </Scrollbars>
               </Box>
               <Grid
@@ -585,14 +694,17 @@ export default function PDV() {
               >
                 <Menu>
                   <MenuButton
-                    as={IconButton}
+                    as={Button}
                     aria-label="Oções"
-                    icon={<AiOutlineTool />}
+                    leftIcon={<AiOutlineTool />}
                     size="lg"
-                    variant="outline"
                     colorScheme="blue"
-                  />
+                    variant="outline"
+                  >
+                    Opções
+                  </MenuButton>
                   <MenuList>
+                    <MenuItem icon={<AiOutlineEdit />}>Observações</MenuItem>
                     <MenuItem icon={<AiOutlineSave />}>
                       Salvar como Orçamento
                     </MenuItem>
@@ -609,7 +721,6 @@ export default function PDV() {
                   size="lg"
                   leftIcon={<AiOutlinePercentage />}
                   colorScheme="blue"
-                  variant="outline"
                 >
                   Desconto
                 </Button>
@@ -696,4 +807,6 @@ export default function PDV() {
       </Modal>
     </Fragment>
   );
-}
+};
+
+export default memo(PDV);

@@ -1249,7 +1249,7 @@ const RegisterProduct = () => {
             align={"center"}
             rounded="md"
           >
-            VENDA FRACIONADA
+            VENDA FRACIONADA (FAST-FOOD'S)
           </Flex>
 
           <Grid templateColumns={"1fr 1fr 1fr"} gap={3}>
