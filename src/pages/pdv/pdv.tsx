@@ -62,13 +62,13 @@ import {
   AiOutlineTool,
   AiOutlineUser,
 } from "react-icons/ai";
-import { BiRename } from "react-icons/bi";
+import { BiCog, BiRename } from "react-icons/bi";
 import { BsPrinter } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
 import Scrollbars from "react-custom-scrollbars";
 import { api, configs } from "../../configs";
 import axios from "axios";
-import { TiPhoneOutline } from "react-icons/ti";
+import { useHotkeys } from "react-hotkeys-hook";
 
 type ClientsProps = {
   id: string;
@@ -122,9 +122,11 @@ export default function PDV() {
   const { colorMode } = useColorMode();
 
   const [clients, setClients] = useState<ClientsProps[]>();
+  const [clientsRef, setClientsRef] = useState<ClientsProps[]>();
   const [client, setClient] = useState<ClientsProps>();
   const [products, setProducts] = useState<ProductsProps[]>();
   const [modalClients, setModalClients] = useState<boolean>(false);
+  const [searchClient, setSearchClient] = useState<string>("");
 
   const [auth, setAuth] = useState<Props>();
 
@@ -147,6 +149,7 @@ export default function PDV() {
     try {
       const response = await api.get(`/pdv_clients/${id}`);
       setClients(response.data);
+      setClientsRef(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
@@ -178,6 +181,25 @@ export default function PDV() {
       );
     }
   }, []);
+
+  useHotkeys("F2", (e) => {
+    setModalClients(true);
+  });
+
+  useHotkeys("F8", (e) => {
+    const input = document.getElementById("quantity");
+    input?.focus();
+  });
+
+  useHotkeys("F4", (e) => {
+    const input = document.getElementById("name");
+    input?.focus();
+  });
+
+  useHotkeys("F9", (e) => {
+    const input = document.getElementById("barcode");
+    input?.focus();
+  });
 
   const TableRow = () => (
     <Tr>
@@ -276,6 +298,20 @@ export default function PDV() {
     const result = clients?.find((obj) => obj.id === id);
     setClient(result);
     setModalClients(false);
+    setClients(clientsRef);
+    setSearchClient("");
+  }
+
+  function handleSearchClient(text: string) {
+    setSearchClient(text);
+    if (text === "") {
+      setClients(clientsRef);
+    } else {
+      const result = clientsRef?.filter((obj) =>
+        obj.name.toLowerCase().includes(text.toLowerCase())
+      );
+      setClients(result);
+    }
   }
 
   return (
@@ -377,17 +413,22 @@ export default function PDV() {
             <Button
               colorScheme="blue"
               leftIcon={<AiOutlineSearch />}
-              px={5}
+              px={7}
               onClick={() => setModalClients(true)}
             >
-              Buscar
+              Buscar{" "}
+              <Kbd color={"ButtonText"} ml={2}>
+                F2
+              </Kbd>
             </Button>
           </HStack>
 
           <HStack borderWidth="1px" rounded="md" px={2}>
             <InputGroup w="72">
-              <Input placeholder="QTD" />
-              <InputRightAddon px={2}>QTD</InputRightAddon>
+              <Input placeholder="QTD" id="quantity" />
+              <InputRightAddon px={2}>
+                <Kbd colorScheme={"blue"}>F8</Kbd>
+              </InputRightAddon>
             </InputGroup>
             <InputGroup>
               <InputLeftElement
@@ -395,19 +436,29 @@ export default function PDV() {
                 children={<AiOutlineBarcode />}
                 zIndex={1}
               />
-              <Input placeholder="Código de Barras" />
+              <Input placeholder="Código de Barras" id="barcode" />
               <InputRightAddon px={2}>
                 <Kbd colorScheme={"blue"}>F9</Kbd>
               </InputRightAddon>
             </InputGroup>
             <InputGroup>
               <InputLeftElement pointerEvents="none" children={<BiRename />} />
-              <Input placeholder="Nome" />
+              <Input placeholder="Nome" id="name" />
               <InputRightAddon px={2}>
-                <Kbd colorScheme={"blue"}>F6</Kbd>
+                <Kbd colorScheme={"blue"}>F4</Kbd>
               </InputRightAddon>
             </InputGroup>
-            <IconButton aria-label="Detalhes" icon={<AiOutlineFilter />} />
+            <Popover placement="bottom-end">
+              <PopoverTrigger>
+                <IconButton aria-label="Detalhes" icon={<BiCog />} />
+              </PopoverTrigger>
+              <PopoverContent shadow="lg" _focus={{ outline: "none" }}>
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverHeader>Configurações de Venda</PopoverHeader>
+                <PopoverBody></PopoverBody>
+              </PopoverContent>
+            </Popover>
           </HStack>
         </Grid>
 
@@ -600,6 +651,7 @@ export default function PDV() {
                   placeholder="Digite para buscar"
                   variant={"flushed"}
                   autoFocus
+                  onChange={(e) => handleSearchClient(e.target.value)}
                 />
               </InputGroup>
             </Box>
