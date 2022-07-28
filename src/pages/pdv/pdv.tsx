@@ -49,6 +49,7 @@ import {
   FormControl,
   FormLabel,
   Skeleton,
+  MenuDivider,
 } from "@chakra-ui/react";
 import { forwardRef, Fragment, useEffect, useRef, useState, memo } from "react";
 import {
@@ -128,7 +129,7 @@ registerLocale("pt_br", pt_br);
 
 const PDV = () => {
   const toast = useToast();
-  const inputRef = useRef(null);
+  const inputref = useRef(null);
   const { colorMode } = useColorMode();
 
   const [clients, setClients] = useState<ClientsProps[]>();
@@ -236,11 +237,6 @@ const PDV = () => {
     setModalClients(true);
   });
 
-  useHotkeys("F8", (e) => {
-    const input = document.getElementById("quantity");
-    input?.focus();
-  });
-
   useHotkeys("F4", (e) => {
     const input = document.getElementById("name");
     input?.focus();
@@ -331,6 +327,12 @@ const PDV = () => {
   const CustomInput = forwardRef((props: any, ref) => {
     return <Input {...props} ref={ref} size="sm" />;
   });
+
+  function calcPercent(price: string, discount: number) {
+    let calc = (parseFloat(price) * discount) / 100;
+    let final = parseFloat(price) - calc;
+    return parseFloat(final.toFixed(2));
+  }
 
   return (
     <Fragment>
@@ -442,12 +444,6 @@ const PDV = () => {
           </HStack>
 
           <HStack borderWidth="1px" rounded="md" px={2}>
-            <InputGroup w="72">
-              <Input placeholder="QTD" id="quantity" />
-              <InputRightAddon px={2}>
-                <Kbd colorScheme={"blue"}>F8</Kbd>
-              </InputRightAddon>
-            </InputGroup>
             <InputGroup>
               <InputLeftElement
                 pointerEvents="none"
@@ -480,7 +476,7 @@ const PDV = () => {
                     <DatePicker
                       selected={saleDate}
                       onChange={(e) => setSaleDate(e || new Date())}
-                      customInput={<CustomInput inputRef={inputRef} />}
+                      customInput={<CustomInput inputRef={inputref} />}
                       locale="pt_br"
                       dateFormat="dd/MM/yyyy"
                       showPopperArrow={true}
@@ -612,7 +608,10 @@ const PDV = () => {
                           <Text>Nenhuma informação para mostrar</Text>
                         </Flex>
                       ) : (
-                        <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
+                        <Box
+                          w="100%"
+                          sx={{ columnCount: [1, 2, 3, 4], columnGap: 2 }}
+                        >
                           {products?.map((prod) => (
                             <Box
                               rounded="md"
@@ -621,9 +620,20 @@ const PDV = () => {
                               position={"relative"}
                               h="fit-content"
                               key={prod.id}
+                              mb={2}
                             >
+                              {prod.in_promotion && (
+                                <Tag
+                                  position={"absolute"}
+                                  top={3}
+                                  left={3}
+                                  colorScheme="red"
+                                >
+                                  -{prod.profit_percent}%
+                                </Tag>
+                              )}
                               <Image src={prod.thumbnail || ""} w="100%" />
-                              <Box borderTopWidth={"1px"} p={2}>
+                              <Box borderTopWidth={"1px"} p={1}>
                                 <Tooltip
                                   label="Barbeador Profissional para Barbas"
                                   hasArrow
@@ -650,28 +660,57 @@ const PDV = () => {
                                 >
                                   {prod.sub_category?.title || ""}
                                 </Text>
-                                <Grid
-                                  templateColumns={"2fr 1fr"}
-                                  mt={1}
-                                  gap={2}
-                                >
+                                {prod.in_promotion ? (
+                                  <Grid templateColumns={"1fr 1fr"} gap={1}>
+                                    <Tag
+                                      justifyContent={"center"}
+                                      w="100%"
+                                      colorScheme={"orange"}
+                                      textDecor="line-through"
+                                      size={"sm"}
+                                    >
+                                      {parseFloat(
+                                        prod.sale_value
+                                      ).toLocaleString("pt-br", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      })}
+                                    </Tag>
+                                    <Tag justifyContent={"center"} w="100%">
+                                      {calcPercent(
+                                        prod.sale_value,
+                                        prod.profit_percent
+                                      ).toLocaleString("pt-br", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      })}
+                                    </Tag>
+                                  </Grid>
+                                ) : (
                                   <Tag justifyContent={"center"} w="100%">
                                     {parseFloat(prod.sale_value).toLocaleString(
                                       "pt-br",
-                                      { style: "currency", currency: "BRL" }
+                                      {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      }
                                     )}
                                   </Tag>
-                                  <IconButton
-                                    aria-label="Adicionar Produto"
-                                    icon={<AiOutlineShopping />}
-                                    size="xs"
-                                    colorScheme={"blue"}
-                                  />
-                                </Grid>
+                                )}
+
+                                <Button
+                                  isFullWidth
+                                  colorScheme={"blue"}
+                                  size="sm"
+                                  mt={1}
+                                  leftIcon={<AiOutlineShoppingCart />}
+                                >
+                                  Adicionar
+                                </Button>
                               </Box>
                             </Box>
                           ))}
-                        </Grid>
+                        </Box>
                       )}
                     </Fragment>
                   )}
@@ -709,6 +748,7 @@ const PDV = () => {
                       Salvar como Orçamento
                     </MenuItem>
                     <MenuItem icon={<BsPrinter />}>Imprimir Venda</MenuItem>
+                    <MenuDivider />
                     <MenuItem
                       icon={<FaTrashAlt />}
                       color={useColorModeValue("red.600", "red.200")}
@@ -763,6 +803,7 @@ const PDV = () => {
                   variant={"flushed"}
                   autoFocus
                   onChange={(e) => handleSearchClient(e.target.value)}
+                  value={searchClient}
                 />
               </InputGroup>
             </Box>

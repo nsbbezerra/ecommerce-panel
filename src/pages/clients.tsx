@@ -51,10 +51,10 @@ type Props = {
 const Clients = () => {
   const toast = useToast();
 
-  const [clients, setClients] = useState<Props[]>();
+  const [clients, setClients] = useState<ClientProps[]>();
   const [page, setPage] = useState<number>(0);
   const [pages, setPages] = useState<number>(0);
-  const [client, setClient] = useState<Props>();
+  const [client, setClient] = useState<ClientProps>();
   const [address, setAddress] = useState<boolean>(false);
 
   function showToast(
@@ -97,7 +97,7 @@ const Clients = () => {
     }
   }
 
-  const paginateGood = (array: Props[], page_size: number) => {
+  const paginateGood = (array: ClientProps[], page_size: number) => {
     const pag = array.slice(page * page_size, page * page_size + page_size);
     setClients(pag);
   };
@@ -115,6 +115,7 @@ const Clients = () => {
 
   useEffect(() => {
     if (data) {
+      console.log(data);
       paginateGood(data, configs.pagination);
       setPages(Math.ceil(data.length / configs.pagination));
     }
@@ -127,7 +128,7 @@ const Clients = () => {
   }, [page]);
 
   const search = (id: string) => {
-    const result = clients?.find((obj) => obj.client.id === id);
+    const result = clients?.find((obj) => obj.id === id);
     setClient(result);
     setAddress(true);
   };
@@ -167,17 +168,17 @@ const Clients = () => {
                     </Thead>
                     <Tbody>
                       {clients?.map((cli) => (
-                        <Tr key={cli.client.id}>
-                          <Td>{cli.client.name}</Td>
-                          <Td>{cli.client.cpf}</Td>
-                          <Td>{cli.client.phone}</Td>
-                          <Td>{cli.client.email}</Td>
+                        <Tr key={cli.id || ""}>
+                          <Td>{cli.name || ""}</Td>
+                          <Td>{cli.cpf || ""}</Td>
+                          <Td>{cli.phone || ""}</Td>
+                          <Td>{cli.email || ""}</Td>
                           <Td>
                             <Button
                               isFullWidth
                               size="xs"
                               leftIcon={<AiOutlineSearch />}
-                              onClick={() => search(cli.client.id)}
+                              onClick={() => search(cli.id || "")}
                             >
                               Visualizar
                             </Button>
@@ -218,35 +219,35 @@ const Clients = () => {
           <ModalHeader>Endereço</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Table size="sm">
+            <Table>
               <Tbody>
                 <Tr>
                   <Th w="10%">Rua</Th>
-                  <Td>{client?.client.street}</Td>
+                  <Td>{client?.street}</Td>
                 </Tr>
                 <Tr>
                   <Th w="10%">Número</Th>
-                  <Td>{client?.client.number}</Td>
+                  <Td>{client?.number}</Td>
                 </Tr>
                 <Tr>
                   <Th w="10%">Comp.</Th>
-                  <Td>{client?.client.comp}</Td>
+                  <Td>{client?.comp}</Td>
                 </Tr>
                 <Tr>
                   <Th w="10%">Bairro</Th>
-                  <Td>{client?.client.district}</Td>
+                  <Td>{client?.district}</Td>
                 </Tr>
                 <Tr>
                   <Th w="10%">CEP</Th>
-                  <Td>{client?.client.zip_code}</Td>
+                  <Td>{client?.zip_code}</Td>
                 </Tr>
                 <Tr>
                   <Th w="10%">Cidade</Th>
-                  <Td>{client?.client.city}</Td>
+                  <Td>{client?.city}</Td>
                 </Tr>
                 <Tr>
                   <Th w="10%">Estado</Th>
-                  <Td>{client?.client.state}</Td>
+                  <Td>{client?.state}</Td>
                 </Tr>
               </Tbody>
             </Table>

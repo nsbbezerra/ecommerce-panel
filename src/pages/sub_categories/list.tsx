@@ -329,14 +329,14 @@ const ListSubCategories = () => {
                 <Thead>
                   <Tr>
                     <Th w="5%" textAlign={"center"}>
+                      Ativo?
+                    </Th>
+                    <Th w="5%" textAlign={"center"}>
                       Ícone
                     </Th>
                     <Th>Título</Th>
                     <Th>Descrição</Th>
                     <Th>Categoria</Th>
-                    <Th w="10%" textAlign={"center"}>
-                      Ativo?
-                    </Th>
                     <Th w="10%" textAlign={"center"}>
                       Opções
                     </Th>
@@ -345,15 +345,6 @@ const ListSubCategories = () => {
                 <Tbody>
                   {subCategories?.map((sbc) => (
                     <Tr key={sbc.id}>
-                      <Td textAlign={"center"}>
-                        <Icon
-                          as={getIcon({ icon: sbc.icon as keyof typeof Icons })}
-                          fontSize="xl"
-                        />
-                      </Td>
-                      <Td>{sbc.title}</Td>
-                      <Td>{sbc.description}</Td>
-                      <Td>{sbc.category.title}</Td>
                       <Td textAlign={"center"}>
                         <Switch
                           defaultChecked={sbc.active}
@@ -365,6 +356,15 @@ const ListSubCategories = () => {
                           }
                         />
                       </Td>
+                      <Td textAlign={"center"}>
+                        <Icon
+                          as={getIcon({ icon: sbc.icon as keyof typeof Icons })}
+                          fontSize="xl"
+                        />
+                      </Td>
+                      <Td>{sbc.title}</Td>
+                      <Td>{sbc.description}</Td>
+                      <Td>{sbc.category.title}</Td>
                       <Td textAlign={"center"}>
                         <Menu>
                           <MenuButton

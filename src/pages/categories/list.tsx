@@ -331,27 +331,19 @@ const ListCategories = () => {
                 <Thead>
                   <Tr>
                     <Th w="5%" textAlign={"center"}>
+                      Ativo?
+                    </Th>
+                    <Th w="5%" textAlign={"center"}>
                       Ícone
                     </Th>
                     <Th>Título</Th>
                     <Th>Descrição</Th>
-                    <Th w="10%" textAlign={"center"}>
-                      Ativo?
-                    </Th>
                     <Th w="10%">Opções</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {categories?.map((cat) => (
                     <Tr key={cat.id}>
-                      <Td textAlign={"center"}>
-                        <Icon
-                          as={getIcon({ icon: cat.icon as keyof typeof Icons })}
-                          fontSize="xl"
-                        />
-                      </Td>
-                      <Td>{cat.title}</Td>
-                      <Td>{cat.description}</Td>
                       <Td textAlign={"center"}>
                         <Switch
                           defaultChecked={cat.active}
@@ -363,6 +355,14 @@ const ListCategories = () => {
                           }
                         />
                       </Td>
+                      <Td textAlign={"center"}>
+                        <Icon
+                          as={getIcon({ icon: cat.icon as keyof typeof Icons })}
+                          fontSize="xl"
+                        />
+                      </Td>
+                      <Td>{cat.title}</Td>
+                      <Td>{cat.description}</Td>
                       <Td>
                         <Menu>
                           <MenuButton

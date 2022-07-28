@@ -1,4 +1,10 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
   Grid,
   Popover,
   PopoverTrigger,
@@ -53,15 +59,16 @@ import {
   Tbody,
   Td,
   Image,
-  Wrap,
   PopoverFooter,
   ToastPositionWithLogical,
+  Wrap,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useRef, useState, memo } from "react";
 import {
   AiOutlineAppstoreAdd,
   AiOutlineCalculator,
+  AiOutlineClose,
   AiOutlineEdit,
   AiOutlinePercentage,
   AiOutlinePicture,
@@ -254,6 +261,7 @@ type AdicionalItemsProps = {
 
 const ListProduct = () => {
   const toast = useToast();
+  const cancelRef = useRef(null);
   const formRefTax = useRef<FormHandles>(null);
   const formRefInformation = useRef<FormHandles>(null);
   const formRefSizes = useRef<FormHandles>(null);
@@ -308,6 +316,8 @@ const ListProduct = () => {
   const [isPromotional, setIsPromotional] = useState<boolean>(false);
 
   const [modalPromotions, setModalPromotions] = useState<boolean>(false);
+  const [showWidths, setShowWidths] = useState<boolean>(false);
+  const [productWidts, setProductWidths] = useState<WidthProps[]>();
 
   const [tax, setTax] = useState<TaxProps>();
   const [productId, setProductId] = useState<string>("");
@@ -759,9 +769,16 @@ const ListProduct = () => {
     }
   }
 
-  const handleShowWidths = (widths: string) => {
-    const larguras: WidthProps[] = JSON.parse(widths);
-    return larguras;
+  const handleShowWidths = (id: string) => {
+    const result = products?.find((obj) => obj.id === id);
+    const larguras = result?.width;
+    const parsed = JSON.parse(larguras || "");
+    if (parsed) {
+      setProductWidths(parsed);
+      setShowWidths(true);
+    } else {
+      showToast("Não foi encontrado nenhuma informação", "warning", "Atenção");
+    }
   };
 
   const saveSizes: SubmitHandler<SizeProps> = async (data, { reset }) => {
@@ -1054,36 +1071,16 @@ const ListProduct = () => {
                       <Td>{pro.unit_desc}</Td>
                       <Td w="180px" textAlign={"center"}>
                         {(pro.type_unit === "square_meter" && (
-                          <Popover>
-                            <PopoverTrigger>
-                              <Button
-                                leftIcon={<BiRuler />}
-                                size="xs"
-                                isFullWidth
-                                colorScheme={"blue"}
-                                variant="outline"
-                              >
-                                Larguras
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              shadow={"lg"}
-                              _focus={{ outline: "none" }}
-                            >
-                              <PopoverArrow />
-                              <PopoverCloseButton />
-                              <PopoverHeader textAlign={"justify"}>
-                                Larguras
-                              </PopoverHeader>
-                              <PopoverBody>
-                                <Wrap spacing={3}>
-                                  {handleShowWidths(pro.width).map((wid) => (
-                                    <Tag key={wid.id}>{wid.width} MT</Tag>
-                                  ))}
-                                </Wrap>
-                              </PopoverBody>
-                            </PopoverContent>
-                          </Popover>
+                          <Button
+                            leftIcon={<BiRuler />}
+                            size="xs"
+                            isFullWidth
+                            colorScheme={"blue"}
+                            variant="outline"
+                            onClick={() => handleShowWidths(pro.id)}
+                          >
+                            Larguras
+                          </Button>
                         )) ||
                           (pro.type_unit === "unity" && (
                             <Tag
@@ -2509,6 +2506,41 @@ const ListProduct = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      <AlertDialog
+        isOpen={showWidths}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setShowWidths(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Larguras
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              <Wrap>
+                {productWidts?.map((pro) => (
+                  <Tag size={"lg"} key={pro.width}>
+                    {pro.width}mt
+                  </Tag>
+                ))}
+              </Wrap>
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setShowWidths(false)}
+                colorScheme="blue"
+                leftIcon={<AiOutlineClose />}
+              >
+                Fechar
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Fragment>
   );
 };
