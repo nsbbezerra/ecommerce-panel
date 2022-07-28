@@ -50,23 +50,33 @@ import {
   FormLabel,
   Skeleton,
   MenuDivider,
+  InputLeftAddon,
+  Divider,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
 } from "@chakra-ui/react";
 import { forwardRef, Fragment, useEffect, useRef, useState, memo } from "react";
 import {
+  AiOutlineAppstoreAdd,
   AiOutlineBarcode,
   AiOutlineCheck,
   AiOutlineEdit,
   AiOutlineEnter,
   AiOutlineMore,
+  AiOutlineNumber,
+  AiOutlinePartition,
   AiOutlinePercentage,
+  AiOutlinePlus,
   AiOutlineSave,
   AiOutlineSearch,
-  AiOutlineShopping,
   AiOutlineShoppingCart,
   AiOutlineTool,
   AiOutlineUser,
 } from "react-icons/ai";
-import { BiCog, BiRename } from "react-icons/bi";
+import { BiCode, BiCog, BiRename } from "react-icons/bi";
 import { BsPrinter } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
 import Scrollbars from "react-custom-scrollbars";
@@ -114,6 +124,9 @@ type ProductsProps = {
   type_sale: "unique" | "partition";
   sub_category: CatProps;
   category: CatProps;
+  sale_options?: string;
+  sale_options_category: string;
+  adictional_items_id: string;
 };
 
 type CatProps = {
@@ -123,6 +136,46 @@ type CatProps = {
 type Props = {
   id: string;
   token: string;
+};
+
+type ProductSaleProps = {
+  id: string;
+  name: string;
+  quantity: number;
+  unity: string;
+  sale_value: number;
+  sale_total: number;
+  partition?: PartitionProps[];
+  adictional?: AdicionalProps[];
+  widths?: WidthsProps;
+  height: number;
+};
+
+type WidthsProps = {
+  id: string;
+  width: string;
+};
+
+type PartitionProps = {
+  id: string;
+  quantity: number;
+  partition_id: string;
+  partition_name: string;
+  value: number;
+};
+
+type AdicionalProps = {
+  id: string;
+  quantity: number;
+  adictional_id: string;
+  adictional_name: string;
+  value: number;
+};
+
+type PartitionSaleProps = {
+  id: string;
+  name: string;
+  value: string;
 };
 
 registerLocale("pt_br", pt_br);
@@ -139,6 +192,25 @@ const PDV = () => {
   const [modalClients, setModalClients] = useState<boolean>(false);
   const [searchClient, setSearchClient] = useState<string>("");
   const [saleDate, setSaleDate] = useState<Date>(new Date());
+  const [saleProducts, setSaleProducts] = useState<ProductSaleProps[]>();
+  const [loadingFind, setLoadingFind] = useState<boolean>(false);
+
+  const [quantity, setQuantity] = useState<number>(1);
+  const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
+  const [modalAdictionalItems, setModalAdictionalItems] =
+    useState<boolean>(true);
+  const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
+  const [refSaleValue, setRefSaleValue] = useState<number>(0);
+  const [refWidthsList, setRefWidthsList] = useState<WidthsProps[]>();
+  const [refWidth, setRefWidth] = useState<number>(0);
+  const [refHeight, setRefHeight] = useState<number>(0);
+  const [refProduct, setRefProduct] = useState<ProductsProps>();
+  const [partitionSale, setPartitionSale] = useState<PartitionSaleProps[]>();
+  const [adicionalItems, setAdictionalItems] = useState<PartitionSaleProps[]>();
+
+  const [name, setName] = useState<string>("");
+  const [barcode, setBarcode] = useState<string>("");
+  const [sku, setSku] = useState<string>("");
 
   const [auth, setAuth] = useState<Props>();
 
@@ -225,6 +297,43 @@ const PDV = () => {
       setProducts(data);
     }
   }, [data]);
+
+  function searchProductByName(text: string) {
+    setName(text);
+    if (text === "") {
+      setProducts(data);
+    } else {
+      const initProducts: ProductsProps[] = data;
+      const result = initProducts.filter((obj) =>
+        obj.title.toLowerCase().includes(text.toLowerCase())
+      );
+      setProducts(result);
+    }
+  }
+
+  function searchProductByBarcode(text: string) {
+    setBarcode(text);
+    if (text === "") {
+      setProducts(data);
+    } else {
+      const initProducts: ProductsProps[] = data;
+      const result = initProducts.filter((obj) => obj.barcode.includes(text));
+      setProducts(result);
+    }
+  }
+
+  function searchProductBySku(text: string) {
+    setSku(text);
+    if (text === "") {
+      setProducts(data);
+    } else {
+      const initProducts: ProductsProps[] = data;
+      const result = initProducts.filter((obj) =>
+        obj.sku.toLowerCase().includes(text.toLowerCase())
+      );
+      setProducts(result);
+    }
+  }
 
   useEffect(() => {
     if (error) {
@@ -332,6 +441,42 @@ const PDV = () => {
     let calc = (parseFloat(price) * discount) / 100;
     let final = parseFloat(price) - calc;
     return parseFloat(final.toFixed(2));
+  }
+
+  function handleAddProduct(id: string, un: string) {
+    const productsReferencia: ProductsProps[] = data;
+    const result = productsReferencia.find((obj) => obj.id === id);
+    setRefProduct(result);
+    console.log(un);
+    if (
+      un === "meter" ||
+      un === "unity" ||
+      un === "weight" ||
+      un === "liter" ||
+      un === "without"
+    ) {
+      setModalWithUnity(true);
+      setRefSaleValue(parseFloat(result?.sale_value || ""));
+    }
+  }
+
+  async function findAdictionalItems(id: string) {
+    try {
+      setLoadingFind(true);
+      setModalAdictionalItems(true);
+      const response = await api.get(`/adictionalItems/${id}`);
+      setAdictionalItems(response.data);
+      console.log(response.data);
+      setLoadingFind(false);
+    } catch (error) {
+      setLoadingFind(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
   }
 
   return (
@@ -447,17 +592,43 @@ const PDV = () => {
             <InputGroup>
               <InputLeftElement
                 pointerEvents="none"
+                children={<AiOutlineNumber />}
+                zIndex={1}
+              />
+              <Input
+                placeholder="SKU"
+                id="sku"
+                value={sku}
+                onChange={(e) => searchProductBySku(e.target.value)}
+              />
+              <InputRightAddon px={2}>
+                <Kbd colorScheme={"blue"}>F9</Kbd>
+              </InputRightAddon>
+            </InputGroup>
+            <InputGroup>
+              <InputLeftElement
+                pointerEvents="none"
                 children={<AiOutlineBarcode />}
                 zIndex={1}
               />
-              <Input placeholder="Código de Barras" id="barcode" />
+              <Input
+                placeholder="Código de Barras"
+                id="barcode"
+                value={barcode}
+                onChange={(e) => searchProductByBarcode(e.target.value)}
+              />
               <InputRightAddon px={2}>
                 <Kbd colorScheme={"blue"}>F9</Kbd>
               </InputRightAddon>
             </InputGroup>
             <InputGroup>
               <InputLeftElement pointerEvents="none" children={<BiRename />} />
-              <Input placeholder="Nome" id="name" />
+              <Input
+                placeholder="Nome"
+                id="name"
+                value={name}
+                onChange={(e) => searchProductByName(e.target.value)}
+              />
               <InputRightAddon px={2}>
                 <Kbd colorScheme={"blue"}>F4</Kbd>
               </InputRightAddon>
@@ -489,7 +660,7 @@ const PDV = () => {
         </Grid>
 
         <Box h="full" maxH="full" overflow={"hidden"} pt={"65px"}>
-          <Grid templateColumns={"1fr 1fr"} gap={3} h="full" maxH={"full"}>
+          <Grid templateColumns={"570px 1fr"} gap={3} h="full" maxH={"full"}>
             <Grid
               templateRows={"1fr 130px"}
               borderWidth="1px"
@@ -634,6 +805,29 @@ const PDV = () => {
                               )}
                               <Image src={prod.thumbnail || ""} w="100%" />
                               <Box borderTopWidth={"1px"} p={1}>
+                                <HStack spacing={1}>
+                                  <Text
+                                    fontSize={"xx-small"}
+                                    fontWeight="thin"
+                                    noOfLines={1}
+                                  >
+                                    {prod.sku || ""}
+                                  </Text>
+                                  <Text
+                                    fontSize={"xx-small"}
+                                    fontWeight="thin"
+                                    noOfLines={1}
+                                  >
+                                    -
+                                  </Text>
+                                  <Text
+                                    fontSize={"xx-small"}
+                                    fontWeight="thin"
+                                    noOfLines={1}
+                                  >
+                                    {prod.barcode || ""}
+                                  </Text>
+                                </HStack>
                                 <Tooltip
                                   label="Barbeador Profissional para Barbas"
                                   hasArrow
@@ -661,13 +855,14 @@ const PDV = () => {
                                   {prod.sub_category?.title || ""}
                                 </Text>
                                 {prod.in_promotion ? (
-                                  <Grid templateColumns={"1fr 1fr"} gap={1}>
-                                    <Tag
-                                      justifyContent={"center"}
-                                      w="100%"
-                                      colorScheme={"orange"}
+                                  <HStack spacing={2}>
+                                    <Text
+                                      fontSize={"sm"}
                                       textDecor="line-through"
-                                      size={"sm"}
+                                      color={useColorModeValue(
+                                        "gray.600",
+                                        "gray.400"
+                                      )}
                                     >
                                       {parseFloat(
                                         prod.sale_value
@@ -675,27 +870,29 @@ const PDV = () => {
                                         style: "currency",
                                         currency: "BRL",
                                       })}
-                                    </Tag>
-                                    <Tag justifyContent={"center"} w="100%">
+                                    </Text>
+                                    <Text fontSize={"sm"} fontWeight="semibold">
                                       {calcPercent(
                                         prod.sale_value,
                                         prod.profit_percent
                                       ).toLocaleString("pt-br", {
                                         style: "currency",
                                         currency: "BRL",
-                                      })}
-                                    </Tag>
-                                  </Grid>
+                                      })}{" "}
+                                      {prod.unit_desc}
+                                    </Text>
+                                  </HStack>
                                 ) : (
-                                  <Tag justifyContent={"center"} w="100%">
+                                  <Text fontSize={"sm"} fontWeight="semibold">
                                     {parseFloat(prod.sale_value).toLocaleString(
                                       "pt-br",
                                       {
                                         style: "currency",
                                         currency: "BRL",
                                       }
-                                    )}
-                                  </Tag>
+                                    )}{" "}
+                                    {prod.unit_desc}
+                                  </Text>
                                 )}
 
                                 <Button
@@ -704,6 +901,9 @@ const PDV = () => {
                                   size="sm"
                                   mt={1}
                                   leftIcon={<AiOutlineShoppingCart />}
+                                  onClick={() =>
+                                    handleAddProduct(prod.id, prod.type_unit)
+                                  }
                                 >
                                   Adicionar
                                 </Button>
@@ -717,7 +917,7 @@ const PDV = () => {
                 </Scrollbars>
               </Box>
               <Grid
-                templateColumns="1fr 2fr 2fr"
+                templateColumns="1fr 1fr 3fr"
                 gap={2}
                 px={2}
                 alignItems="center"
@@ -843,6 +1043,155 @@ const PDV = () => {
                 </Button>
               ))}
             </Stack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={modalWithUnity}
+        onClose={() => setModalWithUnity(false)}
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Quantidade</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <Input
+                value={quantity}
+                onChange={(e) => setQuantity(parseFloat(e.target.value))}
+                type="number"
+              />
+            </FormControl>
+
+            {refProduct?.type_sale === "partition" ? (
+              <>
+                <Divider mt={3} mb={3} />
+
+                <Button leftIcon={<AiOutlinePartition />} isFullWidth>
+                  Venda Fracionada
+                </Button>
+              </>
+            ) : (
+              ""
+            )}
+
+            {refProduct?.have_adictional ? (
+              <>
+                <Divider mt={3} mb={3} />
+
+                <Button
+                  leftIcon={<AiOutlineAppstoreAdd />}
+                  isFullWidth
+                  onClick={() =>
+                    findAdictionalItems(refProduct.adictional_items_id)
+                  }
+                >
+                  Itens Adicionais
+                </Button>
+              </>
+            ) : (
+              ""
+            )}
+          </ModalBody>
+
+          <ModalFooter>
+            <HStack>
+              <InputGroup>
+                <InputLeftAddon children="R$" />
+                <Input
+                  placeholder="Total"
+                  isReadOnly
+                  value={
+                    parseFloat((quantity * refSaleValue).toFixed(2)) ||
+                    parseFloat("0").toLocaleString("pt-br", {
+                      minimumFractionDigits: 2,
+                    })
+                  }
+                />
+              </InputGroup>
+              <Button
+                colorScheme="blue"
+                leftIcon={<AiOutlineShoppingCart />}
+                px={10}
+              >
+                Adicionar
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={modalAdictionalItems}
+        onClose={() => setModalAdictionalItems(false)}
+        size="4xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Itens Adicionais</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={5}>
+            <Grid templateColumns={"1fr 1fr"} gap={5}>
+              <Box rounded="md" borderWidth={"1px"} p={2} h="fit-content">
+                <InputGroup mb={3}>
+                  <InputLeftAddon children="Quantidade" />
+                  <NumberInput w="full">
+                    <NumberInputField roundedLeft={"none"} />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </InputGroup>
+                {loadingFind ? (
+                  <Stack>
+                    <Skeleton rounded={"sm"} h={5} />
+                    <Skeleton rounded={"sm"} h={5} />
+                    <Skeleton rounded={"sm"} h={5} />
+                    <Skeleton rounded={"sm"} h={5} />
+                    <Skeleton rounded={"sm"} h={5} />
+                    <Skeleton rounded={"sm"} h={5} />
+                    <Skeleton rounded={"sm"} h={5} />
+                  </Stack>
+                ) : (
+                  <Table size={"sm"}>
+                    <Thead>
+                      <Tr>
+                        <Th>Descrição</Th>
+                        <Th isNumeric>Valor</Th>
+                        <Th w="5%" textAlign={"center"}>
+                          Ação
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {adicionalItems?.map((add) => (
+                        <Tr key={add.id}>
+                          <Td>{add.name}</Td>
+                          <Td isNumeric>
+                            {parseFloat(add.value).toLocaleString("pt-br", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </Td>
+                          <Td textAlign={"center"}>
+                            <IconButton
+                              aria-label="Adicionar Itens"
+                              icon={<AiOutlinePlus />}
+                              size="xs"
+                              colorScheme={"blue"}
+                            />
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                )}
+              </Box>
+              <Box rounded="md" borderWidth={"1px"} p={2} h="fit-content"></Box>
+            </Grid>
           </ModalBody>
         </ModalContent>
       </Modal>
