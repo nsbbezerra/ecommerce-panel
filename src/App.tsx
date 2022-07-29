@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Layout from "./components/layout";
 import { QueryClientProvider, QueryClient } from "react-query";
 import "react-datepicker/dist/react-datepicker.css";
+import "./styles/style.css";
 
 const queryClient = new QueryClient();
 

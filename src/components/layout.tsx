@@ -24,6 +24,7 @@ import {
 } from "react-icons/ai";
 import { FaTelegramPlane } from "react-icons/fa";
 import { BiMobileVibration } from "react-icons/bi";
+import { version } from "../../package.json";
 
 export default function Layout() {
   return (
@@ -75,6 +76,9 @@ export default function Layout() {
                 desenvolvedor responsável: <strong>Natanael Bezerra</strong>
               </Text>
               <HStack>
+                <Text fontSize={"sm"} mr={10}>
+                  Versão: {version}
+                </Text>
                 <IconButton
                   aria-label="Facebook"
                   icon={<AiOutlineFacebook />}

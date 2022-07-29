@@ -198,7 +198,7 @@ const PDV = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
   const [modalAdictionalItems, setModalAdictionalItems] =
-    useState<boolean>(true);
+    useState<boolean>(false);
   const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
   const [refSaleValue, setRefSaleValue] = useState<number>(0);
   const [refWidthsList, setRefWidthsList] = useState<WidthsProps[]>();
@@ -487,11 +487,11 @@ const PDV = () => {
           gap={3}
           h={"55px"}
           position={"absolute"}
-          top={2}
+          top={1}
           right={0}
           left={0}
         >
-          <HStack borderWidth="1px" rounded="md" px={2}>
+          <HStack>
             <InputGroup>
               <InputLeftElement
                 pointerEvents="none"
@@ -588,7 +588,7 @@ const PDV = () => {
             </Button>
           </HStack>
 
-          <HStack borderWidth="1px" rounded="md" px={2}>
+          <HStack>
             <InputGroup>
               <InputLeftElement
                 pointerEvents="none"
@@ -659,10 +659,10 @@ const PDV = () => {
           </HStack>
         </Grid>
 
-        <Box h="full" maxH="full" overflow={"hidden"} pt={"65px"}>
-          <Grid templateColumns={"570px 1fr"} gap={3} h="full" maxH={"full"}>
+        <Box h="full" maxH="full" overflow={"hidden"} pt={"58px"}>
+          <Grid templateColumns={"560px 1fr"} gap={3} h="full" maxH={"full"}>
             <Grid
-              templateRows={"1fr 130px"}
+              templateRows={"1fr 100px"}
               borderWidth="1px"
               overflow={"hidden"}
               rounded="md"
@@ -674,7 +674,7 @@ const PDV = () => {
                       position="sticky"
                       top={0}
                       bg={useColorModeValue("white", "gray.800")}
-                      shadow={"md"}
+                      shadow={"sm"}
                       zIndex={1}
                     >
                       <Tr>
@@ -696,16 +696,14 @@ const PDV = () => {
                   </Table>
                 </Scrollbars>
               </Box>
-              <Flex
+              <Grid
                 bg={useColorModeValue("blackAlpha.50", "whiteAlpha.50")}
-                justify="space-between"
-                align={"center"}
-                direction="column"
                 boxShadow={
                   colorMode === "light"
                     ? "0px -2px 6px rgba(0,0,0,.1)"
                     : "0px -2px 6px rgba(0,0,0,.3)"
                 }
+                templateRows="1fr 1fr 1fr"
               >
                 <Flex
                   justify={"space-between"}
@@ -713,11 +711,7 @@ const PDV = () => {
                   borderTopWidth={"1px"}
                   borderTopStyle="dashed"
                   borderTopColor={useColorModeValue("gray.400", "gray.500")}
-                  borderBottomWidth={"1px"}
-                  borderBottomStyle="dashed"
-                  borderBottomColor={useColorModeValue("gray.400", "gray.500")}
                   px={5}
-                  h={"44px"}
                   align="center"
                 >
                   <Text>SUB TOTAL</Text>
@@ -727,8 +721,10 @@ const PDV = () => {
                   justify={"space-between"}
                   w="full"
                   px={5}
-                  h={"40px"}
                   align="center"
+                  borderTopWidth={"1px"}
+                  borderTopStyle="dashed"
+                  borderTopColor={useColorModeValue("gray.400", "gray.500")}
                 >
                   <Text>DESCONTO</Text>
                   <Text>10%</Text>
@@ -744,16 +740,15 @@ const PDV = () => {
                   borderTopWidth={"1px"}
                   borderTopColor={useColorModeValue("white", "gray.800")}
                   px={5}
-                  h={"45px"}
                   align="center"
                 >
                   <Text>TOTAL A PAGAR</Text>
                   <Text>R$ 36,00</Text>
                 </Flex>
-              </Flex>
+              </Grid>
             </Grid>
             <Grid
-              templateRows={"1fr 64px"}
+              templateRows={"1fr 56px"}
               borderWidth="1px"
               overflow={"hidden"}
               rounded="md"
@@ -936,7 +931,6 @@ const PDV = () => {
                     as={Button}
                     aria-label="Oções"
                     leftIcon={<AiOutlineTool />}
-                    size="lg"
                     colorScheme="blue"
                     variant="outline"
                   >
@@ -957,19 +951,14 @@ const PDV = () => {
                     </MenuItem>
                   </MenuList>
                 </Menu>
-                <Button
-                  size="lg"
-                  leftIcon={<AiOutlinePercentage />}
-                  colorScheme="blue"
-                >
+                <Button leftIcon={<AiOutlinePercentage />} colorScheme="blue">
                   Desconto
                 </Button>
                 <Button
-                  size="lg"
                   leftIcon={<AiOutlineShoppingCart />}
                   colorScheme="green"
                 >
-                  Finalizar
+                  Finalizar Venda
                 </Button>
               </Grid>
             </Grid>

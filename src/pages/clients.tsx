@@ -136,7 +136,7 @@ const Clients = () => {
   return (
     <Fragment>
       <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
+        <Box>
           {isLoading ? (
             <Stack spacing={3}>
               <Skeleton h={7} />

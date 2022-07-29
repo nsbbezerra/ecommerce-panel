@@ -255,7 +255,7 @@ export default function PayForms() {
   return (
     <Fragment>
       <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
+        <Box>
           <Form ref={formRef} onSubmit={handleStorePayForm}>
             <Stack spacing={3}>
               <Grid templateColumns={"3fr 1fr"} gap={3}>

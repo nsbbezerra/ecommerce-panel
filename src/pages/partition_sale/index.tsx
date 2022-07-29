@@ -336,7 +336,7 @@ export default function PartitionSale() {
   return (
     <Fragment>
       <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
+        <Box>
           <Grid templateColumns={"300px 1fr"} gap={5}>
             <Box h="fit-content">
               <Flex

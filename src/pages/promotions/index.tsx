@@ -19,7 +19,7 @@ const IndexPromotions = () => {
   return (
     <Fragment>
       <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
+        <Box>
           <Tabs
             variant={"enclosed-colored"}
             onChange={(e) => setIndex(e)}

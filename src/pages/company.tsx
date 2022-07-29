@@ -277,19 +277,13 @@ export default function Company() {
             templateColumns={[
               "1fr",
               "1fr",
-              "280px 1fr",
-              "280px 1fr",
-              "280px 1fr",
+              "250px 1fr",
+              "250px 1fr",
+              "250px 1fr",
             ]}
             gap={5}
           >
-            <Box
-              borderWidth={"1px"}
-              rounded="md"
-              h="min-content"
-              p={3}
-              w="280px"
-            >
+            <Box h="min-content" w="250px">
               {showThumb ? (
                 <FormControl>
                   <FormLabel>Logo da Empresa</FormLabel>
@@ -439,7 +433,7 @@ export default function Company() {
                 </>
               )}
             </Box>
-            <Box rounded="md" borderWidth={"1px"} p={3}>
+            <Box>
               <Form ref={formRef} onSubmit={handleUpdate}>
                 <Stack spacing={3}>
                   <Grid

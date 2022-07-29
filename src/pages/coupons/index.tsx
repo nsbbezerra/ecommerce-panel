@@ -190,7 +190,7 @@ export default function Coupons() {
   return (
     <Fragment>
       <Box py={3}>
-        <Box borderWidth={"1px"} rounded="md" h="min-content" p={3}>
+        <Box>
           <Grid templateColumns={"repeat(6, 1fr)"} gap={3} alignItems="end">
             <FormControl isRequired>
               <FormLabel>Cupom (Max. 10)</FormLabel>

@@ -29,7 +29,7 @@ export default function Index() {
       gap={1}
       h={"100%"}
     >
-      <Image src={logo} w="20%" />
+      <Image src={logo} w="20%" draggable={false} />
       <Heading fontWeight={"semibold"} mt={5}>
         Gestão de Ecommerce
       </Heading>

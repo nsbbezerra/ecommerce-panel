@@ -152,6 +152,16 @@ export default function Header() {
   }
 
   useEffect(() => {
+    document.documentElement.style.overflow = "hidden";
+    document.body.clientWidth;
+    document.documentElement.setAttribute(
+      "data-color-scheme",
+      colorMode === "light" ? "light" : "dark"
+    );
+    document.documentElement.style.overflow = "";
+  }, [colorMode]);
+
+  useEffect(() => {
     const result = localStorage.getItem("company");
     if (result) {
       const companyParsed = JSON.parse(result || "");
