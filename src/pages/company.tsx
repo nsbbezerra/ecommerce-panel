@@ -38,6 +38,7 @@ import Select from "../components/Select";
 import { AiOutlinePicture, AiOutlineSave } from "react-icons/ai";
 import axios from "axios";
 import { api, configs } from "../configs";
+import Uploader from "../components/uploader";
 
 const queryClient = new QueryClient();
 
@@ -284,7 +285,7 @@ export default function Company() {
             gap={5}
           >
             <Box h="min-content" w="250px">
-              {showThumb ? (
+              {company?.thumbnail ? (
                 <FormControl>
                   <FormLabel>Logo da Empresa</FormLabel>
                   <Flex
@@ -318,7 +319,10 @@ export default function Company() {
                           size="sm"
                         />
                       </PopoverTrigger>
-                      <PopoverContent shadow={"md"}>
+                      <PopoverContent
+                        shadow={"md"}
+                        _focus={{ outline: "none" }}
+                      >
                         <PopoverArrow />
                         <PopoverCloseButton />
                         <PopoverHeader>Atenção!</PopoverHeader>
@@ -351,86 +355,13 @@ export default function Company() {
                   </Flex>
                 </FormControl>
               ) : (
-                <>
-                  {thumbnail ? (
-                    <FormControl>
-                      <FormLabel>Logo da Empresa</FormLabel>
-                      <Flex
-                        direction={"column"}
-                        align="center"
-                        justify={"center"}
-                        mb={3}
-                      >
-                        <Box
-                          rounded="md"
-                          w="250px"
-                          h="250px"
-                          overflow={"hidden"}
-                        >
-                          <Image
-                            src={preview}
-                            w="250px"
-                            h="250px"
-                            objectFit={"contain"}
-                          />
-                        </Box>
-
-                        <IconButton
-                          aria-label="Alterar logo da empresa"
-                          icon={<FaTrashAlt />}
-                          colorScheme={"red"}
-                          mt={"-45px"}
-                          size="sm"
-                          onClick={() => removeThumbnail()}
-                        />
-                      </Flex>
-                      <Button
-                        isFullWidth
-                        colorScheme={"blue"}
-                        leftIcon={<AiOutlineSave />}
-                        mt={3}
-                        isLoading={mutation.isLoading}
-                        onClick={() => {
-                          mutation.mutate(thumbnail);
-                        }}
-                      >
-                        Salvar Imagem
-                      </Button>
-                    </FormControl>
-                  ) : (
-                    <FormControl>
-                      <FormLabel htmlFor="image">
-                        Insira uma imagem
-                        <Flex
-                          w="250px"
-                          h="250px"
-                          rounded={"md"}
-                          borderWidth="1px"
-                          borderStyle={"dashed"}
-                          direction="column"
-                          justify={"center"}
-                          align="center"
-                          cursor={"pointer"}
-                          _hover={{ borderWidth: "2px" }}
-                          mt={2}
-                        >
-                          <Icon as={AiOutlinePicture} fontSize="4xl" />
-                          <Text textAlign={"center"} fontSize="md" mt={2}>
-                            Insira uma imagem
-                          </Text>
-                          <ChakraInput
-                            type={"file"}
-                            id="image"
-                            d="none"
-                            onChange={(e) => {
-                              handleThumbnail(e.target.files);
-                            }}
-                          />
-                        </Flex>
-                      </FormLabel>
-                    </FormControl>
-                  )}
-                </>
+                <Uploader
+                  title="Adicionar Imagem"
+                  name="thumbnail"
+                  url={`/companyThumb/${company?.id}`}
+                  height={250}
+                  width={250}
+                />
               )}
             </Box>
             <Box>
