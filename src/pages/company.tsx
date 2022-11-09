@@ -356,7 +356,7 @@ export default function Company() {
                 </FormControl>
               ) : (
                 <Uploader
-                  title="Adicionar Imagem"
+                  title={true}
                   name="thumbnail"
                   url={`/companyThumb/${company?.id}`}
                   height={250}

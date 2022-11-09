@@ -11,9 +11,10 @@ import {
   Input as ChakraInput,
   useToast,
   ToastPositionWithLogical,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { AiOutlinePicture, AiOutlineSave } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
 import { useMutation } from "react-query";
@@ -25,7 +26,8 @@ interface Props {
   width: number | string;
   height: number | string;
   image?: string | null;
-  title: string;
+  title?: boolean;
+  type?: "PUT" | "POST";
 }
 
 export default function Uploader({
@@ -33,17 +35,18 @@ export default function Uploader({
   name,
   width,
   height,
-  image,
-  title,
+  title = true,
+  type = "PUT",
 }: Props) {
-  const [thumbnail, setThumbnail] = useState<any>(null);
+  const [thumbnail, setThumbnail] = useState<File | undefined>(undefined);
   const toast = useToast();
+
   const preview = useMemo(() => {
     return thumbnail ? URL.createObjectURL(thumbnail) : undefined;
   }, [thumbnail]);
 
   function removeThumbnail() {
-    URL.revokeObjectURL(thumbnail);
+    URL.revokeObjectURL(thumbnail as any);
     setThumbnail(undefined);
   }
   function handleThumbnail(file: FileList | null) {
@@ -55,10 +58,10 @@ export default function Uploader({
   function showToast(
     message: string,
     status: "error" | "info" | "warning" | "success" | undefined,
-    title: string
+    titleToast: string
   ) {
     toast({
-      title: title,
+      title: titleToast,
       description: message,
       status: status,
       position: configs.toastPosition as ToastPositionWithLogical,
@@ -71,7 +74,9 @@ export default function Uploader({
     (thumb: File) => {
       let thumbData = new FormData();
       thumbData.append(name, thumb);
-      return api.put(url, thumbData);
+      return type === "PUT"
+        ? api.put(url, thumbData)
+        : api.post(url, thumbData);
     },
     {
       onSuccess: async (data) => {
@@ -86,11 +91,23 @@ export default function Uploader({
     }
   );
 
+  function convertArchiveSize(size: number) {
+    let sum = size / 1024;
+    if (sum > 500) {
+      showToast(
+        "Arquivo muito grande insira um arquivo de até 500kb",
+        "warning",
+        "Atenção"
+      );
+    }
+    return parseFloat(sum.toFixed(2));
+  }
+
   return (
     <Fragment>
       <>
         {thumbnail ? (
-          <FormControl w={width} h={height}>
+          <FormControl w={width} position="relative">
             <FormLabel>{title}</FormLabel>
             <Flex direction={"column"} align="center" justify={"center"} mb={3}>
               <Box rounded="md" w={width} h={height} overflow={"hidden"}>
@@ -118,11 +135,22 @@ export default function Uploader({
             >
               Salvar Imagem
             </Button>
+            <Text fontSize={"sm"}>{thumbnail.name}</Text>
+            <Text
+              fontSize={"sm"}
+              color={
+                convertArchiveSize(thumbnail.size) > 500
+                  ? useColorModeValue("red.600", "red.300")
+                  : ""
+              }
+            >
+              Tamanho: {convertArchiveSize(thumbnail.size)}kb
+            </Text>
           </FormControl>
         ) : (
-          <FormControl w={width} h={height}>
+          <FormControl w={width}>
             <FormLabel htmlFor="image">
-              Insira uma imagem
+              {title && "Insira uma imagem"}
               <Flex
                 w={width}
                 h={height}
@@ -143,6 +171,14 @@ export default function Uploader({
                 <Text textAlign={"center"} fontSize="sm" fontWeight={"light"}>
                   Dimensões: {width}px X {height}px
                 </Text>
+                <Text
+                  textAlign={"center"}
+                  fontSize="sm"
+                  fontWeight={"light"}
+                  color={useColorModeValue("red.600", "red.300")}
+                >
+                  Tamanho máximo: 500kb
+                </Text>
                 <ChakraInput
                   type={"file"}
                   id="image"
@@ -150,6 +186,7 @@ export default function Uploader({
                   onChange={(e) => {
                     handleThumbnail(e.target.files);
                   }}
+                  accept="image/*"
                 />
               </Flex>
             </FormLabel>

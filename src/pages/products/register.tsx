@@ -62,11 +62,9 @@ import {
   AiOutlineCalculator,
   AiOutlineCheck,
   AiOutlineEdit,
-  AiOutlinePicture,
   AiOutlinePlus,
   AiOutlineSave,
 } from "react-icons/ai";
-import { FaTrashAlt } from "react-icons/fa";
 import RichTextEditor from "react-rte";
 import { dataTrib } from "../../configs/data";
 import MaskedInput from "react-input-mask";
@@ -77,6 +75,7 @@ import { MdHelpOutline } from "react-icons/md";
 import imageHelp from "../../assets/correios.png";
 import imageRolo from "../../assets/rolo.png";
 import imageEnv from "../../assets/envelope.png";
+import Uploader from "../../components/uploader";
 
 type CostValueProps = {
   title: string;
@@ -223,6 +222,7 @@ const RegisterProduct = () => {
     useState<AdicionalItemsProps[]>();
   const [adicionalItemsId, setAdicionalItemsId] = useState<string>("");
   const [modalSizes, setModalSizes] = useState<boolean>(false);
+  const [modalPricImage, setModalPrincImage] = useState<boolean>(false);
   const [sizes, setSizes] = useState<SizeProps[]>();
 
   const [styleStock, setStyleStock] = useState<string>("");
@@ -254,9 +254,6 @@ const RegisterProduct = () => {
   const [loadingImage, setLoadingImage] = useState<boolean>(false);
 
   const [auth, setAuth] = useState<AuthProps>();
-
-  const [thumbnail, setThumbnail] = useState<any>(undefined);
-  const [productImage, setProductImage] = useState<any>(undefined);
 
   const [productId, setProductId] = useState<string>("");
 
@@ -352,36 +349,6 @@ const RegisterProduct = () => {
       );
     }
   }, []);
-
-  const previewThumbnail = useMemo(() => {
-    return thumbnail ? URL.createObjectURL(thumbnail) : undefined;
-  }, [thumbnail]);
-
-  const previewProductImage = useMemo(() => {
-    return productImage ? URL.createObjectURL(productImage) : undefined;
-  }, [productImage]);
-
-  function removeThumbnail() {
-    URL.revokeObjectURL(thumbnail);
-    setThumbnail(undefined);
-  }
-
-  function removeProductImage() {
-    URL.revokeObjectURL(productImage);
-    setProductImage(undefined);
-  }
-
-  function handelThumbnail(file: FileList | null) {
-    if (file) {
-      setThumbnail(file[0]);
-    }
-  }
-
-  function handelProductImage(file: FileList | null) {
-    if (file) {
-      setProductImage(file[0]);
-    }
-  }
 
   function showToast(
     message: string,
@@ -585,68 +552,6 @@ const RegisterProduct = () => {
     }
   }
 
-  async function storeThumbnail() {
-    if (productId === "") {
-      showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
-      return false;
-    }
-    if (!thumbnail) {
-      showToast("Selecione uma imagem para salvar", "warning", "Atenção");
-      return false;
-    }
-    setLoadingThumbnail(true);
-    try {
-      let data = new FormData();
-      data.append("thumbnail", thumbnail);
-
-      const response = await api.put(`/productsThumbnail/${productId}`, data);
-
-      showToast(response.data.message, "success", "Sucesso");
-
-      setLoadingThumbnail(false);
-    } catch (error) {
-      setLoadingThumbnail(false);
-      if (axios.isAxiosError(error) && error.message) {
-        showToast(error.response?.data.message, "error", "Erro");
-      } else {
-        let message = (error as Error).message;
-        showToast(message, "error", "Erro");
-      }
-    }
-  }
-
-  async function storeImageProduct() {
-    if (productId === "") {
-      showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
-      return false;
-    }
-    if (!productImage) {
-      showToast("Selecione uma imagem para salvar", "warning", "Atenção");
-      return false;
-    }
-    setLoadingImage(true);
-    try {
-      let data = new FormData();
-      data.append("image", productImage);
-
-      const response = await api.post(`/storeImagesProduct/${productId}`, data);
-
-      showToast(response.data.message, "success", "Sucesso");
-      setImages(response.data.images);
-      setLoadingImage(false);
-      removeProductImage();
-      setProductImage(undefined);
-    } catch (error) {
-      setLoadingImage(false);
-      if (axios.isAxiosError(error) && error.message) {
-        showToast(error.response?.data.message, "error", "Erro");
-      } else {
-        let message = (error as Error).message;
-        showToast(message, "error", "Erro");
-      }
-    }
-  }
-
   async function storeAddctionalItems() {
     if (productId === "") {
       showToast("Você precisa salvar o produto primeiro", "warning", "Atenção");
@@ -732,7 +637,7 @@ const RegisterProduct = () => {
       setLoadingImage(false);
       showToast(response.data.message, "success", "Sucesso");
       setModalTaxes(false);
-      setModalImages(true);
+      setModalPrincImage(true);
       reset();
     } catch (error) {
       setLoadingImage(false);
@@ -746,10 +651,6 @@ const RegisterProduct = () => {
   };
 
   function handleCloseImages() {
-    setThumbnail(undefined);
-    setProductImage(undefined);
-    removeProductImage();
-    removeThumbnail();
     setModalImages(false);
     setModalAdictional(true);
   }
@@ -788,7 +689,6 @@ const RegisterProduct = () => {
       setLoadingImage(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
-        console.log(error.response?.data.error.message);
       } else {
         let message = (error as Error).message;
         showToast(message, "error", "Erro");
@@ -838,7 +738,6 @@ const RegisterProduct = () => {
       setLoadingThumbnail(false);
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
-        console.log(error.response?.data.error.message);
       } else {
         let message = (error as Error).message;
         showToast(message, "error", "Erro");
@@ -860,6 +759,11 @@ const RegisterProduct = () => {
   const removeTag = (tag: string) => {
     const result = tags?.filter((obj) => obj !== tag);
     setTags(result);
+  };
+
+  const handleCloseImagesPrinc = () => {
+    setModalPrincImage(false);
+    setModalImages(true);
   };
 
   return (
@@ -1803,115 +1707,51 @@ const RegisterProduct = () => {
       </Modal>
 
       <Modal
+        isOpen={modalPricImage}
+        onClose={() => handleCloseImages()}
+        closeOnEsc={false}
+        closeOnOverlayClick={false}
+        size="xs"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Imagem Principal</ModalHeader>
+          <ModalBody>
+            <Flex w={"100%"} justify="center">
+              <Uploader
+                height={260}
+                width={260}
+                name="thumbnail"
+                title={false}
+                url={`/productsThumbnail/${productId}`}
+              />
+            </Flex>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              onClick={() => handleCloseImagesPrinc()}
+              leftIcon={<AiOutlineCheck />}
+            >
+              Finalizar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
         isOpen={modalImages}
         onClose={() => handleCloseImages()}
         closeOnEsc={false}
         closeOnOverlayClick={false}
-        size="6xl"
+        size="sm"
       >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Imagens</ModalHeader>
           <ModalBody>
-            <Grid templateColumns={"260px 1fr"} gap={5}>
-              <Box>
-                <Flex
-                  bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                  p={1}
-                  justify="center"
-                  align={"center"}
-                  rounded="md"
-                  mb={3}
-                >
-                  IMAGEM PRINCIPAL
-                </Flex>
-
-                {thumbnail ? (
-                  <Box
-                    w="260px"
-                    h="260px"
-                    rounded={"md"}
-                    borderWidth="1px"
-                    position={"relative"}
-                    overflow="hidden"
-                  >
-                    <Image
-                      w="260px"
-                      h="260px"
-                      objectFit={"cover"}
-                      src={previewThumbnail}
-                    />
-                    <Grid
-                      templateColumns={"1fr 1fr"}
-                      position="absolute"
-                      bottom={0}
-                      left={0}
-                      right={0}
-                      zIndex={100}
-                    >
-                      <Button
-                        colorScheme={"red"}
-                        rounded="none"
-                        size={"sm"}
-                        leftIcon={<FaTrashAlt />}
-                        onClick={() => removeThumbnail()}
-                        opacity={0.85}
-                      >
-                        Excluir
-                      </Button>
-                      <Button
-                        colorScheme={"blue"}
-                        rounded="none"
-                        size={"sm"}
-                        leftIcon={<AiOutlineSave />}
-                        opacity={0.85}
-                        isLoading={loadingThumbnail}
-                        onClick={() => storeThumbnail()}
-                      >
-                        Salvar
-                      </Button>
-                    </Grid>
-                  </Box>
-                ) : (
-                  <FormLabel
-                    display={"flex"}
-                    rounded={"md"}
-                    overflow="hidden"
-                    position={"relative"}
-                    borderWidth="1px"
-                    borderStyle={"dashed"}
-                    borderColor={useColorModeValue("gray.900", "gray.100")}
-                    _hover={{ borderWidth: "2px" }}
-                    w="260px"
-                    h="260px"
-                    justifyContent={"center"}
-                    alignItems="center"
-                    flexDirection={"column"}
-                    gap={3}
-                    cursor="pointer"
-                  >
-                    <ChakraInput
-                      type={"file"}
-                      display="none"
-                      onChange={(e) => handelThumbnail(e.target.files)}
-                    />
-                    <Icon as={AiOutlinePicture} fontSize="4xl" />
-                    <Text userSelect={"none"}>Insira sua imagem aqui</Text>
-                  </FormLabel>
-                )}
-              </Box>
-              <Box>
-                <Flex
-                  bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                  p={1}
-                  justify="center"
-                  align={"center"}
-                  rounded="md"
-                  mb={3}
-                >
-                  MAIS IMAGENS DO PRODUTO
-                </Flex>
-
+            <Grid templateColumns={"1fr"} gap={5}>
+              <Flex w="100%" justify={"center"}>
                 <Grid
                   templateColumns={"repeat(auto-fit, minmax(260px, 260px))"}
                   gap={2}
@@ -1935,81 +1775,16 @@ const RegisterProduct = () => {
                       />
                     </Box>
                   ))}
-                  {productImage ? (
-                    <Box
-                      w="260px"
-                      h="260px"
-                      rounded={"md"}
-                      borderWidth="1px"
-                      position={"relative"}
-                      overflow="hidden"
-                    >
-                      <Image
-                        w="260px"
-                        h="260px"
-                        objectFit={"cover"}
-                        src={previewProductImage}
-                      />
-                      <Grid
-                        templateColumns={"1fr 1fr"}
-                        position="absolute"
-                        bottom={0}
-                        left={0}
-                        right={0}
-                        zIndex={100}
-                      >
-                        <Button
-                          colorScheme={"red"}
-                          rounded="none"
-                          size={"sm"}
-                          leftIcon={<FaTrashAlt />}
-                          onClick={() => removeProductImage()}
-                          opacity={0.85}
-                        >
-                          Excluir
-                        </Button>
-                        <Button
-                          colorScheme={"blue"}
-                          rounded="none"
-                          size={"sm"}
-                          leftIcon={<AiOutlineSave />}
-                          opacity={0.85}
-                          isLoading={loadingImage}
-                          onClick={() => storeImageProduct()}
-                        >
-                          Salvar
-                        </Button>
-                      </Grid>
-                    </Box>
-                  ) : (
-                    <FormLabel
-                      display={"flex"}
-                      rounded={"md"}
-                      overflow="hidden"
-                      position={"relative"}
-                      borderWidth="1px"
-                      borderStyle={"dashed"}
-                      borderColor={useColorModeValue("gray.900", "gray.100")}
-                      _hover={{ borderWidth: "2px" }}
-                      w="260px"
-                      h="260px"
-                      justifyContent={"center"}
-                      alignItems="center"
-                      flexDirection={"column"}
-                      gap={3}
-                      cursor="pointer"
-                    >
-                      <ChakraInput
-                        type={"file"}
-                        display="none"
-                        onChange={(e) => handelProductImage(e.target.files)}
-                      />
-                      <Icon as={AiOutlinePicture} fontSize="4xl" />
-                      <Text userSelect={"none"}>Insira sua imagem aqui</Text>
-                    </FormLabel>
-                  )}
+                  <Uploader
+                    height={260}
+                    width={260}
+                    name="image"
+                    title={false}
+                    url={`/storeImagesProduct/${productId}`}
+                    type="POST"
+                  />
                 </Grid>
-              </Box>
+              </Flex>
             </Grid>
           </ModalBody>
 
