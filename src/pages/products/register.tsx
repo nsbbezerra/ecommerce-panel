@@ -1715,7 +1715,7 @@ const RegisterProduct = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Imagem Principal</ModalHeader>
+          <ModalHeader>Imagem - Salve uma apenas</ModalHeader>
           <ModalBody>
             <Flex w={"100%"} justify="center">
               <Uploader
@@ -1744,7 +1744,7 @@ const RegisterProduct = () => {
         onClose={() => handleCloseImages()}
         closeOnEsc={false}
         closeOnOverlayClick={false}
-        size="sm"
+        size="xs"
       >
         <ModalOverlay />
         <ModalContent>

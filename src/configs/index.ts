@@ -4,7 +4,7 @@ const configs = {
   url: "http://localhost:4003",
   pagination: 10,
   defaultIcon: { icon: "AiFillTag", title: "Padrão", category: "default" },
-  toastPosition: "bottom",
+  toastPosition: "bottom-right",
 };
 
 const api = axios.create({
