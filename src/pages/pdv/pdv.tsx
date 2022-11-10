@@ -89,7 +89,7 @@ import pt_br from "date-fns/locale/pt-BR";
 import { useQuery } from "react-query";
 import { GiCardboardBox } from "react-icons/gi";
 import { nanoid } from "nanoid";
-import Hotkeys, { IReactHotkeysProps, OnKeyFun } from "react-hot-keys";
+import Hotkeys, { OnKeyFun } from "react-hot-keys";
 
 type ClientsProps = {
   id: string;
@@ -245,9 +245,9 @@ const PDV = () => {
 
   const findClients = async (id: string) => {
     try {
-      const response = await api.get(`/pdv_clients/${id}`);
-      setClients(response.data);
-      setClientsRef(response.data);
+      const response = await api.get(`/pdv_dependent/${id}`);
+      setClients(response.data.clients);
+      setClientsRef(response.data.clients);
     } catch (error) {
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
