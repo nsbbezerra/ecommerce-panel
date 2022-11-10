@@ -815,7 +815,7 @@ const RegisterProduct = () => {
               resize={"none"}
             />
           </FormControl>
-          <Grid templateColumns={"repeat(4, 1fr)"} gap={3}>
+          <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
             <FormControl isRequired>
               <FormLabel>SKU</FormLabel>
               <Input placeholder="SKU" name="sku" />
@@ -828,37 +828,8 @@ const RegisterProduct = () => {
               <FormLabel>Código Interno</FormLabel>
               <Input placeholder="Código Interno" name="internal_code" />
             </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Unidade de Medida</FormLabel>
-              <Select name="unit_desc" placeholder="Selecione uma opção">
-                <option value="KG">Quilograma</option>
-                <option value="GR">Grama</option>
-                <option value="UN">Unidade</option>
-                <option value="MT">Metro</option>
-                <option value="M²">Metro Quadrado</option>
-                <option value="CM">Centímetro</option>
-                <option value="MM">Milímetro</option>
-                <option value="PC">Peça</option>
-                <option value="CX">Caixa</option>
-                <option value="DZ">Duzia</option>
-                <option value="EM">Embalagem</option>
-                <option value="FD">Fardo</option>
-                <option value="KT">KIT</option>
-                <option value="JG">Jogo</option>
-                <option value="PT">Pacote</option>
-                <option value="LATA">Lata</option>
-                <option value="LT">Litro</option>
-                <option value="ML">Mililitro</option>
-                <option value="SC">Saco</option>
-                <option value="ROLO">Rolo</option>
-                <option value="VD">Vidro</option>
-                <option value="CE">Centro</option>
-                <option value="CJ">Conjunto</option>
-                <option value="GF">Garrafa</option>
-              </Select>
-            </FormControl>
           </Grid>
-          <Grid templateColumns={"1fr 2fr"} gap={3}>
+          <Grid templateColumns={"1fr 2fr 1fr"} gap={3}>
             <FormControl isRequired>
               <FormLabel>Estilo do Estoque</FormLabel>
               <Select
@@ -867,10 +838,7 @@ const RegisterProduct = () => {
                 onChange={(e) => setStyleStock(e.target.value)}
               >
                 <option value="square_meter">Venda por Metro Quadrado</option>
-                <option value={"meter"}>Venda por Metro</option>
                 <option value="unity">Venda por Unidade</option>
-                <option value="weight">Venda no Peso</option>
-                <option value="liter">Venda por Litro</option>
                 <option value="without">Venda sem Estoque</option>
                 <option value="sizes">Estoque Personalizado</option>
               </Select>
@@ -985,12 +953,42 @@ const RegisterProduct = () => {
                 </Flex>
               )}
             </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Unidade de Medida</FormLabel>
+              <Select name="unit_desc" placeholder="Selecione uma opção">
+                <option value="KG">Quilograma (KG)</option>
+                <option value="GR">Grama (GR)</option>
+                <option value="UN">Unidade (UN)</option>
+                <option value="MT">Metro (MT)</option>
+                <option value="M²">Metro Quadrado (M²)</option>
+                <option value="CM">Centímetro (CM)</option>
+                <option value="MM">Milímetro (MM)</option>
+                <option value="PC">Peça (PC)</option>
+                <option value="CX">Caixa (CX)</option>
+                <option value="DZ">Duzia (DZ)</option>
+                <option value="EM">Embalagem (EM)</option>
+                <option value="FD">Fardo (FD)</option>
+                <option value="KT">KIT (KT)</option>
+                <option value="JG">Jogo (JG)</option>
+                <option value="PT">Pacote (PT)</option>
+                <option value="LATA">Lata (LATA)</option>
+                <option value="LT">Litro (LT)</option>
+                <option value="ML">Mililitro (ML)</option>
+                <option value="SC">Saco (SC)</option>
+                <option value="ROLO">Rolo (ROLO)</option>
+                <option value="VD">Vidro (VD)</option>
+                <option value="CE">Centro (CE)</option>
+                <option value="CJ">Conjunto (CJ)</option>
+                <option value="GF">Garrafa (GF)</option>
+              </Select>
+            </FormControl>
           </Grid>
           <FormControl>
             <FormLabel>Detalhes do Produto</FormLabel>
             <RichTextEditor
               value={text}
               onChange={(e) => setText(e)}
+              toolbarConfig={configs.toolbarConfigs}
               placeholder="Insira seu texto aqui"
               editorStyle={{
                 background: "transparent",
@@ -1001,6 +999,8 @@ const RegisterProduct = () => {
                   theme.colors.gray["300"],
                   theme.colors.gray["600"]
                 ),
+                fontFamily: "Roboto Condensed, sans-serif",
+                borderRadius: "8px",
               }}
               toolbarStyle={{
                 borderColor: useColorModeValue(
@@ -1008,6 +1008,7 @@ const RegisterProduct = () => {
                   theme.colors.gray["600"]
                 ),
               }}
+              className="rte-editor"
             />
           </FormControl>
 
@@ -1166,7 +1167,11 @@ const RegisterProduct = () => {
             </FormControl>
             <FormControl>
               <FormLabel>Total de Partes</FormLabel>
-              <Input placeholder="Total de Partes" name="sale_options" />
+              <Select name="sale_options" placeholder="Selecione uma opção">
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+              </Select>
             </FormControl>
             <FormControl>
               <FormLabel>Categoria de Itens</FormLabel>
@@ -1708,15 +1713,15 @@ const RegisterProduct = () => {
 
       <Modal
         isOpen={modalPricImage}
-        onClose={() => handleCloseImages()}
+        onClose={() => handleCloseImagesPrinc()}
         closeOnEsc={false}
         closeOnOverlayClick={false}
         size="xs"
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Imagem - Salve uma apenas</ModalHeader>
-          <ModalBody>
+          <ModalHeader>Thumbnail</ModalHeader>
+          <ModalBody pb={5}>
             <Flex w={"100%"} justify="center">
               <Uploader
                 height={260}
@@ -1724,18 +1729,10 @@ const RegisterProduct = () => {
                 name="thumbnail"
                 title={false}
                 url={`/productsThumbnail/${productId}`}
+                onSuccess={handleCloseImagesPrinc}
               />
             </Flex>
           </ModalBody>
-
-          <ModalFooter>
-            <Button
-              onClick={() => handleCloseImagesPrinc()}
-              leftIcon={<AiOutlineCheck />}
-            >
-              Finalizar
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
 

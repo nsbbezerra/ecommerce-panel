@@ -5,3 +5,7 @@
 [data-color-scheme="light"] {
   color-scheme: light;
 }
+
+.rte-editor:focus {
+  border-color: blue;
+}

@@ -28,6 +28,7 @@ interface Props {
   image?: string | null;
   title?: boolean;
   type?: "PUT" | "POST";
+  onSuccess?: () => void;
 }
 
 export default function Uploader({
@@ -37,6 +38,7 @@ export default function Uploader({
   height,
   title = true,
   type = "PUT",
+  onSuccess = undefined,
 }: Props) {
   const [thumbnail, setThumbnail] = useState<File | undefined>(undefined);
   const toast = useToast();
@@ -82,6 +84,7 @@ export default function Uploader({
       onSuccess: async (data) => {
         showToast(data.data.message, "success", "Sucesso");
         removeThumbnail();
+        onSuccess !== undefined && onSuccess();
       },
       onError: (err) => {
         if (axios.isAxiosError(err) && err.message) {
