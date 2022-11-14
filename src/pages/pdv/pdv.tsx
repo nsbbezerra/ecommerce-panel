@@ -51,26 +51,16 @@ import {
   Skeleton,
   MenuDivider,
   InputLeftAddon,
-  Divider,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Heading,
 } from "@chakra-ui/react";
 import { forwardRef, Fragment, useEffect, useRef, useState, memo } from "react";
 import {
-  AiOutlineAppstoreAdd,
   AiOutlineBarcode,
   AiOutlineCheck,
   AiOutlineEdit,
   AiOutlineEnter,
   AiOutlineMore,
   AiOutlineNumber,
-  AiOutlinePartition,
   AiOutlinePercentage,
-  AiOutlinePlus,
   AiOutlineSave,
   AiOutlineSearch,
   AiOutlineShoppingCart,
@@ -90,6 +80,8 @@ import { useQuery } from "react-query";
 import { GiCardboardBox } from "react-icons/gi";
 import { nanoid } from "nanoid";
 import Hotkeys, { OnKeyFun } from "react-hot-keys";
+import ProductInfo from "./components/productInfo";
+import PartitionSale from "./components/partitionSale";
 
 type ClientsProps = {
   id: string;
@@ -103,6 +95,18 @@ type ClientsProps = {
   zip_code: string;
   state: string;
   city: string;
+};
+
+type PartitionSaleProps = {
+  id: string;
+  name: string;
+  value: number;
+};
+
+type SizeProps = {
+  id: string;
+  description: string;
+  inventory: number;
 };
 
 type ProductsProps = {
@@ -130,6 +134,9 @@ type ProductsProps = {
   sale_options?: string;
   sale_options_category: string;
   adictional_items_id: string;
+  Sizes: SizeProps[];
+  inventory: number;
+  PartitionSale: PartitionSaleProps[];
 };
 
 type CatProps = {
@@ -177,10 +184,23 @@ type AdicionalProps = {
   value: number;
 };
 
-type PartitionSaleProps = {
+type PartitionInfoProps = {
   id: string;
   name: string;
-  value: string;
+  value: number;
+  PartitionSale: PartitionSaleProps[];
+};
+
+type AddictionalInfoProps = {
+  id: string;
+  name: string;
+  value: number;
+  AddictionalItem: PartitionSaleProps[];
+};
+
+type PartitionSaleInfoProps = {
+  partitionSale: PartitionInfoProps | undefined;
+  addictionalItems: AddictionalInfoProps | undefined;
 };
 
 registerLocale("pt_br", pt_br);
@@ -190,30 +210,31 @@ const PDV = () => {
   const inputref = useRef(null);
   const { colorMode } = useColorMode();
 
-  const [clients, setClients] = useState<ClientsProps[]>();
-  const [clientsRef, setClientsRef] = useState<ClientsProps[]>();
+  const [clients, setClients] = useState<ClientsProps[]>([]);
+  const [clientsRef, setClientsRef] = useState<ClientsProps[]>([]);
   const [client, setClient] = useState<ClientsProps>();
-  const [products, setProducts] = useState<ProductsProps[]>();
+  const [products, setProducts] = useState<ProductsProps[]>([]);
   const [modalClients, setModalClients] = useState<boolean>(false);
   const [searchClient, setSearchClient] = useState<string>("");
   const [saleDate, setSaleDate] = useState<Date>(new Date());
   const [saleProducts, setSaleProducts] = useState<ProductSaleProps[]>([]);
-  const [loadingFind, setLoadingFind] = useState<boolean>(false);
 
   const [quantity, setQuantity] = useState<number>(1);
   const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
-  const [modalAdictionalItems, setModalAdictionalItems] =
-    useState<boolean>(false);
   const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
   const [refSaleValue, setRefSaleValue] = useState<number>(0);
   const [refWidthsList, setRefWidthsList] = useState<WidthsProps[]>();
   const [refWidth, setRefWidth] = useState<number>(0);
   const [refHeight, setRefHeight] = useState<number>(0);
   const [refProduct, setRefProduct] = useState<ProductsProps>();
-  const [partitionSale, setPartitionSale] = useState<PartitionSaleProps[]>();
-  const [adicionalItems, setAdictionalItems] = useState<PartitionSaleProps[]>();
+  const [partitionSale, setPartitionSale] = useState<PartitionSaleProps[]>([]);
+  const [adicionalItems, setAdictionalItems] = useState<PartitionSaleProps[]>(
+    []
+  );
   const [modalProductInfo, setModalProductInfo] = useState<boolean>(false);
   const [productInfo, setProductInfo] = useState<ProductsProps | null>(null);
+  const [partitionSaleInfo, setPartitionSaleInfo] =
+    useState<PartitionSaleInfoProps | null>(null);
 
   const [totalOrder, setTotalOrder] = useState<number>(0);
 
@@ -243,11 +264,13 @@ const PDV = () => {
     });
   }
 
-  const findClients = async (id: string) => {
+  const findDependents = async (id: string) => {
     try {
       const response = await api.get(`/pdv_dependent/${id}`);
       setClients(response.data.clients);
       setClientsRef(response.data.clients);
+      setPartitionSale(response.data.partition_sale);
+      setAdictionalItems(response.data.adictional_items);
     } catch (error) {
       if (axios.isAxiosError(error) && error.message) {
         showToast(error.response?.data.message, "error", "Erro");
@@ -260,7 +283,7 @@ const PDV = () => {
 
   useEffect(() => {
     if (auth) {
-      findClients(auth?.id || "");
+      findDependents(auth?.id || "");
     }
   }, [auth]);
 
@@ -398,7 +421,22 @@ const PDV = () => {
       un === "without"
     ) {
       setProductInfo(result || null);
-      setModalWithUnity(true);
+      if (result?.type_sale === "partition") {
+        setModalPartitionSale(true);
+        const partition = partitionSale.find(
+          (obj) => obj.id === result.sale_options_category
+        );
+        const addicional = adicionalItems.find(
+          (obj) => obj.id === result.adictional_items_id
+        );
+        setPartitionSaleInfo({
+          addictionalItems: addicional as AddictionalInfoProps,
+          partitionSale: partition as PartitionInfoProps,
+        });
+        setModalPartitionSale(true);
+      } else {
+        setModalWithUnity(true);
+      }
       setRefSaleValue(
         result?.in_promotion
           ? calcPercent(result?.sale_value, result.profit_percent)
@@ -435,24 +473,6 @@ const PDV = () => {
     setSaleProducts(result);
   };
 
-  async function findAdictionalItems(id: string) {
-    try {
-      setLoadingFind(true);
-      setModalAdictionalItems(true);
-      const response = await api.get(`/adictionalItems/${id}`);
-      setAdictionalItems(response.data);
-      setLoadingFind(false);
-    } catch (error) {
-      setLoadingFind(false);
-      if (axios.isAxiosError(error) && error.message) {
-        showToast(error.response?.data.message, "error", "Erro");
-      } else {
-        let message = (error as Error).message;
-        showToast(message, "error", "Erro");
-      }
-    }
-  }
-
   const handleProductInfo = (id: string) => {
     const result = products?.find((obj) => obj.id === id);
     setProductInfo(result || null);
@@ -460,7 +480,6 @@ const PDV = () => {
   };
 
   const onKeyDown: OnKeyFun = (shortcut, evn, handle) => {
-    console.log(shortcut);
     switch (shortcut) {
       case "f2":
         setModalClients(true);
@@ -689,13 +708,22 @@ const PDV = () => {
             </HStack>
           </Grid>
 
-          <Box h="full" maxH="full" overflow={"hidden"} pt={"58px"}>
+          <Box
+            h="full"
+            maxH="full"
+            overflow={"hidden"}
+            pt={"58px"}
+            pb={1}
+            px={1}
+          >
             <Grid templateColumns={"550px 1fr"} gap={3} h="full" maxH={"full"}>
               <Grid
                 templateRows={"1fr 100px"}
-                borderWidth="1px"
+                borderWidth="2px"
                 overflow={"hidden"}
                 rounded="md"
+                shadow={"md"}
+                borderColor={useColorModeValue("blue.500", "blue.300")}
               >
                 <Box maxH={"full"} h="full" overflow={"auto"}>
                   <Scrollbars autoHide>
@@ -719,13 +747,13 @@ const PDV = () => {
                           zIndex={1}
                         >
                           <Tr>
-                            <Th py={3} w="3%">
-                              Thumb
+                            <Th w="1%"></Th>
+                            <Th py={3} w="1%" textAlign={"center"}>
+                              Qtd
                             </Th>
-                            <Th w="1%">Qtd</Th>
-                            <Th>desc</Th>
-                            <Th>Unit</Th>
-                            <Th>Total</Th>
+                            <Th>descrição</Th>
+                            <Th isNumeric>Unit</Th>
+                            <Th isNumeric>Total</Th>
                             <Th w="3%" textAlign={"center"}>
                               Opções
                             </Th>
@@ -741,15 +769,15 @@ const PDV = () => {
                                   zIndex={-1}
                                 />
                               </Td>
-                              <Td>{prd.quantity}</Td>
+                              <Td textAlign={"center"}>{prd.quantity}</Td>
                               <Td>{prd.name}</Td>
-                              <Td>
+                              <Td isNumeric>
                                 {prd.sale_value.toLocaleString("pt-br", {
                                   style: "currency",
                                   currency: "BRL",
                                 })}
                               </Td>
-                              <Td>
+                              <Td isNumeric>
                                 {prd.sale_total.toLocaleString("pt-br", {
                                   style: "currency",
                                   currency: "BRL",
@@ -868,11 +896,13 @@ const PDV = () => {
               </Grid>
               <Grid
                 templateRows={"1fr 56px"}
-                borderWidth="1px"
+                borderWidth="2px"
                 overflow={"hidden"}
                 rounded="md"
+                shadow={"md"}
+                borderColor={useColorModeValue("blue.500", "blue.300")}
               >
-                <Box maxH={"full"} h="full" overflow={"auto"} p={2}>
+                <Box maxH={"full"} h="full" overflow={"auto"} p={3}>
                   <Scrollbars autoHide>
                     {isLoading ? (
                       <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
@@ -994,7 +1024,6 @@ const PDV = () => {
                                     <HStack mt={1} w="100%">
                                       <Button
                                         leftIcon={<AiOutlineShoppingCart />}
-                                        colorScheme="blue"
                                         size="xs"
                                         isFullWidth
                                         onClick={() =>
@@ -1013,6 +1042,7 @@ const PDV = () => {
                                           handleProductInfo(prod.id)
                                         }
                                         size="xs"
+                                        variant={"outline"}
                                       />
                                     </HStack>
                                   </Box>
@@ -1187,36 +1217,6 @@ const PDV = () => {
                   />
                 </InputGroup>
               </FormControl>
-
-              {refProduct?.type_sale === "partition" ? (
-                <>
-                  <Divider mt={3} mb={3} />
-
-                  <Button leftIcon={<AiOutlinePartition />} isFullWidth>
-                    Venda Fracionada
-                  </Button>
-                </>
-              ) : (
-                ""
-              )}
-
-              {refProduct?.have_adictional ? (
-                <>
-                  <Divider mt={3} mb={3} />
-
-                  <Button
-                    leftIcon={<AiOutlineAppstoreAdd />}
-                    isFullWidth
-                    onClick={() =>
-                      findAdictionalItems(refProduct.adictional_items_id)
-                    }
-                  >
-                    Itens Adicionais
-                  </Button>
-                </>
-              ) : (
-                ""
-              )}
             </ModalBody>
 
             <ModalFooter>
@@ -1250,161 +1250,19 @@ const PDV = () => {
           </ModalContent>
         </Modal>
 
-        <Modal
-          isOpen={modalAdictionalItems}
-          onClose={() => setModalAdictionalItems(false)}
-          size="4xl"
-        >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Itens Adicionais</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={5}>
-              <Grid templateColumns={"1fr 1fr"} gap={5}>
-                <Box rounded="md" borderWidth={"1px"} p={2} h="fit-content">
-                  <InputGroup mb={3}>
-                    <InputLeftAddon children="Quantidade" />
-                    <NumberInput w="full">
-                      <NumberInputField roundedLeft={"none"} />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </InputGroup>
-                  {loadingFind ? (
-                    <Stack>
-                      <Skeleton rounded={"sm"} h={5} />
-                      <Skeleton rounded={"sm"} h={5} />
-                      <Skeleton rounded={"sm"} h={5} />
-                      <Skeleton rounded={"sm"} h={5} />
-                      <Skeleton rounded={"sm"} h={5} />
-                      <Skeleton rounded={"sm"} h={5} />
-                      <Skeleton rounded={"sm"} h={5} />
-                    </Stack>
-                  ) : (
-                    <Table size={"sm"}>
-                      <Thead>
-                        <Tr>
-                          <Th>Descrição</Th>
-                          <Th isNumeric>Valor</Th>
-                          <Th w="5%" textAlign={"center"}>
-                            Ação
-                          </Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {adicionalItems?.map((add) => (
-                          <Tr key={add.id}>
-                            <Td>{add.name}</Td>
-                            <Td isNumeric>
-                              {parseFloat(add.value).toLocaleString("pt-br", {
-                                style: "currency",
-                                currency: "BRL",
-                              })}
-                            </Td>
-                            <Td textAlign={"center"}>
-                              <IconButton
-                                aria-label="Adicionar Itens"
-                                icon={<AiOutlinePlus />}
-                                size="xs"
-                                colorScheme={"blue"}
-                              />
-                            </Td>
-                          </Tr>
-                        ))}
-                      </Tbody>
-                    </Table>
-                  )}
-                </Box>
-                <Box
-                  rounded="md"
-                  borderWidth={"1px"}
-                  p={2}
-                  h="fit-content"
-                ></Box>
-              </Grid>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+        <PartitionSale
+          isOpen={modalPartitionSale}
+          onClose={setModalPartitionSale}
+          productInfo={productInfo}
+          partitionSale={partitionSaleInfo?.partitionSale || null}
+          addictionalItems={partitionSaleInfo?.addictionalItems || null}
+        />
 
-        <Modal
+        <ProductInfo
           isOpen={modalProductInfo}
-          onClose={() => setModalProductInfo(false)}
-          size="xs"
-        >
-          <ModalOverlay />
-          <ModalContent p={0} overflow="hidden">
-            <ModalCloseButton />
-            <ModalBody p={0}>
-              {!productInfo ? (
-                <Flex justify={"center"} align="center" direction={"column"}>
-                  <Icon as={GiCardboardBox} fontSize="8xl" />
-                  <Text>Nenhuma informação para mostrar</Text>
-                </Flex>
-              ) : (
-                <>
-                  <Image w={"100%"} src={productInfo.thumbnail} />
-                  <Box p={3} borderTopWidth="1px">
-                    <Heading fontSize={"2xl"} noOfLines={2} mb={2}>
-                      {productInfo.title}
-                    </Heading>
-                    <Text fontWeight={"light"}>SKU: {productInfo?.sku}</Text>
-                    <Text fontWeight={"light"}>
-                      COD. BARRAS: {productInfo?.barcode}
-                    </Text>
-                    <Text fontWeight={"light"}>
-                      FORMATO DE VENDA: {productInfo?.unit_desc}
-                    </Text>
-                    <Text fontWeight={"light"}>
-                      DEPARTAMENTO: {productInfo?.category.title}
-                    </Text>
-                    <Text fontWeight={"light"}>
-                      CATEGORIA: {productInfo?.sub_category.title}
-                    </Text>
-
-                    {productInfo.in_promotion ? (
-                      <HStack spacing={2} mt={3}>
-                        <Text
-                          fontSize={"2xl"}
-                          textDecor="line-through"
-                          color={useColorModeValue("gray.600", "gray.400")}
-                        >
-                          {parseFloat(productInfo.sale_value).toLocaleString(
-                            "pt-br",
-                            {
-                              style: "currency",
-                              currency: "BRL",
-                            }
-                          )}
-                        </Text>
-                        <Text fontSize={"2xl"} fontWeight="semibold">
-                          {calcPercent(
-                            productInfo.sale_value,
-                            productInfo.profit_percent
-                          ).toLocaleString("pt-br", {
-                            style: "currency",
-                            currency: "BRL",
-                          })}
-                        </Text>
-                      </HStack>
-                    ) : (
-                      <Text fontSize={"2xl"} fontWeight="semibold" mt={3}>
-                        {parseFloat(productInfo.sale_value).toLocaleString(
-                          "pt-br",
-                          {
-                            style: "currency",
-                            currency: "BRL",
-                          }
-                        )}
-                      </Text>
-                    )}
-                  </Box>
-                </>
-              )}
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+          productInfo={productInfo}
+          onClose={setModalProductInfo}
+        />
       </Hotkeys>
     </Fragment>
   );
