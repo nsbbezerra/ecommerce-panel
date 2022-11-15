@@ -403,8 +403,7 @@ const PDV = () => {
   }
 
   function handleAddProduct(id: string, un: string) {
-    const productsReferencia: ProductsProps[] = data;
-    const result = productsReferencia.find((obj) => obj.id === id);
+    const result = products.find((obj) => obj.id === id);
     if (un === "square_meter") {
       setProductInfo(result || null);
       setModalSquareMeter(true);
@@ -765,7 +764,7 @@ const PDV = () => {
                         <Thead
                           position="sticky"
                           top={0}
-                          bg={useColorModeValue("white", "gray.800")}
+                          bg={useColorModeValue("gray.50", "gray.900")}
                           shadow={"sm"}
                           zIndex={1}
                         >
@@ -1022,11 +1021,11 @@ const PDV = () => {
                   </Scrollbars>
                 </Box>
                 <Grid
-                  bg={useColorModeValue("blackAlpha.50", "whiteAlpha.50")}
+                  bg={useColorModeValue("gray.50", "gray.900")}
                   boxShadow={
                     colorMode === "light"
-                      ? "0px -2px 6px rgba(0,0,0,.1)"
-                      : "0px -2px 6px rgba(0,0,0,.3)"
+                      ? "0px -1px 4px rgba(0,0,0,.1)"
+                      : "0px -1px 4px rgba(0,0,0,.3)"
                   }
                   templateRows="1fr 1fr 1fr"
                 >
@@ -1091,7 +1090,7 @@ const PDV = () => {
                 shadow={"md"}
                 borderColor={useColorModeValue("blue.500", "blue.300")}
               >
-                <Box maxH={"full"} h="full" overflow={"auto"} p={3}>
+                <Box maxH={"full"} h="full" overflow={"auto"} pb={3}>
                   <Scrollbars autoHide>
                     {isLoading ? (
                       <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
@@ -1113,144 +1112,114 @@ const PDV = () => {
                           </Flex>
                         ) : (
                           <>
-                            <Box
-                              w="100%"
-                              sx={{
-                                columnCount: [1, 2, 2, 2, 4],
-                                columnGap: 3,
-                              }}
-                            >
-                              {products?.map((prod) => (
-                                <Grid
-                                  templateColumns={"1fr"}
-                                  rounded="md"
-                                  overflow={"hidden"}
-                                  borderWidth="1px"
-                                  key={prod.id}
-                                  mb={3}
-                                  position="relative"
-                                >
-                                  {prod.in_promotion && (
-                                    <Tag
-                                      position={"absolute"}
-                                      right={1}
-                                      top={1}
-                                      colorScheme="red"
-                                      size={"sm"}
-                                    >
-                                      -{prod.profit_percent}%
-                                    </Tag>
-                                  )}
-                                  <Box
-                                    w="100%"
-                                    bg={useColorModeValue(
-                                      "blackAlpha.100",
-                                      "whiteAlpha.100"
-                                    )}
-                                  >
-                                    <Image
-                                      src={prod.thumbnail || ""}
-                                      w="100%"
-                                      objectFit={"cover"}
-                                    />
-                                  </Box>
-                                  <Box p={2} borderTopWidth="1px">
-                                    <Tooltip label={prod.title} hasArrow>
-                                      <Text
-                                        fontSize="sm"
-                                        noOfLines={1}
-                                        cursor="pointer"
-                                        mt={-1}
-                                      >
-                                        {prod.title || ""}
-                                      </Text>
-                                    </Tooltip>
-                                    {prod.in_promotion ? (
-                                      <Stack spacing={-1}>
-                                        <Text
-                                          fontSize={"sm"}
-                                          textDecor="line-through"
-                                          color={useColorModeValue(
-                                            "gray.600",
-                                            "gray.400"
-                                          )}
-                                        >
+                            <Table size={"sm"}>
+                              <Thead
+                                position="sticky"
+                                top={0}
+                                bg={useColorModeValue("gray.50", "gray.900")}
+                                shadow={"sm"}
+                                zIndex={1}
+                              >
+                                <Tr>
+                                  <Th w="1%"></Th>
+                                  <Th py={3}>Nome</Th>
+                                  <Th>Promo?</Th>
+                                  <Th>Preço</Th>
+                                  <Th>Opções</Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {products.map((prod) => (
+                                  <Tr key={prod.id}>
+                                    <Td>
+                                      <Avatar
+                                        src={prod.thumbnail}
+                                        size="xs"
+                                        zIndex={-1}
+                                      />
+                                    </Td>
+                                    <Td>{prod?.title}</Td>
+                                    <Td textAlign={"center"}>
+                                      {prod.in_promotion === true ? (
+                                        <Tag size={"sm"} colorScheme="red">
+                                          -{prod.profit_percent}%
+                                        </Tag>
+                                      ) : (
+                                        <Icon as={AiOutlineStop} />
+                                      )}
+                                    </Td>
+                                    <Td>
+                                      {prod.in_promotion ? (
+                                        <Stack spacing={0}>
+                                          <Text
+                                            fontSize={"sm"}
+                                            fontWeight="light"
+                                            textDecor="line-through"
+                                            color={useColorModeValue(
+                                              "gray.600",
+                                              "gray.400"
+                                            )}
+                                          >
+                                            {parseFloat(
+                                              prod.sale_value
+                                            ).toLocaleString("pt-br", {
+                                              style: "currency",
+                                              currency: "BRL",
+                                            })}
+                                          </Text>
+                                          <Text fontSize={"sm"}>
+                                            {calcPercent(
+                                              prod.sale_value,
+                                              prod.profit_percent
+                                            ).toLocaleString("pt-br", {
+                                              style: "currency",
+                                              currency: "BRL",
+                                            })}{" "}
+                                            {prod.unit_desc}
+                                          </Text>
+                                        </Stack>
+                                      ) : (
+                                        <Text fontSize={"sm"}>
                                           {parseFloat(
                                             prod.sale_value
-                                          ).toLocaleString("pt-br", {
-                                            style: "currency",
-                                            currency: "BRL",
-                                          })}
-                                        </Text>
-                                        <Text
-                                          fontSize={"sm"}
-                                          fontWeight="semibold"
-                                        >
-                                          {calcPercent(
-                                            prod.sale_value,
-                                            prod.profit_percent
                                           ).toLocaleString("pt-br", {
                                             style: "currency",
                                             currency: "BRL",
                                           })}{" "}
                                           {prod.unit_desc}
                                         </Text>
-                                      </Stack>
-                                    ) : (
-                                      <Text
-                                        fontSize={"sm"}
-                                        fontWeight="semibold"
-                                        mt={-1}
-                                      >
-                                        {parseFloat(
-                                          prod.sale_value
-                                        ).toLocaleString("pt-br", {
-                                          style: "currency",
-                                          currency: "BRL",
-                                        })}{" "}
-                                        {prod.unit_desc}
-                                      </Text>
-                                    )}
-                                    <HStack mt={1} w="100%">
-                                      <Button
-                                        leftIcon={<AiOutlineShoppingCart />}
-                                        size="xs"
-                                        isFullWidth
-                                        onClick={() =>
-                                          handleAddProduct(
-                                            prod.id,
-                                            prod.type_unit
-                                          )
-                                        }
-                                      >
-                                        Adicionar
-                                      </Button>
-                                      <IconButton
-                                        aria-label="Detalhes"
-                                        icon={<AiOutlineZoomIn />}
-                                        onClick={() =>
-                                          handleProductInfo(prod.id)
-                                        }
-                                        size="xs"
-                                        variant={"outline"}
-                                      />
-                                    </HStack>
-                                  </Box>
-                                </Grid>
-                              ))}
-                            </Box>
-                            <Flex
-                              borderTopWidth={"1px"}
-                              mt={2}
-                              pt={3}
-                              align="center"
-                              gap={2}
-                              pl={1}
-                            >
-                              <Button size={"sm"}>Anterior</Button>
-                              <Text>1 / 1</Text>
-                              <Button size={"sm"}>Próxima</Button>
-                            </Flex>
+                                      )}
+                                    </Td>
+                                    <Td>
+                                      <HStack mt={1} w="100%">
+                                        <Button
+                                          leftIcon={<AiOutlineShoppingCart />}
+                                          size="xs"
+                                          isFullWidth
+                                          onClick={() =>
+                                            handleAddProduct(
+                                              prod.id,
+                                              prod.type_unit
+                                            )
+                                          }
+                                        >
+                                          Adicionar
+                                        </Button>
+                                        <IconButton
+                                          aria-label="Detalhes"
+                                          icon={<AiOutlineZoomIn />}
+                                          onClick={() =>
+                                            handleProductInfo(prod.id)
+                                          }
+                                          size="xs"
+                                          variant={"outline"}
+                                        />
+                                      </HStack>
+                                    </Td>
+                                  </Tr>
+                                ))}
+                              </Tbody>
+                            </Table>
                           </>
                         )}
                       </Fragment>
@@ -1264,10 +1233,10 @@ const PDV = () => {
                   alignItems="center"
                   boxShadow={
                     colorMode === "light"
-                      ? "0px -2px 6px rgba(0,0,0,.1)"
-                      : "0px -2px 6px rgba(0,0,0,.3)"
+                      ? "0px -1px 4px rgba(0,0,0,.1)"
+                      : "0px -1px 4px rgba(0,0,0,.3)"
                   }
-                  bg={useColorModeValue("blackAlpha.50", "whiteAlpha.50")}
+                  bg={useColorModeValue("gray.50", "gray.900")}
                 >
                   <Menu>
                     <MenuButton
