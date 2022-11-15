@@ -20,11 +20,15 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  ToastPositionWithLogical,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import { AiOutlineMinus, AiOutlinePlus, AiOutlineSave } from "react-icons/ai";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
+import { GiCardboardBox } from "react-icons/gi";
+import { configs } from "../../../configs";
 
 type CatProps = {
   title: string;
@@ -91,6 +95,12 @@ interface Props {
   productInfo: ProductsProps | null;
   partitionSale: PartitionInfoProps | null;
   addictionalItems?: AddictionalInfoProps | null;
+  onSuccess: (
+    id: string,
+    partition: PartitionSaleProps[],
+    addicional: PartitionSaleProps[],
+    totalPartition: number
+  ) => void;
 }
 
 const PartitionSale = ({
@@ -99,7 +109,95 @@ const PartitionSale = ({
   productInfo,
   partitionSale,
   addictionalItems,
+  onSuccess,
 }: Props) => {
+  const toast = useToast();
+  const [partition, setPartition] = useState<PartitionSaleProps[]>([]);
+  const [addicional, setAddictional] = useState<PartitionSaleProps[]>([]);
+  const [total, setTotal] = useState<number>(0);
+
+  useEffect(() => {
+    if (isOpen === false) {
+      setPartition([]);
+      setAddictional([]);
+      setTotal(0);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const sumPart = partition.reduce((a, b) => +a + +b.value, 0);
+    const sumAdd = addicional.reduce((a, b) => +a + +b.value, 0);
+    setTotal(sumPart + sumAdd);
+  }, [partition, addicional]);
+
+  function showToast(
+    message: string,
+    status: "error" | "info" | "warning" | "success" | undefined,
+    title: string
+  ) {
+    toast({
+      title: title,
+      description: message,
+      status: status,
+      position: configs.toastPosition as ToastPositionWithLogical,
+      duration: 8000,
+      isClosable: true,
+    });
+  }
+
+  function handleSetPartition(id: string, check: boolean) {
+    if (check === true) {
+      if (partition.length >= parseInt(productInfo?.sale_options || "0")) {
+        showToast(
+          "Você já escolheu todas as opções para este pedido",
+          "warning",
+          "Atenção"
+        );
+        return false;
+      }
+      const result = partitionSale?.PartitionSale.find((obj) => obj.id === id);
+      setPartition((older) => [
+        ...older,
+        {
+          id: result?.id || "",
+          name: result?.name || "",
+          value: result?.value || 0,
+        },
+      ]);
+    } else {
+      const result = partition.filter((obj) => obj.id !== id);
+      setPartition(result);
+    }
+  }
+  function handleSetAddictional(id: string, check: boolean) {
+    if (check === true) {
+      const result = addictionalItems?.AddictionalItem.find(
+        (obj) => obj.id === id
+      );
+      setAddictional((older) => [
+        ...older,
+        {
+          id: result?.id || "",
+          name: result?.name || "",
+          value: result?.value || 0,
+        },
+      ]);
+    } else {
+      const result = addicional.filter((obj) => obj.id !== id);
+      setAddictional(result);
+    }
+  }
+
+  function removePartition(id: string) {
+    const result = partition.filter((obj) => obj.id !== id);
+    setPartition(result);
+  }
+
+  function removeAddictional(id: string) {
+    const result = addicional.filter((obj) => obj.id !== id);
+    setAddictional(result);
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)} size="2xl">
       <ModalOverlay />
@@ -117,11 +215,12 @@ const PartitionSale = ({
             >
               <Box
                 rounded={"md"}
-                borderWidth="1px"
+                borderWidth="2px"
                 p={2}
                 h="fit-content"
                 maxH={"100%"}
                 overflow="auto"
+                borderColor={useColorModeValue("blue.500", "blue.300")}
               >
                 <Flex
                   bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
@@ -130,7 +229,9 @@ const PartitionSale = ({
                   align={"center"}
                   rounded="md"
                 >
-                  OPÇÕES DO PEDIDO - Restam: {productInfo?.sale_options}{" "}
+                  OPÇÕES DO PEDIDO - Restam:{" "}
+                  {parseInt(productInfo?.sale_options || "0") -
+                    partition.length}{" "}
                   escolhas
                 </Flex>
 
@@ -142,7 +243,19 @@ const PartitionSale = ({
                       alignItems="center"
                       justify={"space-between"}
                     >
-                      <Checkbox size={"lg"}>{part.name}</Checkbox>
+                      <Checkbox
+                        size={"lg"}
+                        onChange={(e) =>
+                          handleSetPartition(part.id, e.target.checked)
+                        }
+                        isChecked={
+                          partition.find((obj) => obj.id === part.id)
+                            ? true
+                            : false
+                        }
+                      >
+                        {part.name}
+                      </Checkbox>
                       <Text
                         textAlign={"right"}
                         fontWeight={"semibold"}
@@ -160,7 +273,13 @@ const PartitionSale = ({
                   ))}
                 </Flex>
               </Box>
-              <Box rounded={"md"} borderWidth="1px" p={2} h="fit-content">
+              <Box
+                rounded={"md"}
+                borderWidth="2px"
+                p={2}
+                h="fit-content"
+                borderColor={useColorModeValue("blue.500", "blue.300")}
+              >
                 <Flex
                   bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
                   p={1}
@@ -178,7 +297,19 @@ const PartitionSale = ({
                       alignItems="center"
                       justify={"space-between"}
                     >
-                      <Checkbox size={"lg"}>{part.name}</Checkbox>
+                      <Checkbox
+                        size={"lg"}
+                        isChecked={
+                          addicional.find((obj) => obj.id === part.id)
+                            ? true
+                            : false
+                        }
+                        onChange={(e) =>
+                          handleSetAddictional(part.id, e.target.checked)
+                        }
+                      >
+                        {part.name}
+                      </Checkbox>
                       <Text
                         textAlign={"right"}
                         fontWeight={"semibold"}
@@ -209,18 +340,45 @@ const PartitionSale = ({
                     </Box>
 
                     <Flex direction={"column"} gap={2} p={2}>
-                      <Flex justify={"space-between"} align="center">
-                        <HStack>
-                          <IconButton
-                            aria-label="remover"
-                            icon={<FaTrash />}
-                            colorScheme="red"
-                            size="xs"
-                          />
-                          <Text>1/2 Pizza Calabresa</Text>
-                        </HStack>
-                        <Text fontWeight={"semibold"}>R$ 40,00</Text>
-                      </Flex>
+                      {partition.length === 0 ? (
+                        <Flex
+                          justify={"center"}
+                          align="center"
+                          direction={"column"}
+                        >
+                          <Icon as={GiCardboardBox} fontSize="3xl" />
+                          <Text>Nenhum item na venda</Text>
+                        </Flex>
+                      ) : (
+                        <>
+                          {partition.map((part) => (
+                            <Flex
+                              justify={"space-between"}
+                              align="center"
+                              key={part.id}
+                            >
+                              <HStack>
+                                <IconButton
+                                  aria-label="remover"
+                                  icon={<FaTrash />}
+                                  colorScheme="red"
+                                  size="xs"
+                                  onClick={() => removePartition(part.id)}
+                                />
+                                <Text>{part.name}</Text>
+                              </HStack>
+                              <Text fontWeight={"semibold"}>
+                                {parseFloat(
+                                  part.value.toString()
+                                ).toLocaleString("pt-br", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </Text>
+                            </Flex>
+                          ))}
+                        </>
+                      )}
                     </Flex>
                   </Box>
                 </Box>
@@ -237,18 +395,45 @@ const PartitionSale = ({
                     </Box>
 
                     <Flex direction={"column"} gap={2} p={2}>
-                      <Flex justify={"space-between"} align="center">
-                        <HStack>
-                          <IconButton
-                            aria-label="remover"
-                            icon={<FaTrash />}
-                            colorScheme="red"
-                            size="xs"
-                          />
-                          <Text>1/2 Pizza Calabresa</Text>
-                        </HStack>
-                        <Text fontWeight={"semibold"}>R$ 40,00</Text>
-                      </Flex>
+                      {addicional.length === 0 ? (
+                        <Flex
+                          justify={"center"}
+                          align="center"
+                          direction={"column"}
+                        >
+                          <Icon as={GiCardboardBox} fontSize="3xl" />
+                          <Text>Nenhum item na venda</Text>
+                        </Flex>
+                      ) : (
+                        <>
+                          {addicional.map((part) => (
+                            <Flex
+                              justify={"space-between"}
+                              align="center"
+                              key={part.id}
+                            >
+                              <HStack>
+                                <IconButton
+                                  aria-label="remover"
+                                  icon={<FaTrash />}
+                                  colorScheme="red"
+                                  size="xs"
+                                  onClick={() => removeAddictional(part.id)}
+                                />
+                                <Text>{part.name}</Text>
+                              </HStack>
+                              <Text fontWeight={"semibold"}>
+                                {parseFloat(
+                                  part.value.toString()
+                                ).toLocaleString("pt-br", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </Text>
+                            </Flex>
+                          ))}
+                        </>
+                      )}
                     </Flex>
                   </Box>
                 </Box>
@@ -267,7 +452,12 @@ const PartitionSale = ({
                     fontWeight="semibold"
                   >
                     <Text>Total</Text>
-                    <Text>R$ 40,00</Text>
+                    <Text>
+                      {total.toLocaleString("pt-br", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </Text>
                   </Flex>
                 </Box>
               </Box>
@@ -275,7 +465,13 @@ const PartitionSale = ({
           </Box>
         </ModalBody>
         <ModalFooter>
-          <Button leftIcon={<AiOutlineSave />} colorScheme="blue">
+          <Button
+            leftIcon={<AiOutlineSave />}
+            colorScheme="blue"
+            onClick={() =>
+              onSuccess(productInfo?.id || "", partition, addicional, total)
+            }
+          >
             Salvar
           </Button>
         </ModalFooter>

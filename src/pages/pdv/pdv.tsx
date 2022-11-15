@@ -154,34 +154,27 @@ type ProductSaleProps = {
   thumbnail: string;
   name: string;
   quantity: number;
+  type:
+    | "square_meter"
+    | "meter"
+    | "unity"
+    | "weight"
+    | "liter"
+    | "without"
+    | "sizes";
   unity: string;
   sale_value: number;
   sale_total: number;
-  partition?: PartitionProps[];
-  adictional?: AdicionalProps[];
-  widths?: WidthsProps;
-  height?: number;
+  partition: PartitionSaleProps[] | null;
+  adictional: PartitionSaleProps[] | null;
+  widths: number;
+  height: number;
+  size: SizeProps | null;
 };
 
 type WidthsProps = {
   id: string;
   width: string;
-};
-
-type PartitionProps = {
-  id: string;
-  quantity: number;
-  partition_id: string;
-  partition_name: string;
-  value: number;
-};
-
-type AdicionalProps = {
-  id: string;
-  quantity: number;
-  adictional_id: string;
-  adictional_name: string;
-  value: number;
 };
 
 type PartitionInfoProps = {
@@ -462,6 +455,12 @@ const PDV = () => {
       sale_value: parseFloat(productInfo?.sale_value as string),
       sale_total: parseFloat(productInfo?.sale_value as string) * quantity,
       unity: productInfo?.unit_desc || "",
+      type: productInfo?.type_unit || "unity",
+      partition: null,
+      adictional: null,
+      height: 0,
+      widths: 0,
+      size: null,
     };
     setSaleProducts((old) => [...old, info]);
     setQuantity(1);
@@ -512,6 +511,39 @@ const PDV = () => {
         break;
     }
   };
+
+  function handleProductPartitionSale(
+    id: string,
+    partition: PartitionSaleProps[],
+    addicional: PartitionSaleProps[],
+    totalPartition: number
+  ) {
+    const result = products.find((obj) => obj.id === id);
+    const findProduct = saleProducts?.find((obj) => obj.product_id === id);
+    if (findProduct) {
+      showToast("Este produto já foi adicionado", "warning", "Atenção");
+      return false;
+    }
+    let info: ProductSaleProps = {
+      id: nanoid() || "",
+      product_id: result?.id || "",
+      thumbnail: result?.thumbnail || "",
+      name: result?.title || "",
+      quantity: 1,
+      sale_value: totalPartition,
+      sale_total: totalPartition * 1,
+      unity: result?.unit_desc || "",
+      type: result?.type_unit || "unity",
+      partition: partition,
+      adictional: addicional,
+      height: 0,
+      widths: 0,
+      size: null,
+    };
+    console.log({ id, partition, addicional, totalPartition, result, info });
+    setSaleProducts((old) => [...old, info]);
+    setModalPartitionSale(false);
+  }
 
   return (
     <Fragment>
@@ -1256,6 +1288,7 @@ const PDV = () => {
           productInfo={productInfo}
           partitionSale={partitionSaleInfo?.partitionSale || null}
           addictionalItems={partitionSaleInfo?.addictionalItems || null}
+          onSuccess={handleProductPartitionSale}
         />
 
         <ProductInfo
