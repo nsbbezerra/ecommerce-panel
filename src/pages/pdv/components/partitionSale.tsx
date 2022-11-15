@@ -24,6 +24,7 @@ import { memo, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { GiCardboardBox } from "react-icons/gi";
 import { configs } from "../../../configs";
+import { nanoid } from "nanoid";
 
 type CatProps = {
   title: string;
@@ -84,18 +85,37 @@ type AddictionalInfoProps = {
   AddictionalItem: PartitionSaleProps[];
 };
 
+type ProductSaleProps = {
+  id: string;
+  product_id: string;
+  thumbnail: string;
+  name: string;
+  quantity: number;
+  type:
+    | "square_meter"
+    | "meter"
+    | "unity"
+    | "weight"
+    | "liter"
+    | "without"
+    | "sizes";
+  unity: string;
+  sale_value: number;
+  sale_total: number;
+  partition: PartitionSaleProps[] | null;
+  adictional: PartitionSaleProps[] | null;
+  widths: number | null;
+  height: number;
+  size: SizeProps | null;
+};
+
 interface Props {
   isOpen: boolean;
   onClose: (data: boolean) => void;
   productInfo: ProductsProps | null;
   partitionSale: PartitionInfoProps | null;
   addictionalItems?: AddictionalInfoProps | null;
-  onSuccess: (
-    id: string,
-    partition: PartitionSaleProps[] | null,
-    addicional: PartitionSaleProps[] | null,
-    totalPartition: number
-  ) => void;
+  onSuccess: (itens: ProductSaleProps) => void;
 }
 
 const PartitionSale = ({
@@ -110,6 +130,12 @@ const PartitionSale = ({
   const [partition, setPartition] = useState<PartitionSaleProps[]>([]);
   const [addicional, setAddictional] = useState<PartitionSaleProps[]>([]);
   const [total, setTotal] = useState<number>(0);
+
+  function calcPercent(price: string, discount: number) {
+    let calc = (parseFloat(price) * discount) / 100;
+    let final = parseFloat(price) - calc;
+    return parseFloat(final.toFixed(2));
+  }
 
   useEffect(() => {
     if (isOpen === false) {
@@ -191,6 +217,45 @@ const PartitionSale = ({
   function removeAddictional(id: string) {
     const result = addicional.filter((obj) => obj.id !== id);
     setAddictional(result);
+  }
+
+  function handleProductPartitionSale() {
+    if (partition === null) {
+      showToast(
+        "Complete seu pedido, ainda falta selecionar outras opções",
+        "warning",
+        "Atenção"
+      );
+      return false;
+    } else if (
+      (partition?.length as number) <
+      parseInt(productInfo?.sale_options as string)
+    ) {
+      showToast(
+        "Complete seu pedido, ainda falta selecionar outras opções",
+        "warning",
+        "Atenção"
+      );
+      return false;
+    }
+
+    let info: ProductSaleProps = {
+      id: nanoid() || "",
+      product_id: productInfo?.id || "",
+      thumbnail: productInfo?.thumbnail || "",
+      name: productInfo?.title || "",
+      quantity: 1,
+      sale_value: total,
+      sale_total: total * 1,
+      unity: productInfo?.unit_desc || "",
+      type: productInfo?.type_unit || "unity",
+      partition: partition.length === 0 ? null : partition,
+      adictional: addicional.length === 0 ? null : addicional,
+      height: 0,
+      widths: null,
+      size: null,
+    };
+    onSuccess(info);
   }
 
   return (
@@ -463,14 +528,7 @@ const PartitionSale = ({
           <Button
             leftIcon={<AiOutlineSave />}
             colorScheme="blue"
-            onClick={() =>
-              onSuccess(
-                productInfo?.id || "",
-                partition.length === 0 ? null : partition,
-                addicional.length === 0 ? null : addicional,
-                total
-              )
-            }
+            onClick={() => handleProductPartitionSale()}
           >
             Salvar
           </Button>

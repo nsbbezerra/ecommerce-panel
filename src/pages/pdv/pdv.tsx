@@ -83,6 +83,7 @@ import Hotkeys, { OnKeyFun } from "react-hot-keys";
 import ProductInfo from "./components/productInfo";
 import PartitionSale from "./components/partitionSale";
 import AddictionalItems from "./components/addictionalItems";
+import SquareMeter from "./components/squareMeter";
 
 type ClientsProps = {
   id: string;
@@ -138,6 +139,7 @@ type ProductsProps = {
   Sizes: SizeProps[];
   inventory: number;
   PartitionSale: PartitionSaleProps[];
+  width: string;
 };
 
 type CatProps = {
@@ -168,14 +170,9 @@ type ProductSaleProps = {
   sale_total: number;
   partition: PartitionSaleProps[] | null;
   adictional: PartitionSaleProps[] | null;
-  widths: number;
+  widths: number | null;
   height: number;
   size: SizeProps | null;
-};
-
-type WidthsProps = {
-  id: string;
-  width: string;
 };
 
 type PartitionInfoProps = {
@@ -216,6 +213,7 @@ const PDV = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
   const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
+  const [modalSquareMeter, setModalSquareMeter] = useState<boolean>(false);
   const [modalAddicionalItems, setModalAddicionalItems] =
     useState<boolean>(false);
   const [refSaleValue, setRefSaleValue] = useState<number>(0);
@@ -404,6 +402,10 @@ const PDV = () => {
   function handleAddProduct(id: string, un: string) {
     const productsReferencia: ProductsProps[] = data;
     const result = productsReferencia.find((obj) => obj.id === id);
+    if (un === "square_meter") {
+      setProductInfo(result || null);
+      setModalSquareMeter(true);
+    }
     if (
       un === "meter" ||
       un === "unity" ||
@@ -448,13 +450,6 @@ const PDV = () => {
   }
 
   const addToCartUnity = () => {
-    const findProduct = saleProducts?.find(
-      (obj) => obj.product_id === productInfo?.id
-    );
-    if (findProduct) {
-      showToast("Este produto já foi adicionado", "warning", "Atenção");
-      return false;
-    }
     let info: ProductSaleProps = {
       id: nanoid() || "",
       product_id: productInfo?.id || "",
@@ -468,7 +463,7 @@ const PDV = () => {
       partition: null,
       adictional: null,
       height: 0,
-      widths: 0,
+      widths: null,
       size: null,
     };
     setSaleProducts((old) => [...old, info]);
@@ -521,53 +516,19 @@ const PDV = () => {
     }
   };
 
-  function handleProductPartitionSale(
-    id: string,
-    partition: PartitionSaleProps[] | null,
-    addicional: PartitionSaleProps[] | null,
-    totalPartition: number
-  ) {
-    const result = products.find((obj) => obj.id === id);
-    if (partition === null) {
-      showToast(
-        "Complete seu pedido, ainda falta selecionar outras opções",
-        "warning",
-        "Atenção"
-      );
-      return false;
-    } else if (
-      (partition?.length as number) < parseInt(result?.sale_options as string)
-    ) {
-      showToast(
-        "Complete seu pedido, ainda falta selecionar outras opções",
-        "warning",
-        "Atenção"
-      );
-      return false;
-    }
-    const findProduct = saleProducts?.find((obj) => obj.product_id === id);
-    if (findProduct) {
-      showToast("Este produto já foi adicionado", "warning", "Atenção");
-      return false;
-    }
-    let info: ProductSaleProps = {
-      id: nanoid() || "",
-      product_id: result?.id || "",
-      thumbnail: result?.thumbnail || "",
-      name: result?.title || "",
-      quantity: 1,
-      sale_value: totalPartition,
-      sale_total: totalPartition * 1,
-      unity: result?.unit_desc || "",
-      type: result?.type_unit || "unity",
-      partition: partition,
-      adictional: addicional,
-      height: 0,
-      widths: 0,
-      size: null,
-    };
-    setSaleProducts((old) => [...old, info]);
+  function handleProductPartitionSale(itens: ProductSaleProps) {
+    setSaleProducts((old) => [...old, itens]);
     setModalPartitionSale(false);
+  }
+
+  function handleProductAddictionalItems(itens: ProductSaleProps) {
+    setSaleProducts((old) => [...old, itens]);
+    setModalAddicionalItems(false);
+  }
+
+  function handleProductSquareMeter(itens: ProductSaleProps) {
+    setSaleProducts((old) => [...old, itens]);
+    setModalSquareMeter(false);
   }
 
   return (
@@ -773,7 +734,7 @@ const PDV = () => {
             pb={1}
             px={1}
           >
-            <Grid templateColumns={"570px 1fr"} gap={3} h="full" maxH={"full"}>
+            <Grid templateColumns={"580px 1fr"} gap={3} h="full" maxH={"full"}>
               <Grid
                 templateRows={"1fr 100px"}
                 borderWidth="2px"
@@ -841,14 +802,162 @@ const PDV = () => {
                                 })}
                               </Td>
                               <Td textAlign={"center"}>
-                                <HStack>
-                                  <Tooltip label="Detalhes do Item" hasArrow>
-                                    <IconButton
-                                      aria-label="Detalhes"
-                                      icon={<AiOutlineMore />}
-                                      size="xs"
-                                    />
-                                  </Tooltip>
+                                <HStack justify={"end"}>
+                                  {!prd.widths &&
+                                  !prd.adictional &&
+                                  !prd.partition ? (
+                                    ""
+                                  ) : (
+                                    <Popover placement="auto">
+                                      <PopoverTrigger>
+                                        <IconButton
+                                          aria-label="Detalhes"
+                                          icon={<AiOutlineMore />}
+                                          size="xs"
+                                        />
+                                      </PopoverTrigger>
+
+                                      <PopoverContent
+                                        shadow="lg"
+                                        _focus={{ outline: "none" }}
+                                      >
+                                        <PopoverArrow />
+                                        <PopoverHeader textAlign={"justify"}>
+                                          Detalhes
+                                        </PopoverHeader>
+                                        <PopoverCloseButton />
+                                        <PopoverBody>
+                                          <Grid templateColumns={"1fr"} gap={2}>
+                                            {prd.partition && (
+                                              <Box
+                                                rounded="md"
+                                                borderWidth={"1px"}
+                                                overflow="hidden"
+                                              >
+                                                <Box
+                                                  bg={useColorModeValue(
+                                                    "blackAlpha.100",
+                                                    "whiteAlpha.100"
+                                                  )}
+                                                  px={3}
+                                                  py={1}
+                                                  fontSize="sm"
+                                                  fontWeight={"semibold"}
+                                                >
+                                                  VENDA PARTICIONADA
+                                                </Box>
+                                                <Flex
+                                                  p={2}
+                                                  fontSize="sm"
+                                                  direction={"column"}
+                                                  gap={2}
+                                                >
+                                                  {prd.partition.map((part) => (
+                                                    <Flex
+                                                      align={"center"}
+                                                      justify="space-between"
+                                                      key={part.id}
+                                                    >
+                                                      <Text>{part.name}</Text>
+                                                      <Text>
+                                                        {parseFloat(
+                                                          part.value.toString()
+                                                        ).toLocaleString(
+                                                          "pt-br",
+                                                          {
+                                                            style: "currency",
+                                                            currency: "BRL",
+                                                          }
+                                                        )}
+                                                      </Text>
+                                                    </Flex>
+                                                  ))}
+                                                </Flex>
+                                              </Box>
+                                            )}
+                                            {prd.adictional && (
+                                              <Box
+                                                rounded="md"
+                                                borderWidth={"1px"}
+                                                overflow="hidden"
+                                              >
+                                                <Box
+                                                  bg={useColorModeValue(
+                                                    "blackAlpha.100",
+                                                    "whiteAlpha.100"
+                                                  )}
+                                                  px={3}
+                                                  py={1}
+                                                  fontSize="sm"
+                                                  fontWeight={"semibold"}
+                                                >
+                                                  ITENS ADICIONAIS - POR UNIDADE
+                                                </Box>
+                                                <Flex
+                                                  p={2}
+                                                  fontSize="sm"
+                                                  direction={"column"}
+                                                  gap={2}
+                                                >
+                                                  {prd.adictional.map(
+                                                    (part) => (
+                                                      <Flex
+                                                        align={"center"}
+                                                        justify="space-between"
+                                                        key={part.id}
+                                                      >
+                                                        <Text>{part.name}</Text>
+                                                        <Text>
+                                                          {parseFloat(
+                                                            part.value.toString()
+                                                          ).toLocaleString(
+                                                            "pt-br",
+                                                            {
+                                                              style: "currency",
+                                                              currency: "BRL",
+                                                            }
+                                                          )}
+                                                        </Text>
+                                                      </Flex>
+                                                    )
+                                                  )}
+                                                </Flex>
+                                              </Box>
+                                            )}
+                                            {prd.widths && (
+                                              <Box
+                                                rounded="md"
+                                                borderWidth={"1px"}
+                                                overflow="hidden"
+                                              >
+                                                <Box
+                                                  bg={useColorModeValue(
+                                                    "blackAlpha.100",
+                                                    "whiteAlpha.100"
+                                                  )}
+                                                  px={3}
+                                                  py={1}
+                                                  fontSize="sm"
+                                                  fontWeight={"semibold"}
+                                                >
+                                                  TAMANHO PERSONALIZADO
+                                                </Box>
+                                                <Flex
+                                                  p={2}
+                                                  fontSize="sm"
+                                                  direction={"column"}
+                                                  gap={2}
+                                                >
+                                                  {prd.widths}mt X {prd.height}
+                                                  mt
+                                                </Flex>
+                                              </Box>
+                                            )}
+                                          </Grid>
+                                        </PopoverBody>
+                                      </PopoverContent>
+                                    </Popover>
+                                  )}
 
                                   <Popover>
                                     <PopoverTrigger>
@@ -1325,9 +1434,16 @@ const PDV = () => {
         <AddictionalItems
           isOpen={modalAddicionalItems}
           onClose={setModalAddicionalItems}
-          onSuccess={() => {}}
+          onSuccess={handleProductAddictionalItems}
           productInfo={productInfo}
           addictionalItems={partitionSaleInfo?.addictionalItems || null}
+        />
+
+        <SquareMeter
+          isOpen={modalSquareMeter}
+          onClose={setModalSquareMeter}
+          productInfo={productInfo}
+          onSuccess={handleProductSquareMeter}
         />
       </Hotkeys>
     </Fragment>

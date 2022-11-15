@@ -9,7 +9,6 @@ import {
   HStack,
   Icon,
   IconButton,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -24,11 +23,15 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  useToast,
+  ToastPositionWithLogical,
 } from "@chakra-ui/react";
+import { nanoid } from "nanoid";
 import { memo, useEffect, useState } from "react";
 import { AiOutlineSave } from "react-icons/ai";
 import { FaTrash } from "react-icons/fa";
 import { GiCardboardBox } from "react-icons/gi";
+import { configs } from "../../../configs";
 
 type CatProps = {
   title: string;
@@ -82,17 +85,36 @@ type AddictionalInfoProps = {
   AddictionalItem: PartitionSaleProps[];
 };
 
+type ProductSaleProps = {
+  id: string;
+  product_id: string;
+  thumbnail: string;
+  name: string;
+  quantity: number;
+  type:
+    | "square_meter"
+    | "meter"
+    | "unity"
+    | "weight"
+    | "liter"
+    | "without"
+    | "sizes";
+  unity: string;
+  sale_value: number;
+  sale_total: number;
+  partition: PartitionSaleProps[] | null;
+  adictional: PartitionSaleProps[] | null;
+  widths: number | null;
+  height: number;
+  size: SizeProps | null;
+};
+
 interface Props {
   isOpen: boolean;
   onClose: (data: boolean) => void;
   productInfo: ProductsProps | null;
   addictionalItems?: AddictionalInfoProps | null;
-  onSuccess: (
-    id: string,
-    partition: PartitionSaleProps[] | null,
-    addicional: PartitionSaleProps[] | null,
-    totalPartition: number
-  ) => void;
+  onSuccess: (itens: ProductSaleProps) => void;
 }
 
 const AddictionalItems = ({
@@ -102,9 +124,18 @@ const AddictionalItems = ({
   addictionalItems,
   productInfo,
 }: Props) => {
+  const toast = useToast();
   const [addicional, setAddictional] = useState<PartitionSaleProps[]>([]);
   const [total, setTotal] = useState<number>(0);
+  const [unityTotal, setUnityTotal] = useState<number>(0);
+  const [totalProduct, setTotalProduct] = useState<number>(0);
   const [quantity, setQuantity] = useState<number | string>(1);
+
+  function calcPercent(price: string, discount: number) {
+    let calc = (parseFloat(price) * discount) / 100;
+    let final = parseFloat(price) - calc;
+    return parseFloat(final.toFixed(2));
+  }
 
   useEffect(() => {
     if (isOpen === false) {
@@ -115,8 +146,32 @@ const AddictionalItems = ({
 
   useEffect(() => {
     const sumAdd = addicional.reduce((a, b) => +a + +b.value, 0);
-    setTotal(sumAdd);
-  }, [addicional]);
+    const calc = sumAdd * parseFloat(quantity as string);
+    const allCalc = isNaN(calc) ? 0 : calc;
+    const sumTotal = allCalc + parseFloat(productInfo?.sale_value as string);
+    setTotal(allCalc);
+    setUnityTotal(sumTotal);
+    setTotalProduct(
+      isNaN(quantity as number) || quantity === ""
+        ? 0
+        : sumTotal * parseFloat(quantity as string)
+    );
+  }, [addicional, quantity]);
+
+  function showToast(
+    message: string,
+    status: "error" | "info" | "warning" | "success" | undefined,
+    title: string
+  ) {
+    toast({
+      title: title,
+      description: message,
+      status: status,
+      position: configs.toastPosition as ToastPositionWithLogical,
+      duration: 8000,
+      isClosable: true,
+    });
+  }
 
   function handleSetAddictional(id: string, check: boolean) {
     if (check === true) {
@@ -140,6 +195,35 @@ const AddictionalItems = ({
   function removeAddictional(id: string) {
     const result = addicional.filter((obj) => obj.id !== id);
     setAddictional(result);
+  }
+
+  function handleSetToCart() {
+    if (quantity === "" || isNaN(quantity as number)) {
+      showToast(
+        "A quantidade não pode ser nula ou menor que 1",
+        "warning",
+        "Atenção"
+      );
+      setQuantity(1);
+      return false;
+    }
+    let info: ProductSaleProps = {
+      id: nanoid() || "",
+      product_id: productInfo?.id || "",
+      thumbnail: productInfo?.thumbnail || "",
+      name: productInfo?.title || "",
+      quantity: quantity as number,
+      sale_value: unityTotal,
+      sale_total: totalProduct * 1,
+      unity: productInfo?.unit_desc || "",
+      type: productInfo?.type_unit || "unity",
+      partition: null,
+      adictional: addicional,
+      height: 0,
+      widths: null,
+      size: null,
+    };
+    onSuccess(info);
   }
 
   return (
@@ -266,6 +350,7 @@ const AddictionalItems = ({
                                 <Text>{part.name}</Text>
                               </HStack>
                               <Text fontWeight={"semibold"}>
+                                {isNaN(quantity as number) ? 0 : quantity}x -{" "}
                                 {parseFloat(
                                   part.value.toString()
                                 ).toLocaleString("pt-br", {
@@ -292,11 +377,43 @@ const AddictionalItems = ({
                     align={"center"}
                     justify="space-between"
                     fontSize={"lg"}
+                    mb={2}
+                  >
+                    <Text>Itens Adicionais</Text>
+                    <Text>
+                      {total.toLocaleString("pt-br", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </Text>
+                  </Flex>
+                  <Flex
+                    align={"center"}
+                    justify="space-between"
+                    fontSize={"lg"}
+                    mb={2}
+                  >
+                    <Text>{productInfo?.title}</Text>
+                    <Text>
+                      {parseFloat(
+                        productInfo?.sale_value as string
+                      ).toLocaleString("pt-br", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </Text>
+                  </Flex>
+                  <Flex
+                    align={"center"}
+                    justify="space-between"
+                    fontSize={"lg"}
                     fontWeight="semibold"
+                    borderTopWidth={"1px"}
+                    pt={2}
                   >
                     <Text>Total</Text>
                     <Text>
-                      {total.toLocaleString("pt-br", {
+                      {totalProduct.toLocaleString("pt-br", {
                         style: "currency",
                         currency: "BRL",
                       })}
@@ -308,7 +425,11 @@ const AddictionalItems = ({
           </Box>
         </ModalBody>
         <ModalFooter>
-          <Button leftIcon={<AiOutlineSave />} colorScheme="blue">
+          <Button
+            leftIcon={<AiOutlineSave />}
+            colorScheme="blue"
+            onClick={() => handleSetToCart()}
+          >
             Salvar
           </Button>
         </ModalFooter>
