@@ -82,6 +82,7 @@ import { nanoid } from "nanoid";
 import Hotkeys, { OnKeyFun } from "react-hot-keys";
 import ProductInfo from "./components/productInfo";
 import PartitionSale from "./components/partitionSale";
+import AddictionalItems from "./components/addictionalItems";
 
 type ClientsProps = {
   id: string;
@@ -215,11 +216,9 @@ const PDV = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
   const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
+  const [modalAddicionalItems, setModalAddicionalItems] =
+    useState<boolean>(false);
   const [refSaleValue, setRefSaleValue] = useState<number>(0);
-  const [refWidthsList, setRefWidthsList] = useState<WidthsProps[]>();
-  const [refWidth, setRefWidth] = useState<number>(0);
-  const [refHeight, setRefHeight] = useState<number>(0);
-  const [refProduct, setRefProduct] = useState<ProductsProps>();
   const [partitionSale, setPartitionSale] = useState<PartitionSaleProps[]>([]);
   const [adicionalItems, setAdictionalItems] = useState<PartitionSaleProps[]>(
     []
@@ -405,7 +404,6 @@ const PDV = () => {
   function handleAddProduct(id: string, un: string) {
     const productsReferencia: ProductsProps[] = data;
     const result = productsReferencia.find((obj) => obj.id === id);
-    setRefProduct(result);
     if (
       un === "meter" ||
       un === "unity" ||
@@ -428,7 +426,18 @@ const PDV = () => {
         });
         setModalPartitionSale(true);
       } else {
-        setModalWithUnity(true);
+        if (result?.have_adictional === true) {
+          const addicional = adicionalItems.find(
+            (obj) => obj.id === result?.adictional_items_id
+          );
+          setPartitionSaleInfo({
+            partitionSale: undefined,
+            addictionalItems: addicional as AddictionalInfoProps,
+          });
+          setModalAddicionalItems(true);
+        } else {
+          setModalWithUnity(true);
+        }
       }
       setRefSaleValue(
         result?.in_promotion
@@ -519,6 +528,23 @@ const PDV = () => {
     totalPartition: number
   ) {
     const result = products.find((obj) => obj.id === id);
+    if (partition === null) {
+      showToast(
+        "Complete seu pedido, ainda falta selecionar outras opções",
+        "warning",
+        "Atenção"
+      );
+      return false;
+    } else if (
+      (partition?.length as number) < parseInt(result?.sale_options as string)
+    ) {
+      showToast(
+        "Complete seu pedido, ainda falta selecionar outras opções",
+        "warning",
+        "Atenção"
+      );
+      return false;
+    }
     const findProduct = saleProducts?.find((obj) => obj.product_id === id);
     if (findProduct) {
       showToast("Este produto já foi adicionado", "warning", "Atenção");
@@ -1294,6 +1320,14 @@ const PDV = () => {
           isOpen={modalProductInfo}
           productInfo={productInfo}
           onClose={setModalProductInfo}
+        />
+
+        <AddictionalItems
+          isOpen={modalAddicionalItems}
+          onClose={setModalAddicionalItems}
+          onSuccess={() => {}}
+          productInfo={productInfo}
+          addictionalItems={partitionSaleInfo?.addictionalItems || null}
         />
       </Hotkeys>
     </Fragment>
