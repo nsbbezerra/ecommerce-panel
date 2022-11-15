@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   Flex,
   Grid,
   Heading,
@@ -23,6 +24,7 @@ import {
 } from "@chakra-ui/react";
 import { AiOutlineMinus, AiOutlinePlus, AiOutlineSave } from "react-icons/ai";
 import { memo } from "react";
+import { FaTrash } from "react-icons/fa";
 
 type CatProps = {
   title: string;
@@ -98,10 +100,8 @@ const PartitionSale = ({
   partitionSale,
   addictionalItems,
 }: Props) => {
-  console.log({ productInfo, partitionSale, addictionalItems });
-
   return (
-    <Modal isOpen={isOpen} onClose={() => onClose(false)} size="4xl" isCentered>
+    <Modal isOpen={isOpen} onClose={() => onClose(false)} size="2xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Venda Fracionada</ModalHeader>
@@ -130,32 +130,24 @@ const PartitionSale = ({
                   align={"center"}
                   rounded="md"
                 >
-                  OPÇÕES DO PEDIDO
+                  OPÇÕES DO PEDIDO - Restam: {productInfo?.sale_options}{" "}
+                  escolhas
                 </Flex>
 
                 <Flex direction={"column"} gap={2} mt={3}>
                   {partitionSale?.PartitionSale.map((part) => (
-                    <Grid
-                      templateColumns={"120px 1fr 70px"}
+                    <Flex
                       gap={2}
                       key={part.id}
                       alignItems="center"
+                      justify={"space-between"}
                     >
-                      <HStack spacing={1}>
-                        <IconButton
-                          aria-label="menos"
-                          icon={<AiOutlineMinus />}
-                          size="sm"
-                        />
-                        <Input size={"sm"} />
-                        <IconButton
-                          aria-label="menos"
-                          icon={<AiOutlinePlus />}
-                          size="sm"
-                        />
-                      </HStack>
-                      <Text noOfLines={1}>{part.name}</Text>
-                      <Text textAlign={"right"} fontWeight={"semibold"}>
+                      <Checkbox size={"lg"}>{part.name}</Checkbox>
+                      <Text
+                        textAlign={"right"}
+                        fontWeight={"semibold"}
+                        fontSize="lg"
+                      >
                         {parseFloat(part.value.toString()).toLocaleString(
                           "pt-br",
                           {
@@ -164,7 +156,7 @@ const PartitionSale = ({
                           }
                         )}
                       </Text>
-                    </Grid>
+                    </Flex>
                   ))}
                 </Flex>
               </Box>
@@ -180,27 +172,18 @@ const PartitionSale = ({
                 </Flex>
                 <Flex direction={"column"} gap={2} mt={3}>
                   {addictionalItems?.AddictionalItem.map((part) => (
-                    <Grid
-                      templateColumns={"120px 1fr 70px"}
+                    <Flex
                       gap={2}
                       key={part.id}
                       alignItems="center"
+                      justify={"space-between"}
                     >
-                      <HStack spacing={1}>
-                        <IconButton
-                          aria-label="menos"
-                          icon={<AiOutlineMinus />}
-                          size="sm"
-                        />
-                        <Input size={"sm"} />
-                        <IconButton
-                          aria-label="menos"
-                          icon={<AiOutlinePlus />}
-                          size="sm"
-                        />
-                      </HStack>
-                      <Text noOfLines={1}>{part.name}</Text>
-                      <Text textAlign={"right"} fontWeight={"semibold"}>
+                      <Checkbox size={"lg"}>{part.name}</Checkbox>
+                      <Text
+                        textAlign={"right"}
+                        fontWeight={"semibold"}
+                        fontSize="lg"
+                      >
                         {parseFloat(part.value.toString()).toLocaleString(
                           "pt-br",
                           {
@@ -209,20 +192,84 @@ const PartitionSale = ({
                           }
                         )}
                       </Text>
-                    </Grid>
+                    </Flex>
                   ))}
                 </Flex>
               </Box>
-              <Box rounded={"md"} borderWidth="1px" p={2} h="fit-content">
-                <Flex
+              <Box h="fit-content">
+                <Box>
+                  <Box rounded="md" borderWidth={"1px"}>
+                    <Box
+                      py={1}
+                      px={3}
+                      fontWeight="semibold"
+                      borderBottomWidth={"1px"}
+                    >
+                      PARTES DO PEDIDO
+                    </Box>
+
+                    <Flex direction={"column"} gap={2} p={2}>
+                      <Flex justify={"space-between"} align="center">
+                        <HStack>
+                          <IconButton
+                            aria-label="remover"
+                            icon={<FaTrash />}
+                            colorScheme="red"
+                            size="xs"
+                          />
+                          <Text>1/2 Pizza Calabresa</Text>
+                        </HStack>
+                        <Text fontWeight={"semibold"}>R$ 40,00</Text>
+                      </Flex>
+                    </Flex>
+                  </Box>
+                </Box>
+
+                <Box mt={2}>
+                  <Box rounded="md" borderWidth={"1px"}>
+                    <Box
+                      py={1}
+                      px={3}
+                      fontWeight="semibold"
+                      borderBottomWidth={"1px"}
+                    >
+                      ITENS ADICIONAIS
+                    </Box>
+
+                    <Flex direction={"column"} gap={2} p={2}>
+                      <Flex justify={"space-between"} align="center">
+                        <HStack>
+                          <IconButton
+                            aria-label="remover"
+                            icon={<FaTrash />}
+                            colorScheme="red"
+                            size="xs"
+                          />
+                          <Text>1/2 Pizza Calabresa</Text>
+                        </HStack>
+                        <Text fontWeight={"semibold"}>R$ 40,00</Text>
+                      </Flex>
+                    </Flex>
+                  </Box>
+                </Box>
+
+                <Box
                   bg={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
-                  p={1}
-                  justify="center"
-                  align={"center"}
+                  py={2}
+                  px={4}
                   rounded="md"
+                  mt={2}
                 >
-                  PEDIDO
-                </Flex>
+                  <Flex
+                    align={"center"}
+                    justify="space-between"
+                    fontSize={"lg"}
+                    fontWeight="semibold"
+                  >
+                    <Text>Total</Text>
+                    <Text>R$ 40,00</Text>
+                  </Flex>
+                </Box>
               </Box>
             </Grid>
           </Box>

@@ -716,7 +716,7 @@ const PDV = () => {
             pb={1}
             px={1}
           >
-            <Grid templateColumns={"550px 1fr"} gap={3} h="full" maxH={"full"}>
+            <Grid templateColumns={"570px 1fr"} gap={3} h="full" maxH={"full"}>
               <Grid
                 templateRows={"1fr 100px"}
                 borderWidth="2px"
