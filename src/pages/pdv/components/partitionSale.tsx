@@ -14,6 +14,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Tag,
   Text,
   ToastPositionWithLogical,
   useColorModeValue,
@@ -91,6 +92,8 @@ type ProductSaleProps = {
   thumbnail: string;
   name: string;
   quantity: number;
+  in_promotion: boolean;
+  profit_percent: number;
   type:
     | "square_meter"
     | "meter"
@@ -182,7 +185,13 @@ const PartitionSale = ({
         {
           id: result?.id || "",
           name: result?.name || "",
-          value: result?.value || 0,
+          value:
+            productInfo?.in_promotion === true
+              ? calcPercent(
+                  result?.value.toString() || "",
+                  productInfo.profit_percent
+                )
+              : result?.value || 0,
         },
       ]);
     } else {
@@ -244,6 +253,8 @@ const PartitionSale = ({
       product_id: productInfo?.id || "",
       thumbnail: productInfo?.thumbnail || "",
       name: productInfo?.title || "",
+      in_promotion: productInfo?.in_promotion || false,
+      profit_percent: productInfo?.profit_percent || 0,
       quantity: 1,
       sale_value: total,
       sale_total: total * 1,
@@ -259,7 +270,7 @@ const PartitionSale = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={() => onClose(false)} size="2xl">
+    <Modal isOpen={isOpen} onClose={() => onClose(false)} size="3xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Venda Fracionada</ModalHeader>
@@ -316,19 +327,52 @@ const PartitionSale = ({
                       >
                         {part.name}
                       </Checkbox>
-                      <Text
+                      <Box
                         textAlign={"right"}
                         fontWeight={"semibold"}
                         fontSize="lg"
                       >
-                        {parseFloat(part.value.toString()).toLocaleString(
-                          "pt-br",
-                          {
-                            style: "currency",
-                            currency: "BRL",
-                          }
+                        {productInfo?.in_promotion === true ? (
+                          <HStack>
+                            <Tag colorScheme={"red"} mr={1} size="sm">
+                              -{productInfo.profit_percent}%
+                            </Tag>
+                            <Flex gap={1} align="center">
+                              <Text
+                                fontWeight={"light"}
+                                textDecor="line-through"
+                                fontSize={"md"}
+                              >
+                                {parseFloat(
+                                  part.value.toString()
+                                ).toLocaleString("pt-br", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </Text>
+                              <Text>
+                                {calcPercent(
+                                  part.value.toString(),
+                                  productInfo.profit_percent
+                                ).toLocaleString("pt-br", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </Text>
+                            </Flex>
+                          </HStack>
+                        ) : (
+                          <>
+                            {parseFloat(part.value.toString()).toLocaleString(
+                              "pt-br",
+                              {
+                                style: "currency",
+                                currency: "BRL",
+                              }
+                            )}
+                          </>
                         )}
-                      </Text>
+                      </Box>
                     </Flex>
                   ))}
                 </Flex>

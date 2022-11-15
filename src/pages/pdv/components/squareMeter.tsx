@@ -25,6 +25,8 @@ import {
   Button,
   useToast,
   ToastPositionWithLogical,
+  HStack,
+  Tag,
 } from "@chakra-ui/react";
 import { nanoid } from "nanoid";
 import { memo, useEffect, useState } from "react";
@@ -88,6 +90,8 @@ type ProductSaleProps = {
   thumbnail: string;
   name: string;
   quantity: number;
+  in_promotion: boolean;
+  profit_percent: number;
   type:
     | "square_meter"
     | "meter"
@@ -122,9 +126,14 @@ const SquareMeter = ({ isOpen, onClose, productInfo, onSuccess }: Props) => {
   const [width, setWidth] = useState<string>("");
   const [height, setHeight] = useState<number>(0);
 
+  function calcPercent(price: string, discount: number) {
+    let calc = (parseFloat(price) * discount) / 100;
+    let final = parseFloat(price) - calc;
+    return parseFloat(final.toFixed(2));
+  }
+
   useEffect(() => {
     if (isOpen === false) {
-      setWidths([]);
       setQuantity(1);
       setTotal(0);
       setUnityTotal(0);
@@ -143,7 +152,15 @@ const SquareMeter = ({ isOpen, onClose, productInfo, onSuccess }: Props) => {
         setTotal(0);
       } else {
         setUnityTotal(
-          calcSquareMeter * parseFloat(productInfo?.sale_value as string)
+          calcSquareMeter *
+            parseFloat(
+              productInfo?.in_promotion === true
+                ? calcPercent(
+                    productInfo?.sale_value,
+                    productInfo.profit_percent
+                  ).toString()
+                : (productInfo?.sale_value as string)
+            )
         );
         const sum =
           calcSquareMeter *
@@ -152,7 +169,16 @@ const SquareMeter = ({ isOpen, onClose, productInfo, onSuccess }: Props) => {
               ? "1"
               : (quantity as string)
           );
-        const lastPrice = sum * parseFloat(productInfo?.sale_value as string);
+        const lastPrice =
+          sum *
+          parseFloat(
+            productInfo?.in_promotion === true
+              ? calcPercent(
+                  productInfo?.sale_value,
+                  productInfo.profit_percent
+                ).toString()
+              : (productInfo?.sale_value as string)
+          );
         setTotal(lastPrice);
       }
     }
@@ -199,6 +225,8 @@ const SquareMeter = ({ isOpen, onClose, productInfo, onSuccess }: Props) => {
       id: nanoid() || "",
       product_id: productInfo?.id || "",
       thumbnail: productInfo?.thumbnail || "",
+      in_promotion: productInfo?.in_promotion || false,
+      profit_percent: productInfo?.profit_percent || 0,
       name: productInfo?.title || "",
       quantity: quantity as number,
       sale_value: unityTotal,
@@ -273,15 +301,39 @@ const SquareMeter = ({ isOpen, onClose, productInfo, onSuccess }: Props) => {
           >
             <Flex align={"center"} justify="space-between" fontSize={"lg"}>
               <Text>Valor do Metro</Text>
-              <Text>
-                {parseFloat(productInfo?.sale_value as string).toLocaleString(
-                  "pt-br",
-                  {
-                    style: "currency",
-                    currency: "BRL",
-                  }
-                )}
-              </Text>
+              {productInfo?.in_promotion === true ? (
+                <HStack>
+                  <Tag colorScheme={"red"}>-{productInfo?.profit_percent}%</Tag>
+                  <Text
+                    fontWeight={"light"}
+                    textDecor="line-through"
+                    fontSize={"md"}
+                  >
+                    {parseFloat(
+                      productInfo?.sale_value as string
+                    ).toLocaleString("pt-br", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </Text>
+                  <Text>
+                    {calcPercent(
+                      productInfo.sale_value.toString(),
+                      productInfo.profit_percent
+                    )}
+                  </Text>
+                </HStack>
+              ) : (
+                <Text>
+                  {parseFloat(productInfo?.sale_value as string).toLocaleString(
+                    "pt-br",
+                    {
+                      style: "currency",
+                      currency: "BRL",
+                    }
+                  )}
+                </Text>
+              )}
             </Flex>
             <Flex
               align={"center"}

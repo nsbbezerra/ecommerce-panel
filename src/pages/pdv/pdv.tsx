@@ -64,6 +64,7 @@ import {
   AiOutlineSave,
   AiOutlineSearch,
   AiOutlineShoppingCart,
+  AiOutlineStop,
   AiOutlineTool,
   AiOutlineUser,
   AiOutlineZoomIn,
@@ -157,6 +158,8 @@ type ProductSaleProps = {
   thumbnail: string;
   name: string;
   quantity: number;
+  in_promotion: boolean;
+  profit_percent: number;
   type:
     | "square_meter"
     | "meter"
@@ -454,6 +457,8 @@ const PDV = () => {
       id: nanoid() || "",
       product_id: productInfo?.id || "",
       thumbnail: productInfo?.thumbnail || "",
+      in_promotion: productInfo?.in_promotion || false,
+      profit_percent: productInfo?.profit_percent || 0,
       name: productInfo?.title || "",
       quantity: quantity || 0,
       sale_value: parseFloat(productInfo?.sale_value as string),
@@ -734,7 +739,7 @@ const PDV = () => {
             pb={1}
             px={1}
           >
-            <Grid templateColumns={"580px 1fr"} gap={3} h="full" maxH={"full"}>
+            <Grid templateColumns={"1fr 1fr"} gap={3} h="full" maxH={"full"}>
               <Grid
                 templateRows={"1fr 100px"}
                 borderWidth="2px"
@@ -766,6 +771,7 @@ const PDV = () => {
                         >
                           <Tr>
                             <Th w="1%"></Th>
+                            <Th w="1%">Promo?</Th>
                             <Th py={3} w="1%" textAlign={"center"}>
                               Qtd
                             </Th>
@@ -786,6 +792,15 @@ const PDV = () => {
                                   size="xs"
                                   zIndex={-1}
                                 />
+                              </Td>
+                              <Td textAlign={"center"}>
+                                {prd.in_promotion === true ? (
+                                  <Tag size={"sm"} colorScheme="red">
+                                    -{prd.profit_percent}%
+                                  </Tag>
+                                ) : (
+                                  <Icon as={AiOutlineStop} />
+                                )}
                               </Td>
                               <Td textAlign={"center"}>{prd.quantity}</Td>
                               <Td>{prd.name}</Td>
@@ -1038,7 +1053,15 @@ const PDV = () => {
                     fontWeight={"light"}
                   >
                     <Text>DESCONTO</Text>
-                    <Text>0%</Text>
+                    <HStack>
+                      <IconButton
+                        aria-label="adicionar desconto"
+                        icon={<AiOutlineEdit />}
+                        size="xs"
+                        colorScheme={"green"}
+                      />
+                      <Text>0%</Text>
+                    </HStack>
                   </Flex>
                   <Flex
                     justify={"space-between"}
@@ -1092,17 +1115,19 @@ const PDV = () => {
                           <>
                             <Box
                               w="100%"
-                              sx={{ columnCount: [1, 2, 3, 3], columnGap: 2 }}
+                              sx={{
+                                columnCount: [1, 2, 2, 2, 4],
+                                columnGap: 3,
+                              }}
                             >
                               {products?.map((prod) => (
                                 <Grid
-                                  templateColumns={"78px 1fr"}
+                                  templateColumns={"1fr"}
                                   rounded="md"
                                   overflow={"hidden"}
                                   borderWidth="1px"
-                                  h="78px"
                                   key={prod.id}
-                                  mb={2}
+                                  mb={3}
                                   position="relative"
                                 >
                                   {prod.in_promotion && (
@@ -1125,16 +1150,15 @@ const PDV = () => {
                                   >
                                     <Image
                                       src={prod.thumbnail || ""}
-                                      w="78px"
-                                      h="78px"
+                                      w="100%"
                                       objectFit={"cover"}
                                     />
                                   </Box>
-                                  <Box p={2}>
+                                  <Box p={2} borderTopWidth="1px">
                                     <Tooltip label={prod.title} hasArrow>
                                       <Text
                                         fontSize="sm"
-                                        noOfLines={2}
+                                        noOfLines={1}
                                         cursor="pointer"
                                         mt={-1}
                                       >
@@ -1142,7 +1166,7 @@ const PDV = () => {
                                       </Text>
                                     </Tooltip>
                                     {prod.in_promotion ? (
-                                      <HStack spacing={2} mt={-1}>
+                                      <Stack spacing={-1}>
                                         <Text
                                           fontSize={"sm"}
                                           textDecor="line-through"
@@ -1171,7 +1195,7 @@ const PDV = () => {
                                           })}{" "}
                                           {prod.unit_desc}
                                         </Text>
-                                      </HStack>
+                                      </Stack>
                                     ) : (
                                       <Text
                                         fontSize={"sm"}
@@ -1234,7 +1258,7 @@ const PDV = () => {
                   </Scrollbars>
                 </Box>
                 <Grid
-                  templateColumns="1fr 1fr 3fr"
+                  templateColumns="1fr 2fr"
                   gap={2}
                   px={2}
                   alignItems="center"
@@ -1270,18 +1294,12 @@ const PDV = () => {
                       </MenuItem>
                     </MenuList>
                   </Menu>
-                  <Button leftIcon={<AiOutlinePercentage />} colorScheme="blue">
-                    Desconto{" "}
-                    <Kbd color={"ButtonText"} ml={2}>
-                      F6
-                    </Kbd>
-                  </Button>
                   <Button
                     leftIcon={<AiOutlineShoppingCart />}
                     colorScheme="green"
                   >
                     Finalizar Venda{" "}
-                    <Kbd color={"ButtonText"} ml={2}>
+                    <Kbd color={"HighlightText"} ml={2}>
                       F4
                     </Kbd>
                   </Button>

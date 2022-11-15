@@ -91,6 +91,8 @@ type ProductSaleProps = {
   thumbnail: string;
   name: string;
   quantity: number;
+  in_promotion: boolean;
+  profit_percent: number;
   type:
     | "square_meter"
     | "meter"
@@ -130,12 +132,6 @@ const AddictionalItems = ({
   const [unityTotal, setUnityTotal] = useState<number>(0);
   const [totalProduct, setTotalProduct] = useState<number>(0);
   const [quantity, setQuantity] = useState<number | string>(1);
-
-  function calcPercent(price: string, discount: number) {
-    let calc = (parseFloat(price) * discount) / 100;
-    let final = parseFloat(price) - calc;
-    return parseFloat(final.toFixed(2));
-  }
 
   useEffect(() => {
     if (isOpen === false) {
@@ -211,6 +207,8 @@ const AddictionalItems = ({
       id: nanoid() || "",
       product_id: productInfo?.id || "",
       thumbnail: productInfo?.thumbnail || "",
+      in_promotion: productInfo?.in_promotion || false,
+      profit_percent: productInfo?.profit_percent || 0,
       name: productInfo?.title || "",
       quantity: quantity as number,
       sale_value: unityTotal,
