@@ -97,8 +97,8 @@ interface Props {
   addictionalItems?: AddictionalInfoProps | null;
   onSuccess: (
     id: string,
-    partition: PartitionSaleProps[],
-    addicional: PartitionSaleProps[],
+    partition: PartitionSaleProps[] | null,
+    addicional: PartitionSaleProps[] | null,
     totalPartition: number
   ) => void;
 }
@@ -469,7 +469,12 @@ const PartitionSale = ({
             leftIcon={<AiOutlineSave />}
             colorScheme="blue"
             onClick={() =>
-              onSuccess(productInfo?.id || "", partition, addicional, total)
+              onSuccess(
+                productInfo?.id || "",
+                partition.length === 0 ? null : partition,
+                addicional.length === 0 ? null : addicional,
+                total
+              )
             }
           >
             Salvar

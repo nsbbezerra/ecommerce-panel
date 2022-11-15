@@ -514,8 +514,8 @@ const PDV = () => {
 
   function handleProductPartitionSale(
     id: string,
-    partition: PartitionSaleProps[],
-    addicional: PartitionSaleProps[],
+    partition: PartitionSaleProps[] | null,
+    addicional: PartitionSaleProps[] | null,
     totalPartition: number
   ) {
     const result = products.find((obj) => obj.id === id);
@@ -540,7 +540,6 @@ const PDV = () => {
       widths: 0,
       size: null,
     };
-    console.log({ id, partition, addicional, totalPartition, result, info });
     setSaleProducts((old) => [...old, info]);
     setModalPartitionSale(false);
   }
