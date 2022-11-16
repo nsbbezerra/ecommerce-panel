@@ -430,7 +430,12 @@ export default function Header() {
             </MenuItem>
           </MenuGroup>
           <MenuGroup title="Caixa">
-            <MenuItem icon={<FaCashRegister />}>Caixa Diário</MenuItem>
+            <MenuItem
+              icon={<FaCashRegister />}
+              onClick={() => navigate("/caixa")}
+            >
+              Caixa Diário
+            </MenuItem>
             <MenuItem icon={<BsJournalBookmark />}>Gestão de Caixa</MenuItem>
           </MenuGroup>
           <MenuGroup title="Recebimento">
