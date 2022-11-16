@@ -25,6 +25,7 @@ import {
   NumberDecrementStepper,
   useToast,
   ToastPositionWithLogical,
+  Tag,
 } from "@chakra-ui/react";
 import { nanoid } from "nanoid";
 import { memo, useEffect, useState } from "react";
@@ -133,6 +134,12 @@ const AddictionalItems = ({
   const [totalProduct, setTotalProduct] = useState<number>(0);
   const [quantity, setQuantity] = useState<number | string>(1);
 
+  function calcPercent(price: string, discount: number) {
+    let calc = (parseFloat(price) * discount) / 100;
+    let final = parseFloat(price) - calc;
+    return parseFloat(final.toFixed(2));
+  }
+
   useEffect(() => {
     if (isOpen === false) {
       setAddictional([]);
@@ -141,16 +148,18 @@ const AddictionalItems = ({
   }, [isOpen]);
 
   useEffect(() => {
+    const productValue =
+      productInfo?.in_promotion === true
+        ? calcPercent(productInfo?.sale_value, productInfo?.profit_percent)
+        : parseFloat(productInfo?.sale_value as string);
     const sumAdd = addicional.reduce((a, b) => +a + +b.value, 0);
-    const calc = sumAdd * parseFloat(quantity as string);
-    const allCalc = isNaN(calc) ? 0 : calc;
-    const sumTotal = allCalc + parseFloat(productInfo?.sale_value as string);
-    setTotal(allCalc);
-    setUnityTotal(sumTotal);
+    const unityCalc = sumAdd + productValue;
+    setTotal(sumAdd);
+    setUnityTotal(unityCalc);
     setTotalProduct(
       isNaN(quantity as number) || quantity === ""
         ? 0
-        : sumTotal * parseFloat(quantity as string)
+        : unityCalc * parseFloat(quantity as string)
     );
   }, [addicional, quantity]);
 
@@ -212,7 +221,7 @@ const AddictionalItems = ({
       name: productInfo?.title || "",
       quantity: quantity as number,
       sale_value: unityTotal,
-      sale_total: totalProduct * 1,
+      sale_total: totalProduct,
       unity: productInfo?.unit_desc || "",
       type: productInfo?.type_unit || "unity",
       partition: null,
@@ -222,6 +231,33 @@ const AddictionalItems = ({
       size: null,
     };
     onSuccess(info);
+  }
+
+  function handleTotalValue() {
+    if (isNaN(totalProduct)) {
+      if (productInfo?.in_promotion === true) {
+        return calcPercent(
+          productInfo?.sale_value,
+          productInfo?.profit_percent
+        ).toLocaleString("pt-br", {
+          style: "currency",
+          currency: "BRL",
+        });
+      } else {
+        return parseFloat(productInfo?.sale_value as string).toLocaleString(
+          "pt-br",
+          {
+            style: "currency",
+            currency: "BRL",
+          }
+        );
+      }
+    } else {
+      return totalProduct.toLocaleString("pt-br", {
+        style: "currency",
+        currency: "BRL",
+      });
+    }
   }
 
   return (
@@ -379,6 +415,7 @@ const AddictionalItems = ({
                   >
                     <Text>Itens Adicionais</Text>
                     <Text>
+                      {quantity}x -{" "}
                       {total.toLocaleString("pt-br", {
                         style: "currency",
                         currency: "BRL",
@@ -393,12 +430,48 @@ const AddictionalItems = ({
                   >
                     <Text>{productInfo?.title}</Text>
                     <Text>
-                      {parseFloat(
-                        productInfo?.sale_value as string
-                      ).toLocaleString("pt-br", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
+                      {productInfo?.in_promotion === true && (
+                        <Tag colorScheme={"red"} mr={2}>
+                          -{productInfo?.profit_percent}%
+                        </Tag>
+                      )}
+                      {productInfo?.in_promotion === true
+                        ? calcPercent(
+                            productInfo?.sale_value,
+                            productInfo?.profit_percent
+                          ).toLocaleString("pt-br", {
+                            style: "currency",
+                            currency: "BRL",
+                          })
+                        : parseFloat(
+                            productInfo?.sale_value as string
+                          ).toLocaleString("pt-br", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                    </Text>
+                  </Flex>
+                  <Flex
+                    align={"center"}
+                    justify="space-between"
+                    fontSize={"lg"}
+                    borderTopWidth={"1px"}
+                    pt={2}
+                    borderTopColor={useColorModeValue("white", "gray.500")}
+                  >
+                    <Text>Total Unitário</Text>
+                    <Text>
+                      {isNaN(unityTotal)
+                        ? parseFloat(
+                            productInfo?.sale_value as string
+                          ).toLocaleString("pt-br", {
+                            style: "currency",
+                            currency: "BRL",
+                          })
+                        : unityTotal.toLocaleString("pt-br", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
                     </Text>
                   </Flex>
                   <Flex
@@ -406,16 +479,10 @@ const AddictionalItems = ({
                     justify="space-between"
                     fontSize={"lg"}
                     fontWeight="semibold"
-                    borderTopWidth={"1px"}
-                    pt={2}
+                    mt={2}
                   >
                     <Text>Total</Text>
-                    <Text>
-                      {totalProduct.toLocaleString("pt-br", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </Text>
+                    <Text>{handleTotalValue()}</Text>
                   </Flex>
                 </Box>
               </Box>

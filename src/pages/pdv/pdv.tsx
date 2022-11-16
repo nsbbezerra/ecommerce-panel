@@ -85,6 +85,7 @@ import ProductInfo from "./components/productInfo";
 import PartitionSale from "./components/partitionSale";
 import AddictionalItems from "./components/addictionalItems";
 import SquareMeter from "./components/squareMeter";
+import Sizes from "./components/sizes";
 
 type ClientsProps = {
   id: string;
@@ -216,6 +217,7 @@ const PDV = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
   const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
+  const [modalSizes, setModalSizes] = useState<boolean>(false);
   const [modalSquareMeter, setModalSquareMeter] = useState<boolean>(false);
   const [modalAddicionalItems, setModalAddicionalItems] =
     useState<boolean>(false);
@@ -408,6 +410,10 @@ const PDV = () => {
       setProductInfo(result || null);
       setModalSquareMeter(true);
     }
+    if (un === "sizes") {
+      setProductInfo(result || null);
+      setModalSizes(true);
+    }
     if (
       un === "meter" ||
       un === "unity" ||
@@ -533,6 +539,11 @@ const PDV = () => {
   function handleProductSquareMeter(itens: ProductSaleProps) {
     setSaleProducts((old) => [...old, itens]);
     setModalSquareMeter(false);
+  }
+
+  function handleProductSizes(itens: ProductSaleProps) {
+    setSaleProducts((old) => [...old, itens]);
+    setModalSizes(false);
   }
 
   return (
@@ -770,7 +781,6 @@ const PDV = () => {
                         >
                           <Tr>
                             <Th w="1%"></Th>
-                            <Th w="1%">Promo?</Th>
                             <Th py={3} w="1%" textAlign={"center"}>
                               Qtd
                             </Th>
@@ -792,17 +802,16 @@ const PDV = () => {
                                   zIndex={-1}
                                 />
                               </Td>
-                              <Td textAlign={"center"}>
-                                {prd.in_promotion === true ? (
-                                  <Tag size={"sm"} colorScheme="red">
+                              <Td textAlign={"center"}>{prd.quantity}</Td>
+                              <Td>
+                                {prd.in_promotion === true && (
+                                  <Tag size={"sm"} colorScheme="red" mr={2}>
                                     -{prd.profit_percent}%
                                   </Tag>
-                                ) : (
-                                  <Icon as={AiOutlineStop} />
                                 )}
+                                {prd.name}{" "}
+                                {prd.size && `(Tam: ${prd.size.description})`}
                               </Td>
-                              <Td textAlign={"center"}>{prd.quantity}</Td>
-                              <Td>{prd.name}</Td>
                               <Td isNumeric>
                                 {prd.sale_value.toLocaleString("pt-br", {
                                   style: "currency",
@@ -905,7 +914,7 @@ const PDV = () => {
                                                   fontSize="sm"
                                                   fontWeight={"semibold"}
                                                 >
-                                                  ITENS ADICIONAIS - POR UNIDADE
+                                                  ITENS ADICIONAIS
                                                 </Box>
                                                 <Flex
                                                   p={2}
@@ -922,6 +931,7 @@ const PDV = () => {
                                                       >
                                                         <Text>{part.name}</Text>
                                                         <Text>
+                                                          {prd.quantity}x -{" "}
                                                           {parseFloat(
                                                             part.value.toString()
                                                           ).toLocaleString(
@@ -1093,11 +1103,12 @@ const PDV = () => {
                 <Box maxH={"full"} h="full" overflow={"auto"} pb={3}>
                   <Scrollbars autoHide>
                     {isLoading ? (
-                      <Grid templateColumns={"repeat(4, 1fr)"} gap={2}>
-                        <Skeleton h="200px" rounded={"md"} />
-                        <Skeleton h="200px" rounded={"md"} />
-                        <Skeleton h="200px" rounded={"md"} />
-                        <Skeleton h="200px" rounded={"md"} />
+                      <Grid templateColumns={"repeat(1, 1fr)"} gap={2}>
+                        <Skeleton h={7} rounded={"md"} />
+                        <Skeleton h={7} rounded={"md"} />
+                        <Skeleton h={7} rounded={"md"} />
+                        <Skeleton h={7} rounded={"md"} />
+                        <Skeleton h={7} rounded={"md"} />
                       </Grid>
                     ) : (
                       <Fragment>
@@ -1123,9 +1134,9 @@ const PDV = () => {
                                 <Tr>
                                   <Th w="1%"></Th>
                                   <Th py={3}>Nome</Th>
-                                  <Th>Promo?</Th>
-                                  <Th>Preço</Th>
-                                  <Th>Opções</Th>
+                                  <Th>Cat.</Th>
+                                  <Th isNumeric>Preço</Th>
+                                  <Th w="120px">Opções</Th>
                                 </Tr>
                               </Thead>
                               <Tbody>
@@ -1138,17 +1149,20 @@ const PDV = () => {
                                         zIndex={-1}
                                       />
                                     </Td>
-                                    <Td>{prod?.title}</Td>
-                                    <Td textAlign={"center"}>
-                                      {prod.in_promotion === true ? (
-                                        <Tag size={"sm"} colorScheme="red">
+                                    <Td>
+                                      {prod?.title}{" "}
+                                      {prod?.in_promotion === true && (
+                                        <Tag
+                                          size={"sm"}
+                                          colorScheme="red"
+                                          ml={2}
+                                        >
                                           -{prod.profit_percent}%
                                         </Tag>
-                                      ) : (
-                                        <Icon as={AiOutlineStop} />
                                       )}
                                     </Td>
-                                    <Td>
+                                    <Td>{prod?.sub_category?.title}</Td>
+                                    <Td isNumeric>
                                       {prod.in_promotion ? (
                                         <Stack spacing={0}>
                                           <Text
@@ -1431,6 +1445,13 @@ const PDV = () => {
           onClose={setModalSquareMeter}
           productInfo={productInfo}
           onSuccess={handleProductSquareMeter}
+        />
+
+        <Sizes
+          isOpen={modalSizes}
+          onClose={setModalSizes}
+          productInfo={productInfo}
+          onSuccess={handleProductSizes}
         />
       </Hotkeys>
     </Fragment>

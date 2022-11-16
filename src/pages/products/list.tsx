@@ -1050,7 +1050,7 @@ const ListProduct = () => {
                       </Td>
                       <Td w="3%" textAlign={"center"}>
                         <Switch
-                          defaultChecked={pro.active}
+                          isChecked={pro.active}
                           onChange={(e) =>
                             mutationActive.mutate({
                               id: pro.id,
