@@ -1684,7 +1684,7 @@ const ListProduct = () => {
                         resize={"none"}
                       />
                     </FormControl>
-                    <Grid templateColumns={"repeat(4, 1fr)"} gap={3}>
+                    <Grid templateColumns={"repeat(3, 1fr)"} gap={3}>
                       <FormControl isRequired>
                         <FormLabel>SKU</FormLabel>
                         <Input placeholder="SKU" name="sku" />
@@ -1703,40 +1703,8 @@ const ListProduct = () => {
                           name="internal_code"
                         />
                       </FormControl>
-                      <FormControl isRequired>
-                        <FormLabel>Unidade de Medida</FormLabel>
-                        <Select
-                          name="unit_desc"
-                          placeholder="Selecione uma opção"
-                        >
-                          <option value="KG">Quilograma</option>
-                          <option value="GR">Grama</option>
-                          <option value="UN">Unidade</option>
-                          <option value="MT">Metro</option>
-                          <option value="M²">Metro Quadrado</option>
-                          <option value="CM">Centímetro</option>
-                          <option value="MM">Milímetro</option>
-                          <option value="PC">Peça</option>
-                          <option value="CX">Caixa</option>
-                          <option value="DZ">Duzia</option>
-                          <option value="EM">Embalagem</option>
-                          <option value="FD">Fardo</option>
-                          <option value="KT">KIT</option>
-                          <option value="JG">Jogo</option>
-                          <option value="PT">Pacote</option>
-                          <option value="LATA">Lata</option>
-                          <option value="LT">Litro</option>
-                          <option value="ML">Mililitro</option>
-                          <option value="SC">Saco</option>
-                          <option value="ROLO">Rolo</option>
-                          <option value="VD">Vidro</option>
-                          <option value="CE">Centro</option>
-                          <option value="CJ">Conjunto</option>
-                          <option value="GF">Garrafa</option>
-                        </Select>
-                      </FormControl>
                     </Grid>
-                    <Grid templateColumns={"1fr 2fr"} gap={3}>
+                    <Grid templateColumns={"1fr 2fr 1fr"} gap={3}>
                       <FormControl isRequired>
                         <FormLabel>Estilo do Estoque</FormLabel>
                         <Select
@@ -1747,10 +1715,7 @@ const ListProduct = () => {
                           <option value="square_meter">
                             Venda por Metro Quadrado
                           </option>
-                          <option value={"meter"}>Venda por Metro</option>
                           <option value="unity">Venda por Unidade</option>
-                          <option value="weight">Venda no Peso</option>
-                          <option value="liter">Venda por Litro</option>
                           <option value="without">Venda sem Estoque</option>
                           <option value="sizes">Estoque Personalizado</option>
                         </Select>
@@ -1876,6 +1841,38 @@ const ListProduct = () => {
                             estoque.
                           </Flex>
                         )}
+                      </FormControl>
+                      <FormControl isRequired>
+                        <FormLabel>Unidade de Medida</FormLabel>
+                        <Select
+                          name="unit_desc"
+                          placeholder="Selecione uma opção"
+                        >
+                          <option value="KG">Quilograma</option>
+                          <option value="GR">Grama</option>
+                          <option value="UN">Unidade</option>
+                          <option value="MT">Metro</option>
+                          <option value="M²">Metro Quadrado</option>
+                          <option value="CM">Centímetro</option>
+                          <option value="MM">Milímetro</option>
+                          <option value="PC">Peça</option>
+                          <option value="CX">Caixa</option>
+                          <option value="DZ">Duzia</option>
+                          <option value="EM">Embalagem</option>
+                          <option value="FD">Fardo</option>
+                          <option value="KT">KIT</option>
+                          <option value="JG">Jogo</option>
+                          <option value="PT">Pacote</option>
+                          <option value="LATA">Lata</option>
+                          <option value="LT">Litro</option>
+                          <option value="ML">Mililitro</option>
+                          <option value="SC">Saco</option>
+                          <option value="ROLO">Rolo</option>
+                          <option value="VD">Vidro</option>
+                          <option value="CE">Centro</option>
+                          <option value="CJ">Conjunto</option>
+                          <option value="GF">Garrafa</option>
+                        </Select>
                       </FormControl>
                     </Grid>
                     <FormControl>
