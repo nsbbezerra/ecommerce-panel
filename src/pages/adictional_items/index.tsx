@@ -350,7 +350,7 @@ export default function AdictionalItems() {
               >
                 CATEGORIAS
               </Flex>
-              <Box borderWidth="1px" rounded="md" py={2} px={3}>
+              <Box borderWidth="1px" rounded="md" py={2} px={3} shadow="md">
                 {isLoading ? (
                   <Stack>
                     <Skeleton h={7} />
@@ -498,7 +498,7 @@ export default function AdictionalItems() {
               >
                 ITENS ADICIONAIS
               </Flex>
-              <Box borderWidth="1px" rounded="md" py={2} px={3}>
+              <Box borderWidth="1px" rounded="md" py={2} px={3} shadow="md">
                 <Form ref={formItemsRef} onSubmit={handleSubmitItems}>
                   <Grid
                     templateColumns={"1fr 1fr 150px"}

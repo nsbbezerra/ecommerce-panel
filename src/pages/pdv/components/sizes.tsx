@@ -120,6 +120,13 @@ const Sizes = ({ isOpen, onClose, productInfo, onSuccess }: Props) => {
   const [size, setSize] = useState<SizeProps | null>(null);
   const [total, setTotal] = useState<number>(0);
 
+  useEffect(() => {
+    if (isOpen === false) {
+      setQuantity(1);
+      setSize(null);
+    }
+  }, [isOpen]);
+
   function calcPercent(price: string, discount: number) {
     let calc = (parseFloat(price) * discount) / 100;
     let final = parseFloat(price) - calc;

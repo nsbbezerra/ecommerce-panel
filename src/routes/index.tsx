@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Index from "../pages";
 import AdictionalItems from "../pages/adictional_items";
 import CashierIndex from "../pages/cashier";
+import Cashier from "../pages/cashier/cashier";
 import IndexCategories from "../pages/categories";
 import Clients from "../pages/clients";
 import Company from "../pages/company";
@@ -35,6 +36,7 @@ export default function Routing() {
       <Route path="/receitas" element={<IndexRevenues />} />
       <Route path="/despesas" element={<IndexExpenses />} />
       <Route path="/caixa" element={<CashierIndex />} />
+      <Route path="/caixa/:caixa" element={<Cashier />} />
     </Routes>
   );
 }

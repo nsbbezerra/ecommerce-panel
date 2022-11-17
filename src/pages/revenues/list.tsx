@@ -1,6 +1,5 @@
 import {
   Button,
-  Divider,
   Flex,
   FormControl,
   FormLabel,
@@ -34,6 +33,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Box,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { api, configs } from "../../configs";
@@ -44,7 +44,6 @@ import { format } from "date-fns";
 import { AiOutlineEdit, AiOutlineSave, AiOutlineZoomIn } from "react-icons/ai";
 import { SubmitHandler, FormHandles } from "@unform/core";
 import { Form } from "@unform/web";
-import * as Yup from "yup";
 import Input from "../../components/Input";
 import DatePicker from "../../components/datepicker";
 import TextArea from "../../components/textArea";
@@ -335,155 +334,167 @@ export default function ListRevenues() {
         </FormControl>
       </Grid>
 
-      <Divider mt={3} mb={3} />
-
-      {isLoading ? (
-        <Stack spacing={4}>
-          <Skeleton h={7} />
-          <Skeleton h={7} />
-          <Skeleton h={7} />
-          <Skeleton h={7} />
-          <Skeleton h={7} />
-        </Stack>
-      ) : (
-        <Fragment>
-          {!revenues || revenues.length === 0 ? (
-            <Flex justify={"center"} align="center" direction={"column"}>
-              <Icon as={GiCardboardBox} fontSize="8xl" />
-              <Text>Nenhuma informação para mostrar</Text>
-            </Flex>
-          ) : (
-            <Fragment>
-              <Table size={"sm"}>
-                <Thead>
-                  <Tr>
-                    <Th>Título</Th>
-                    <Th w="12%">Descrição</Th>
-                    <Th w="12%" textAlign={"center"}>
-                      Pagamento
-                    </Th>
-                    <Th w="10%" textAlign={"center"}>
-                      Status
-                    </Th>
-                    <Th w="10%">Vencimento</Th>
-                    <Th w="10%" isNumeric>
-                      Valor
-                    </Th>
-                    <Th w="10%" textAlign={"center"}>
-                      Opções
-                    </Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {revenues.map((rv) => (
-                    <Tr
-                      key={rv.id}
-                      bg={
-                        new Date(rv.due_date) < new Date() &&
-                        rv.payment_status !== "paid_out"
-                          ? useColorModeValue("red.50", "red.900")
-                          : ""
-                      }
-                    >
-                      <Td>{rv.title}</Td>
-                      <Td>
-                        <Popover>
-                          <PopoverTrigger>
-                            <Button
-                              isFullWidth
-                              leftIcon={<AiOutlineZoomIn />}
-                              size="xs"
-                              colorScheme={"blue"}
-                              variant="outline"
+      <Box
+        rounded={"md"}
+        shadow="md"
+        borderWidth={"1px"}
+        mt={5}
+        overflow="hidden"
+      >
+        {isLoading ? (
+          <Stack spacing={4}>
+            <Skeleton h={7} />
+            <Skeleton h={7} />
+            <Skeleton h={7} />
+            <Skeleton h={7} />
+            <Skeleton h={7} />
+          </Stack>
+        ) : (
+          <Fragment>
+            {!revenues || revenues.length === 0 ? (
+              <Flex justify={"center"} align="center" direction={"column"}>
+                <Icon as={GiCardboardBox} fontSize="8xl" />
+                <Text>Nenhuma informação para mostrar</Text>
+              </Flex>
+            ) : (
+              <Fragment>
+                <Table size={"sm"}>
+                  <Thead
+                    position="sticky"
+                    top={0}
+                    bg={useColorModeValue("gray.50", "gray.900")}
+                    shadow={"sm"}
+                    zIndex={1}
+                  >
+                    <Tr>
+                      <Th py={3}>Título</Th>
+                      <Th w="12%">Descrição</Th>
+                      <Th w="12%" textAlign={"center"}>
+                        Pagamento
+                      </Th>
+                      <Th w="10%" textAlign={"center"}>
+                        Status
+                      </Th>
+                      <Th w="10%">Vencimento</Th>
+                      <Th w="10%" isNumeric>
+                        Valor
+                      </Th>
+                      <Th w="10%" textAlign={"center"}>
+                        Opções
+                      </Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {revenues.map((rv) => (
+                      <Tr
+                        key={rv.id}
+                        bg={
+                          new Date(rv.due_date) < new Date() &&
+                          rv.payment_status !== "paid_out"
+                            ? useColorModeValue("red.50", "red.900")
+                            : ""
+                        }
+                      >
+                        <Td>{rv.title}</Td>
+                        <Td>
+                          <Popover>
+                            <PopoverTrigger>
+                              <Button
+                                isFullWidth
+                                leftIcon={<AiOutlineZoomIn />}
+                                size="xs"
+                                colorScheme={"blue"}
+                                variant="outline"
+                              >
+                                Visualizar
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              shadow="lg"
+                              _focus={{ outline: "none" }}
                             >
-                              Visualizar
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            shadow="lg"
-                            _focus={{ outline: "none" }}
-                          >
-                            <PopoverArrow />
-                            <PopoverCloseButton />
-                            <PopoverHeader>Descrição</PopoverHeader>
-                            <PopoverBody>{rv.description}</PopoverBody>
-                          </PopoverContent>
-                        </Popover>
-                      </Td>
-                      <Td>
-                        <Tag
-                          w="full"
-                          justifyContent={"center"}
-                          colorScheme="green"
-                        >
-                          {handlePaymentMethod(rv.payment_method)}
-                        </Tag>
-                      </Td>
-                      <Td>
-                        {rv.payment_status === "cancel" && (
-                          <Tag
-                            w="full"
-                            justifyContent={"center"}
-                            colorScheme="red"
-                          >
-                            {handleStatusPay(rv.payment_status)}
-                          </Tag>
-                        )}
-                        {rv.payment_status === "paid_out" && (
+                              <PopoverArrow />
+                              <PopoverCloseButton />
+                              <PopoverHeader>Descrição</PopoverHeader>
+                              <PopoverBody>{rv.description}</PopoverBody>
+                            </PopoverContent>
+                          </Popover>
+                        </Td>
+                        <Td>
                           <Tag
                             w="full"
                             justifyContent={"center"}
                             colorScheme="green"
                           >
-                            {handleStatusPay(rv.payment_status)}
+                            {handlePaymentMethod(rv.payment_method)}
                           </Tag>
-                        )}
-                        {rv.payment_status === "refused" && (
-                          <Tag
-                            w="full"
-                            justifyContent={"center"}
-                            colorScheme="gray"
-                          >
-                            {handleStatusPay(rv.payment_status)}
-                          </Tag>
-                        )}
-                        {rv.payment_status === "wait" && (
-                          <Tag
-                            w="full"
-                            justifyContent={"center"}
-                            colorScheme="yellow"
-                          >
-                            {handleStatusPay(rv.payment_status)}
-                          </Tag>
-                        )}
-                      </Td>
-                      <Td>{format(new Date(rv.due_date), "dd/MM/yyyy")}</Td>
-                      <Td isNumeric>
-                        {parseFloat(rv.value).toLocaleString("pt-br", {
-                          style: "currency",
-                          currency: "BRL",
-                        })}
-                      </Td>
-                      <Td>
-                        {
-                          <Button
-                            leftIcon={<AiOutlineEdit />}
-                            size="xs"
-                            isFullWidth
-                            onClick={() => handleRevenue(rv.id)}
-                          >
-                            Alterar
-                          </Button>
-                        }
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </Fragment>
-          )}
-        </Fragment>
-      )}
+                        </Td>
+                        <Td>
+                          {rv.payment_status === "cancel" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme="red"
+                            >
+                              {handleStatusPay(rv.payment_status)}
+                            </Tag>
+                          )}
+                          {rv.payment_status === "paid_out" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme="green"
+                            >
+                              {handleStatusPay(rv.payment_status)}
+                            </Tag>
+                          )}
+                          {rv.payment_status === "refused" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme="gray"
+                            >
+                              {handleStatusPay(rv.payment_status)}
+                            </Tag>
+                          )}
+                          {rv.payment_status === "wait" && (
+                            <Tag
+                              w="full"
+                              justifyContent={"center"}
+                              colorScheme="yellow"
+                            >
+                              {handleStatusPay(rv.payment_status)}
+                            </Tag>
+                          )}
+                        </Td>
+                        <Td>{format(new Date(rv.due_date), "dd/MM/yyyy")}</Td>
+                        <Td isNumeric>
+                          {parseFloat(rv.value).toLocaleString("pt-br", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                        </Td>
+                        <Td>
+                          {
+                            <Button
+                              leftIcon={<AiOutlineEdit />}
+                              size="xs"
+                              isFullWidth
+                              onClick={() => handleRevenue(rv.id)}
+                            >
+                              Alterar
+                            </Button>
+                          }
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Fragment>
+            )}
+          </Fragment>
+        )}
+      </Box>
 
       <Modal isOpen={modalEdit} onClose={() => setModalEdit(false)} size="5xl">
         <ModalOverlay />

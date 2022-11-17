@@ -317,90 +317,96 @@ export default function PayForms() {
             </Stack>
           </Form>
 
-          <Divider mt={3} mb={3} />
-
-          {isLoading ? (
-            <Stack spacing={3}>
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-              <Skeleton h={7} />
-            </Stack>
-          ) : (
-            <>
-              {payForms?.length === 0 || !payForms ? (
-                <Flex justify={"center"} align="center" direction={"column"}>
-                  <Icon as={GiCardboardBox} fontSize="8xl" />
-                  <Text>Nenhuma informação para mostrar</Text>
-                </Flex>
-              ) : (
-                <Table size={"sm"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Ativo?</Th>
-                      <Th>Título</Th>
-                      <Th>Tag</Th>
-                      <Th>Parcelado?</Th>
-                      <Th>Intervalo</Th>
-                      <Th>Parcelas</Th>
-                      <Th w="12%" textAlign={"center"}>
-                        Opções
-                      </Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {payForms.map((pay) => (
-                      <Tr key={pay.id}>
-                        <Td>
-                          <Switch
-                            defaultChecked={pay.active}
-                            onChange={(e) =>
-                              mutationActive.mutate({
-                                id: pay.id,
-                                active: e.target.checked,
-                              })
-                            }
-                          />
-                        </Td>
-                        <Td>{pay.name}</Td>
-                        <Td>
-                          <Tag>
-                            {pay.tag === "money" && "Dinheiro"}
-                            {pay.tag === "credit_card" && "Cartão de Crédito"}
-                            {pay.tag === "debit_card" && "Cartão de Débito"}
-                            {pay.tag === "duplicata" && "Duplicata"}
-                            {pay.tag === "pix" && "PIX"}
-                            {pay.tag === "ticket" && "Boleto"}
-                          </Tag>
-                        </Td>
-                        <Td>
-                          {pay.is_installments === true && (
-                            <Tag colorScheme={"green"}>SIM</Tag>
-                          )}
-                          {pay.is_installments === false && (
-                            <Tag colorScheme={"red"}>NÃO</Tag>
-                          )}
-                        </Td>
-                        <Td>{pay.interval_days} dias</Td>
-                        <Td>{pay.installments}x</Td>
-                        <Td w="12%" textAlign={"center"}>
-                          <Button
-                            leftIcon={<AiOutlineEdit />}
-                            size="xs"
-                            isFullWidth
-                            onClick={() => handlePayForm(pay.id)}
-                          >
-                            Editar
-                          </Button>
-                        </Td>
+          <Box
+            rounded={"md"}
+            shadow="md"
+            borderWidth={"1px"}
+            mt={5}
+            overflow="hidden"
+          >
+            {isLoading ? (
+              <Stack spacing={3}>
+                <Skeleton h={7} />
+                <Skeleton h={7} />
+                <Skeleton h={7} />
+                <Skeleton h={7} />
+                <Skeleton h={7} />
+              </Stack>
+            ) : (
+              <>
+                {payForms?.length === 0 || !payForms ? (
+                  <Flex justify={"center"} align="center" direction={"column"}>
+                    <Icon as={GiCardboardBox} fontSize="8xl" />
+                    <Text>Nenhuma informação para mostrar</Text>
+                  </Flex>
+                ) : (
+                  <Table size={"sm"}>
+                    <Thead>
+                      <Tr>
+                        <Th>Ativo?</Th>
+                        <Th>Título</Th>
+                        <Th>Tag</Th>
+                        <Th>Parcelado?</Th>
+                        <Th>Intervalo</Th>
+                        <Th>Parcelas</Th>
+                        <Th w="12%" textAlign={"center"}>
+                          Opções
+                        </Th>
                       </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-            </>
-          )}
+                    </Thead>
+                    <Tbody>
+                      {payForms.map((pay) => (
+                        <Tr key={pay.id}>
+                          <Td>
+                            <Switch
+                              defaultChecked={pay.active}
+                              onChange={(e) =>
+                                mutationActive.mutate({
+                                  id: pay.id,
+                                  active: e.target.checked,
+                                })
+                              }
+                            />
+                          </Td>
+                          <Td>{pay.name}</Td>
+                          <Td>
+                            <Tag>
+                              {pay.tag === "money" && "Dinheiro"}
+                              {pay.tag === "credit_card" && "Cartão de Crédito"}
+                              {pay.tag === "debit_card" && "Cartão de Débito"}
+                              {pay.tag === "duplicata" && "Duplicata"}
+                              {pay.tag === "pix" && "PIX"}
+                              {pay.tag === "ticket" && "Boleto"}
+                            </Tag>
+                          </Td>
+                          <Td>
+                            {pay.is_installments === true && (
+                              <Tag colorScheme={"green"}>SIM</Tag>
+                            )}
+                            {pay.is_installments === false && (
+                              <Tag colorScheme={"red"}>NÃO</Tag>
+                            )}
+                          </Td>
+                          <Td>{pay.interval_days} dias</Td>
+                          <Td>{pay.installments}x</Td>
+                          <Td w="12%" textAlign={"center"}>
+                            <Button
+                              leftIcon={<AiOutlineEdit />}
+                              size="xs"
+                              isFullWidth
+                              onClick={() => handlePayForm(pay.id)}
+                            >
+                              Editar
+                            </Button>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                )}
+              </>
+            )}
+          </Box>
         </Box>
       </Box>
 

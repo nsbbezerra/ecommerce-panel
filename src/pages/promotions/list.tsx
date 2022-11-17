@@ -212,6 +212,7 @@ export default function ListPromotions() {
                   overflow={"hidden"}
                   key={pro.id}
                   h="fit-content"
+                  shadow="md"
                 >
                   <Image src={pro.banner} w="full" />
                   <Divider />

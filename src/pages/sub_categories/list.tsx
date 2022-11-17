@@ -32,6 +32,7 @@ import {
   HStack,
   Input as ChakraInput,
   ToastPositionWithLogical,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import * as Icons from "react-icons/all";
@@ -324,11 +325,22 @@ const ListSubCategories = () => {
               <Text>Nenhuma informação para mostrar</Text>
             </Flex>
           ) : (
-            <Fragment>
+            <Box
+              rounded={"md"}
+              shadow="md"
+              borderWidth={"1px"}
+              overflow="hidden"
+            >
               <Table size="sm">
-                <Thead>
+                <Thead
+                  position="sticky"
+                  top={0}
+                  bg={useColorModeValue("gray.50", "gray.900")}
+                  shadow={"sm"}
+                  zIndex={1}
+                >
                   <Tr>
-                    <Th w="5%" textAlign={"center"}>
+                    <Th w="5%" textAlign={"center"} py={3}>
                       Ativo?
                     </Th>
                     <Th w="5%" textAlign={"center"}>
@@ -395,7 +407,7 @@ const ListSubCategories = () => {
                   ))}
                 </Tbody>
               </Table>
-            </Fragment>
+            </Box>
           )}
           <Flex justify={"flex-end"} align="center" gap={3} mt={3}>
             <Button

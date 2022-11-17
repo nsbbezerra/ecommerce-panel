@@ -42,6 +42,7 @@ import {
   FormControl,
   FormLabel,
   ToastPositionWithLogical,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useState, useRef } from "react";
@@ -306,130 +307,138 @@ const ListEmployee = () => {
               <Text>Nenhuma informação para mostrar</Text>
             </Flex>
           ) : (
-            <Table size={"sm"}>
-              <Thead>
-                <Tr>
-                  <Th>Nome</Th>
-                  <Th>Telefone</Th>
-                  <Th>Usuário</Th>
-                  <Th>Ativo?</Th>
-                  <Th>Permissão</Th>
-                  <Th>Opções</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {employees.map((emp) => (
-                  <Tr key={emp.id}>
-                    <Td>{emp.name}</Td>
-                    <Td>{emp.phone}</Td>
-                    <Td>{emp.user}</Td>
-                    <Td>
-                      <Switch
-                        defaultChecked={emp.active}
-                        onChange={(e) =>
-                          mutationActive.mutate({
-                            id: emp.id,
-                            active: e.target.checked,
-                          })
-                        }
-                      />
-                    </Td>
-                    <Td>
-                      <HStack>
-                        <Tag
-                          colorScheme={
-                            (emp.permission === "all" && "green") ||
-                            (emp.permission === "cashier" && "blue") ||
-                            (emp.permission === "seller" && "gray") ||
-                            "gray"
-                          }
-                        >
-                          {(emp.permission === "all" && "Geral") ||
-                            (emp.permission === "cashier" && "Financeiro") ||
-                            (emp.permission === "seller" && "Vendas") ||
-                            "Geral"}
-                        </Tag>
-                        <Popover>
-                          <PopoverTrigger>
-                            <IconButton
-                              size={"xs"}
-                              icon={<AiOutlineEdit />}
-                              aria-label="Editar permissão"
-                              colorScheme={"blue"}
-                              variant="outline"
-                            />
-                          </PopoverTrigger>
-                          <PopoverContent
-                            _focus={{ outline: "none" }}
-                            shadow="lg"
-                          >
-                            <PopoverArrow />
-                            <PopoverCloseButton />
-                            <PopoverHeader fontWeight={"bold"}>
-                              Permissão
-                            </PopoverHeader>
-                            <PopoverBody>
-                              Selecione uma opção:
-                              <RadioGroup
-                                name="permission"
-                                value={permission}
-                                onChange={(e) => setPermission(e)}
-                                mt={3}
-                              >
-                                <HStack spacing={3}>
-                                  <Radio value="all">Geral</Radio>
-                                  <Radio value="cashier">Financeiro</Radio>
-                                  <Radio value="seller">Vendas</Radio>
-                                </HStack>
-                              </RadioGroup>
-                            </PopoverBody>
-                            <PopoverFooter
-                              display="flex"
-                              justifyContent="flex-end"
-                            >
-                              <Button
-                                colorScheme={"blue"}
-                                size="sm"
-                                leftIcon={<AiOutlineSave />}
-                                onClick={() =>
-                                  mutationPermission.mutate({
-                                    id: emp.id,
-                                    permission: permission || "",
-                                  })
-                                }
-                                isLoading={mutationPermission.isLoading}
-                              >
-                                Salvar
-                              </Button>
-                            </PopoverFooter>
-                          </PopoverContent>
-                        </Popover>
-                      </HStack>
-                    </Td>
-                    <Td>
-                      <Menu>
-                        <MenuButton
-                          as={Button}
-                          rightIcon={<AiOutlineTool />}
-                          size="xs"
-                          isFullWidth
-                        >
-                          Opções
-                        </MenuButton>
-                        <MenuList>
-                          <MenuItem
-                            icon={<AiOutlineEdit />}
-                            onClick={() => handeToUpdate(emp.id)}
-                          >
-                            Alterar Informações
-                          </MenuItem>
-                        </MenuList>
-                      </Menu>
-                    </Td>
+            <Box rounded="md" shadow={"md"} borderWidth="1px">
+              <Table size={"sm"}>
+                <Thead
+                  position="sticky"
+                  top={0}
+                  bg={useColorModeValue("gray.50", "gray.900")}
+                  shadow={"sm"}
+                  zIndex={1}
+                >
+                  <Tr>
+                    <Th py={3}>Nome</Th>
+                    <Th>Telefone</Th>
+                    <Th>Usuário</Th>
+                    <Th>Ativo?</Th>
+                    <Th>Permissão</Th>
+                    <Th>Opções</Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {employees.map((emp) => (
+                    <Tr key={emp.id}>
+                      <Td>{emp.name}</Td>
+                      <Td>{emp.phone}</Td>
+                      <Td>{emp.user}</Td>
+                      <Td>
+                        <Switch
+                          defaultChecked={emp.active}
+                          onChange={(e) =>
+                            mutationActive.mutate({
+                              id: emp.id,
+                              active: e.target.checked,
+                            })
+                          }
+                        />
+                      </Td>
+                      <Td>
+                        <HStack>
+                          <Tag
+                            colorScheme={
+                              (emp.permission === "all" && "green") ||
+                              (emp.permission === "cashier" && "blue") ||
+                              (emp.permission === "seller" && "gray") ||
+                              "gray"
+                            }
+                          >
+                            {(emp.permission === "all" && "Geral") ||
+                              (emp.permission === "cashier" && "Financeiro") ||
+                              (emp.permission === "seller" && "Vendas") ||
+                              "Geral"}
+                          </Tag>
+                          <Popover>
+                            <PopoverTrigger>
+                              <IconButton
+                                size={"xs"}
+                                icon={<AiOutlineEdit />}
+                                aria-label="Editar permissão"
+                                colorScheme={"blue"}
+                                variant="outline"
+                              />
+                            </PopoverTrigger>
+                            <PopoverContent
+                              _focus={{ outline: "none" }}
+                              shadow="lg"
+                            >
+                              <PopoverArrow />
+                              <PopoverCloseButton />
+                              <PopoverHeader fontWeight={"bold"}>
+                                Permissão
+                              </PopoverHeader>
+                              <PopoverBody>
+                                Selecione uma opção:
+                                <RadioGroup
+                                  name="permission"
+                                  value={permission}
+                                  onChange={(e) => setPermission(e)}
+                                  mt={3}
+                                >
+                                  <HStack spacing={3}>
+                                    <Radio value="all">Geral</Radio>
+                                    <Radio value="cashier">Financeiro</Radio>
+                                    <Radio value="seller">Vendas</Radio>
+                                  </HStack>
+                                </RadioGroup>
+                              </PopoverBody>
+                              <PopoverFooter
+                                display="flex"
+                                justifyContent="flex-end"
+                              >
+                                <Button
+                                  colorScheme={"blue"}
+                                  size="sm"
+                                  leftIcon={<AiOutlineSave />}
+                                  onClick={() =>
+                                    mutationPermission.mutate({
+                                      id: emp.id,
+                                      permission: permission || "",
+                                    })
+                                  }
+                                  isLoading={mutationPermission.isLoading}
+                                >
+                                  Salvar
+                                </Button>
+                              </PopoverFooter>
+                            </PopoverContent>
+                          </Popover>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <Menu>
+                          <MenuButton
+                            as={Button}
+                            rightIcon={<AiOutlineTool />}
+                            size="xs"
+                            isFullWidth
+                          >
+                            Opções
+                          </MenuButton>
+                          <MenuList>
+                            <MenuItem
+                              icon={<AiOutlineEdit />}
+                              onClick={() => handeToUpdate(emp.id)}
+                            >
+                              Alterar Informações
+                            </MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Box>
           )}
           <Flex justify={"flex-end"} align="center" gap={3} mt={3}>
             <Button

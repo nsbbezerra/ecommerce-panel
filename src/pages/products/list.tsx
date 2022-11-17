@@ -997,7 +997,6 @@ const ListProduct = () => {
           onChange={(e) => handleSearchName(e.target.value)}
         />
       </Grid>
-      <Divider mt={5} mb={5} />
 
       {isLoading ? (
         <Stack spacing={3}>
@@ -1012,16 +1011,28 @@ const ListProduct = () => {
       ) : (
         <Fragment>
           {products?.length === 0 ? (
-            <Flex justify={"center"} align="center" direction={"column"}>
+            <Flex justify={"center"} align="center" direction={"column"} mt={5}>
               <Icon as={GiCardboardBox} fontSize="8xl" />
               <Text>Nenhuma informação para mostrar</Text>
             </Flex>
           ) : (
-            <Fragment>
+            <Box
+              rounded={"md"}
+              shadow="md"
+              borderWidth={"1px"}
+              overflow="hidden"
+              mt={5}
+            >
               <Table size="sm">
-                <Thead>
+                <Thead
+                  position="sticky"
+                  top={0}
+                  bg={useColorModeValue("gray.50", "gray.900")}
+                  shadow={"sm"}
+                  zIndex={1}
+                >
                   <Tr>
-                    <Th w="5%" textAlign={"center"}>
+                    <Th w="5%" textAlign={"center"} py={3}>
                       Thumb
                     </Th>
                     <Th w="3%" textAlign={"center"}>
@@ -1223,7 +1234,7 @@ const ListProduct = () => {
                   ))}
                 </Tbody>
               </Table>
-            </Fragment>
+            </Box>
           )}
           <Flex justify={"flex-end"} align="center" gap={3} mt={3}>
             <Button

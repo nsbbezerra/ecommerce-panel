@@ -32,6 +32,7 @@ import {
   ToastPositionWithLogical,
   Stack,
   Skeleton,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { forwardRef, Fragment, useEffect, useRef, useState } from "react";
 import { AiOutlineTool } from "react-icons/ai";
@@ -44,6 +45,7 @@ import { api, configs } from "../../configs";
 import { useQuery } from "react-query";
 import axios from "axios";
 import format from "date-fns/format";
+import { useNavigate } from "react-router-dom";
 
 registerLocale("pt_br", pt_br);
 
@@ -68,6 +70,7 @@ type CashierProps = {
 };
 
 export default function CashierIndex() {
+  const navigate = useNavigate();
   const toast = useToast();
   const [search, setSearch] = useState<string>("all");
   const inputref = useRef(null);
@@ -289,76 +292,93 @@ export default function CashierIndex() {
             <Skeleton h={7} />
           </Stack>
         ) : (
-          <Table size={"sm"} mt={5}>
-            <Thead>
-              <Tr>
-                <Th>Usuário</Th>
-                <Th>Data de Abertura</Th>
-                <Th isNumeric>Valor de Abertura</Th>
-                <Th>Status</Th>
-                <Th>Data de Fechamento</Th>
-                <Th isNumeric>Valor de Fechamento</Th>
-                <Th w="10%" textAlign={"center"}>
-                  Opções
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {cashiers.map((cash) => (
-                <Tr key={cash.id}>
-                  <Td>{cash?.employee?.name}</Td>
-                  <Td>{format(new Date(cash.open_date), "dd/MM/yyyy")}</Td>
-                  <Td isNumeric>
-                    {parseFloat(cash.open_value).toLocaleString("pt-br", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </Td>
-                  <Td>
-                    {cash.status === "opened" ? (
-                      <Tag colorScheme={"green"}>Aberto</Tag>
-                    ) : (
-                      <Tag colorScheme={"red"}>Fechado</Tag>
-                    )}
-                  </Td>
-                  <Td>
-                    {cash.status === "opened"
-                      ? "-"
-                      : format(new Date(cash.close_date), "dd/MM/yyyy")}
-                  </Td>
-                  <Td isNumeric>
-                    {parseFloat(cash.close_value).toLocaleString("pt-br", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </Td>
-                  <Td>
-                    <Menu>
-                      <MenuButton
-                        as={Button}
-                        rightIcon={<AiOutlineTool />}
-                        size="xs"
-                        isFullWidth
-                      >
-                        Opções
-                      </MenuButton>
-                      <MenuList>
-                        {cash.status === "opened" ? (
-                          <MenuItem icon={<BiLineChart />}>
-                            Movimentar Caixa
-                          </MenuItem>
-                        ) : (
-                          <MenuItem icon={<GiNotebook />}>
-                            Ver Movimentação
-                          </MenuItem>
-                        )}
-                      </MenuList>
-                    </Menu>
-                  </Td>
+          <Box
+            rounded={"md"}
+            shadow="md"
+            borderWidth={"1px"}
+            mt={5}
+            overflow="hidden"
+          >
+            <Table size={"sm"}>
+              <Thead
+                position="sticky"
+                top={0}
+                bg={useColorModeValue("gray.50", "gray.900")}
+                shadow={"sm"}
+                zIndex={1}
+              >
+                <Tr>
+                  <Th py={3}>Usuário</Th>
+                  <Th>Data de Abertura</Th>
+                  <Th isNumeric>Valor de Abertura</Th>
+                  <Th>Status</Th>
+                  <Th>Data de Fechamento</Th>
+                  <Th isNumeric>Valor de Fechamento</Th>
+                  <Th w="10%" textAlign={"center"}>
+                    Opções
+                  </Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
+              </Thead>
+              <Tbody>
+                {cashiers.map((cash) => (
+                  <Tr key={cash.id}>
+                    <Td>{cash?.employee?.name}</Td>
+                    <Td>{format(new Date(cash.open_date), "dd/MM/yyyy")}</Td>
+                    <Td isNumeric>
+                      {parseFloat(cash.open_value).toLocaleString("pt-br", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </Td>
+                    <Td>
+                      {cash.status === "opened" ? (
+                        <Tag colorScheme={"green"}>Aberto</Tag>
+                      ) : (
+                        <Tag colorScheme={"red"}>Fechado</Tag>
+                      )}
+                    </Td>
+                    <Td>
+                      {cash.status === "opened"
+                        ? "-"
+                        : format(new Date(cash.close_date), "dd/MM/yyyy")}
+                    </Td>
+                    <Td isNumeric>
+                      {parseFloat(cash.close_value).toLocaleString("pt-br", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </Td>
+                    <Td>
+                      <Menu>
+                        <MenuButton
+                          as={Button}
+                          rightIcon={<AiOutlineTool />}
+                          size="xs"
+                          isFullWidth
+                        >
+                          Opções
+                        </MenuButton>
+                        <MenuList>
+                          {cash.status === "opened" ? (
+                            <MenuItem
+                              icon={<BiLineChart />}
+                              onClick={() => navigate(`/caixa/${cash.id}`)}
+                            >
+                              Movimentar Caixa
+                            </MenuItem>
+                          ) : (
+                            <MenuItem icon={<GiNotebook />}>
+                              Ver Movimentação
+                            </MenuItem>
+                          )}
+                        </MenuList>
+                      </Menu>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
         )}
       </Box>
     </Fragment>

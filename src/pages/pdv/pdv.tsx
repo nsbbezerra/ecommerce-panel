@@ -32,8 +32,6 @@ import {
   InputLeftElement,
   InputRightAddon,
   Kbd,
-  Tooltip,
-  Image,
   Tag,
   useToast,
   ToastPositionWithLogical,
@@ -51,6 +49,7 @@ import {
   Skeleton,
   MenuDivider,
   InputLeftAddon,
+  Textarea,
 } from "@chakra-ui/react";
 import { forwardRef, Fragment, useEffect, useRef, useState, memo } from "react";
 import {
@@ -60,11 +59,9 @@ import {
   AiOutlineEnter,
   AiOutlineMore,
   AiOutlineNumber,
-  AiOutlinePercentage,
   AiOutlineSave,
   AiOutlineSearch,
   AiOutlineShoppingCart,
-  AiOutlineStop,
   AiOutlineTool,
   AiOutlineUser,
   AiOutlineZoomIn,
@@ -86,6 +83,7 @@ import PartitionSale from "./components/partitionSale";
 import AddictionalItems from "./components/addictionalItems";
 import SquareMeter from "./components/squareMeter";
 import Sizes from "./components/sizes";
+import Payment from "../../components/Payment";
 
 type ClientsProps = {
   id: string;
@@ -217,6 +215,9 @@ const PDV = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [modalWithUnity, setModalWithUnity] = useState<boolean>(false);
   const [modalPartitionSale, setModalPartitionSale] = useState<boolean>(false);
+  const [modalObservation, setModalObservation] = useState<boolean>(false);
+  const [observation, setObservation] = useState<string>("");
+  const [modalPayment, setModalPayment] = useState<boolean>(false);
   const [modalSizes, setModalSizes] = useState<boolean>(false);
   const [modalSquareMeter, setModalSquareMeter] = useState<boolean>(false);
   const [modalAddicionalItems, setModalAddicionalItems] =
@@ -1263,7 +1264,12 @@ const PDV = () => {
                       Opções
                     </MenuButton>
                     <MenuList>
-                      <MenuItem icon={<AiOutlineEdit />}>Observações</MenuItem>
+                      <MenuItem
+                        icon={<AiOutlineEdit />}
+                        onClick={() => setModalObservation(true)}
+                      >
+                        Observações
+                      </MenuItem>
                       <MenuItem icon={<AiOutlineSave />}>
                         Salvar como Orçamento
                       </MenuItem>
@@ -1454,6 +1460,37 @@ const PDV = () => {
           onSuccess={handleProductSizes}
         />
       </Hotkeys>
+
+      <Modal
+        isOpen={modalObservation}
+        onClose={() => setModalObservation(false)}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Observação</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Textarea
+              rows={5}
+              resize="none"
+              autoFocus
+              value={observation}
+              onChange={(e) => setObservation(e.target.value)}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              onClick={() => setModalObservation(false)}
+            >
+              Concluir
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Payment isOpen={modalPayment} onSuccess={setModalPayment} order="" />
     </Fragment>
   );
 };

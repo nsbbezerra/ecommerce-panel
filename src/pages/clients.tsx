@@ -21,6 +21,7 @@ import {
   ModalBody,
   ModalCloseButton,
   ToastPositionWithLogical,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Fragment, useEffect, useState } from "react";
@@ -155,11 +156,17 @@ const Clients = () => {
                   <Text>Nenhuma informação para mostrar</Text>
                 </Flex>
               ) : (
-                <Fragment>
+                <Box rounded={"md"} shadow="md" borderWidth={"1px"}>
                   <Table size="sm">
-                    <Thead>
+                    <Thead
+                      position="sticky"
+                      top={0}
+                      bg={useColorModeValue("gray.50", "gray.900")}
+                      shadow={"sm"}
+                      zIndex={1}
+                    >
                       <Tr>
-                        <Th>Nome</Th>
+                        <Th py={3}>Nome</Th>
                         <Th>CPF</Th>
                         <Th>Telefone</Th>
                         <Th>Email</Th>
@@ -187,7 +194,7 @@ const Clients = () => {
                       ))}
                     </Tbody>
                   </Table>
-                </Fragment>
+                </Box>
               )}
               <Flex justify={"flex-end"} align="center" gap={3} mt={3}>
                 <Button
