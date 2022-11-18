@@ -149,6 +149,8 @@ type CatProps = {
 type Props = {
   id: string;
   token: string;
+  user: string;
+  name: string;
 };
 
 type ProductSaleProps = {
@@ -196,6 +198,11 @@ type PartitionSaleInfoProps = {
   addictionalItems: AddictionalInfoProps | undefined;
 };
 
+type OrderInfoProps = {
+  id: string;
+  value: string;
+};
+
 registerLocale("pt_br", pt_br);
 
 const PDV = () => {
@@ -227,6 +234,7 @@ const PDV = () => {
   const [adicionalItems, setAdictionalItems] = useState<PartitionSaleProps[]>(
     []
   );
+  const [discount, setDiscount] = useState<number>(0);
   const [modalProductInfo, setModalProductInfo] = useState<boolean>(false);
   const [productInfo, setProductInfo] = useState<ProductsProps | null>(null);
   const [partitionSaleInfo, setPartitionSaleInfo] =
@@ -239,6 +247,10 @@ const PDV = () => {
   const [sku, setSku] = useState<string>("");
 
   const [auth, setAuth] = useState<Props>();
+
+  const [loadingOrder, setLoadingOrder] = useState<boolean>(false);
+
+  const [orderInfo, setOrderInfo] = useState<OrderInfoProps | null>(null);
 
   useEffect(() => {
     const sum = saleProducts.reduce((a, b) => +a + +b.sale_total, 0);
@@ -289,7 +301,12 @@ const PDV = () => {
     let companyParse = JSON.parse(company || "");
     let userParse = JSON.parse(userToken || "");
     if (companyParse && userParse) {
-      setAuth({ id: companyParse.id, token: userParse.token });
+      setAuth({
+        id: companyParse.id,
+        token: userParse.token,
+        user: userParse.user.id,
+        name: userParse.user.name,
+      });
     } else {
       showToast(
         "Informações da empresa e do usuário ausentes",
@@ -545,6 +562,53 @@ const PDV = () => {
   function handleProductSizes(itens: ProductSaleProps) {
     setSaleProducts((old) => [...old, itens]);
     setModalSizes(false);
+  }
+
+  async function saveOrder() {
+    if (!client) {
+      showToast("Selecione um cliente", "warning", "Atenção");
+      return false;
+    }
+    if (saleProducts.length === 0) {
+      showToast("Insira produtos na venda", "warning", "Atenção");
+      return false;
+    }
+    setLoadingOrder(true);
+    try {
+      const response = await api.post(
+        `/order/${auth?.id}/${auth?.user}`,
+        {
+          order: {
+            checkout_id: "all",
+            discount: discount,
+            month: saleDate.toLocaleString("pt-Br", { month: "long" }),
+            order_status: "finish",
+            origin: "pdv",
+            payment_status: "wait",
+            total_order: totalOrder,
+            total_to_pay: totalOrder,
+            year: saleDate.getFullYear().toString(),
+          },
+          items: saleProducts,
+          client: client.id,
+        },
+        {
+          headers: { "x-access-authorization": auth?.token || "" },
+        }
+      );
+      setOrderInfo(response.data.orderInfo);
+      showToast(response.data.message, "success", "Sucesso");
+      setLoadingOrder(false);
+      setModalPayment(true);
+    } catch (error) {
+      setLoadingOrder(false);
+      if (axios.isAxiosError(error) && error.message) {
+        showToast(error.response?.data.message, "error", "Erro");
+      } else {
+        let message = (error as Error).message;
+        showToast(message, "error", "Erro");
+      }
+    }
   }
 
   return (
@@ -1286,6 +1350,8 @@ const PDV = () => {
                   <Button
                     leftIcon={<AiOutlineShoppingCart />}
                     colorScheme="green"
+                    onClick={() => saveOrder()}
+                    isLoading={loadingOrder}
                   >
                     Finalizar Venda{" "}
                     <Kbd color={"HighlightText"} ml={2}>
@@ -1490,7 +1556,11 @@ const PDV = () => {
         </ModalContent>
       </Modal>
 
-      <Payment isOpen={modalPayment} onSuccess={setModalPayment} order="" />
+      <Payment
+        isOpen={modalPayment}
+        onSuccess={setModalPayment}
+        order={orderInfo}
+      />
     </Fragment>
   );
 };
