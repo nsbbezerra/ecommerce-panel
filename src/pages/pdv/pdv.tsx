@@ -579,7 +579,6 @@ const PDV = () => {
         `/order/${auth?.id}/${auth?.user}`,
         {
           order: {
-            checkout_id: "all",
             discount: discount,
             month: saleDate.toLocaleString("pt-Br", { month: "long" }),
             order_status: "finish",
